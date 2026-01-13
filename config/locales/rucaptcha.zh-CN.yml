@@ -1,0 +1,6 @@
+zh-CN:
+  rucaptcha:
+    label: "验证码"
+    hint: "点击图片刷新验证码。"
+    refresh: "刷新验证码"
+    invalid: "验证码不正确。"

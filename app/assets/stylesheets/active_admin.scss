@@ -15,3 +15,27 @@
 // For example, to change the default status-tag color:
 //
 //   .status_tag { background: #6090DB; }
+
+#login .language-switcher {
+  margin: 0 0 12px;
+  font-size: 12px;
+}
+
+body.logged_out #login .language-switcher a {
+  float: none;
+  margin-top: 0;
+}
+
+#login .rucaptcha-wrap {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#login .rucaptcha-input {
+  max-width: 160px;
+}
+
+#login img.rucaptcha-image {
+  cursor: pointer;
+}

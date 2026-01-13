@@ -1,0 +1,157 @@
+zh-CN:
+  activerecord:
+    models:
+      comment:
+        one: "评论"
+        other: "评论"
+      active_admin/comment:
+        one: "评论"
+        other: "评论"
+    attributes:
+      active_admin/comment:
+        author_type: "作者类型"
+        body: "内容"
+        created_at: "创建时间"
+        namespace: "命名空间"
+        resource_type: "资源类型"
+        updated_at: "更新时间"
+  active_admin:
+    language:
+      zh: "中文"
+      en: "English"
+    dashboard: "仪表盘"
+    dashboard_welcome:
+      welcome: "欢迎使用 Active Admin。这是默认的仪表盘页面。"
+      call_to_action: "要添加仪表盘区块，请查看 'app/admin/dashboard.rb'"
+    view: "查看"
+    edit: "编辑"
+    delete: "删除"
+    delete_confirmation: "确定要删除吗？"
+    create_another: "再创建一个%{model}"
+    new_model: "新建%{model}"
+    edit_model: "编辑%{model}"
+    delete_model: "删除%{model}"
+    details: "%{model}详情"
+    cancel: "取消"
+    empty: "空"
+    previous: "上一页"
+    next: "下一页"
+    download: "下载："
+    has_many_new: "新增%{model}"
+    has_many_delete: "删除"
+    has_many_remove: "移除"
+    move: "移动"
+    filters:
+      buttons:
+        filter: "筛选"
+        clear: "清除筛选"
+      predicates:
+        from: "从"
+        to: "到"
+    scopes:
+      all: "全部"
+    search_status:
+      headline: "搜索状态："
+      current_scope: "范围："
+      current_filters: "当前筛选："
+      no_current_filters: "无"
+    status_tag:
+      "yes": "是"
+      "no": "否"
+      "unset": "否"
+    main_content: "请实现 %{model}#main_content 来显示内容。"
+    logout: "退出登录"
+    powered_by: "由 %{active_admin} %{version} 驱动"
+    sidebars:
+      filters: "筛选"
+      search_status: "搜索状态"
+    pagination:
+      empty: "未找到%{model}"
+      one: "显示 <b>1</b> 条%{model}"
+      one_page: "显示全部 <b>%{n}</b> 条%{model}"
+      multiple: "显示 %{model} <b>%{from}&nbsp;-&nbsp;%{to}</b>，共 <b>%{total}</b> 条"
+      multiple_without_total: "显示 %{model} <b>%{from}&nbsp;-&nbsp;%{to}</b>"
+      per_page: "每页："
+      entry:
+        one: "条"
+        other: "条"
+    any: "任意"
+    blank_slate:
+      content: "暂无%{resource_name}。"
+      link: "创建一个"
+    dropdown_actions:
+      button_label: "操作"
+    batch_actions:
+      button_label: "批量操作"
+      default_confirmation: "确定要执行此操作吗？"
+      delete_confirmation: "确定要删除这些%{plural_model}吗？"
+      succesfully_destroyed:
+        one: "成功删除 1 条%{model}"
+        other: "成功删除 %{count} 条%{plural_model}"
+      selection_toggle_explanation: "（切换选择）"
+      action_label: "已选择%{title}"
+      labels:
+        destroy: "删除"
+    comments:
+      created_at: "创建时间"
+      resource_type: "资源类型"
+      author_type: "作者类型"
+      body: "内容"
+      author: "作者"
+      add: "添加评论"
+      delete: "删除评论"
+      delete_confirmation: "确定要删除这些评论吗？"
+      resource: "资源"
+      no_comments_yet: "暂无评论。"
+      author_missing: "匿名"
+      title_content: "评论（%{count}）"
+      errors:
+        empty_text: "评论未保存，内容为空。"
+    devise:
+      username:
+        title: "用户名"
+      email:
+        title: "邮箱"
+      subdomain:
+        title: "子域"
+      password:
+        title: "密码"
+      password_confirmation:
+        title: "确认密码"
+      sign_up:
+        title: "注册"
+        submit: "注册"
+      login:
+        title: "登录"
+        remember_me: "记住我"
+        submit: "登录"
+      reset_password:
+        title: "忘记密码？"
+        submit: "重置密码"
+      change_password:
+        title: "修改密码"
+        submit: "修改密码"
+      unlock:
+        title: "重新发送解锁说明"
+        submit: "重新发送解锁说明"
+      resend_confirmation_instructions:
+        title: "重新发送确认说明"
+        submit: "重新发送确认说明"
+      links:
+        sign_up: "注册"
+        sign_in: "登录"
+        forgot_your_password: "忘记密码？"
+        sign_in_with_omniauth_provider: "使用 %{provider} 登录"
+        resend_unlock_instructions: "重新发送解锁说明"
+        resend_confirmation_instructions: "重新发送确认说明"
+    unsupported_browser:
+      headline: "请注意，ActiveAdmin 不再支持 IE8 或更早版本。"
+      recommendation: "建议您 <a href=\"http://browsehappy.com/\">升级浏览器</a> 以获得更好的体验。"
+      turn_off_compatibility_view: "如果您使用 IE9 或更高版本，请确认已 <a href=\"https://support.microsoft.com/zh-cn/help/17471\">关闭“兼容性视图”</a>。"
+    access_denied:
+      message: "您无权执行此操作。"
+    index_list:
+      table: "表格"
+      block: "列表"
+      grid: "网格"
+      blog: "博客"

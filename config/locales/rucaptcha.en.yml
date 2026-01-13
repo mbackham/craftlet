@@ -1,0 +1,6 @@
+en:
+  rucaptcha:
+    label: "Captcha"
+    hint: "Click the image to refresh."
+    refresh: "Refresh captcha"
+    invalid: "Captcha is invalid."

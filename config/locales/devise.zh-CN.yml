@@ -1,0 +1,63 @@
+zh-CN:
+  devise:
+    confirmations:
+      confirmed: "您的邮箱已成功确认。"
+      send_instructions: "您将在几分钟内收到确认邮箱的邮件。"
+      send_paranoid_instructions: "如果该邮箱存在，我们将向其发送确认邮件。"
+    failure:
+      already_authenticated: "您已经登录。"
+      inactive: "您的账号尚未激活。"
+      invalid: "邮箱或密码错误。"
+      locked: "您的账号已被锁定。"
+      last_attempt: "您还有一次尝试机会，之后账号将被锁定。"
+      not_found_in_database: "邮箱或密码错误。"
+      timeout: "登录已过期，请重新登录。"
+      unauthenticated: "请先登录或注册。"
+      unconfirmed: "请先确认您的邮箱。"
+    mailer:
+      confirmation_instructions:
+        subject: "确认说明"
+      reset_password_instructions:
+        subject: "重置密码说明"
+      unlock_instructions:
+        subject: "解锁说明"
+      email_changed:
+        subject: "邮箱已更改"
+      password_change:
+        subject: "密码已更改"
+    omniauth_callbacks:
+      failure: "无法通过 %{kind} 验证，原因：\"%{reason}\"。"
+      success: "已通过 %{kind} 账号成功验证。"
+    passwords:
+      no_token: "您不能在未通过重置密码邮件的情况下访问此页面。"
+      send_instructions: "您将在几分钟内收到重置密码的邮件。"
+      send_paranoid_instructions: "如果该邮箱存在，我们将发送密码重置链接。"
+      updated: "密码已成功修改，您已登录。"
+      updated_not_active: "密码已成功修改。"
+    registrations:
+      destroyed: "再见！您的账号已成功注销。"
+      signed_up: "欢迎！您已成功注册。"
+      signed_up_but_inactive: "您已成功注册，但账号尚未激活。"
+      signed_up_but_locked: "您已成功注册，但账号已被锁定。"
+      signed_up_but_unconfirmed: "确认邮件已发送，请按邮件说明激活账号。"
+      update_needs_confirmation: "您已更新账号，但需要确认新的邮箱地址。"
+      updated: "账号已成功更新。"
+      updated_but_not_signed_in: "账号已更新，但密码更改后需要重新登录。"
+    sessions:
+      signed_in: "登录成功。"
+      signed_out: "已退出登录。"
+      already_signed_out: "已退出登录。"
+    unlocks:
+      send_instructions: "您将在几分钟内收到解锁说明邮件。"
+      send_paranoid_instructions: "如果该账号存在，我们将发送解锁说明邮件。"
+      unlocked: "账号已成功解锁，请登录继续。"
+  errors:
+    messages:
+      already_confirmed: "已确认，请尝试登录"
+      confirmation_period_expired: "需要在 %{period} 内确认，请重新申请"
+      expired: "已过期，请重新申请"
+      not_found: "未找到"
+      not_locked: "未被锁定"
+      not_saved:
+        one: "由于 1 个错误导致 %{resource} 无法保存："
+        other: "由于 %{count} 个错误导致 %{resource} 无法保存："

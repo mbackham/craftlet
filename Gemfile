@@ -21,6 +21,7 @@ gem "devise-jwt"
 # === Admin ===
 gem "activeadmin"
 gem "sassc-rails"
+gem "rucaptcha"
 
 # === Authorization ===
 gem "pundit"

@@ -32,6 +32,12 @@ body.logged_out #login .language-switcher a {
   align-items: center;
 }
 
+#login img.rucaptcha-image {
+  width: 120px;
+  height: 36px;
+  object-fit: contain;
+}
+
 #login .rucaptcha-input {
   max-width: 160px;
 }

@@ -1,0 +1,6 @@
+zh-CN:
+  active_admin:
+    login_tabs:
+      merchant: "商家登录"
+      admin: "管理员/运营登录"
+      merchant_hint: "商家登录入口暂未开放"

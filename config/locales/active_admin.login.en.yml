@@ -1,0 +1,6 @@
+en:
+  active_admin:
+    login_tabs:
+      merchant: "Merchant Login"
+      admin: "Admin / Operator Login"
+      merchant_hint: "Merchant login is not available yet."

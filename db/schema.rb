@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_10_102135) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_10_121500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -36,8 +36,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_10_102135) do
     t.datetime "remember_created_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "role", default: "admin", null: false
     t.index ["email"], name: "index_admin_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
+    t.index ["role"], name: "index_admin_users_on_role"
   end
 
   create_table "audit_logs", force: :cascade do |t|
@@ -216,8 +218,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_10_102135) do
     t.string "status", default: "active", null: false
     t.datetime "disabled_at"
     t.string "disabled_reason"
+    t.string "jti", null: false
     t.index ["disabled_at"], name: "index_users_on_disabled_at"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["jti"], name: "index_users_on_jti", unique: true
     t.index ["phone"], name: "index_users_on_phone", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["status"], name: "index_users_on_status"

@@ -26,6 +26,61 @@ body.logged_out #login .language-switcher a {
   margin-top: 0;
 }
 
+#login .login-tabs {
+  margin: 0 0 12px;
+}
+
+#login .login-tabs input[type="radio"] {
+  position: absolute;
+  left: -9999px;
+}
+
+#login .login-tab-label {
+  display: inline-block;
+  padding: 6px 12px;
+  border: 1px solid #c8c8c8;
+  border-bottom: 0;
+  margin-right: 6px;
+  background: #f3f3f3;
+  color: #555;
+  cursor: pointer;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+}
+
+#login #login-tab-merchant:checked + .login-tab-label,
+#login #login-tab-admin:checked + .login-tab-label {
+  background: #fff;
+  color: #222;
+  font-weight: bold;
+  position: relative;
+  top: 1px;
+}
+
+#login .login-tab-panels {
+  border: 1px solid #c8c8c8;
+  padding: 12px 16px 8px;
+  background: #fff;
+}
+
+#login .login-tab-panel {
+  display: none;
+}
+
+#login #login-tab-merchant:checked ~ .login-tab-panels .login-tab-merchant {
+  display: block;
+}
+
+#login #login-tab-admin:checked ~ .login-tab-panels .login-tab-admin {
+  display: block;
+}
+
+#login .login-tab-hint {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #666;
+}
+
 #login .rucaptcha-wrap {
   display: flex;
   gap: 8px;

@@ -1,5 +1,5 @@
 class AuditLog < ApplicationRecord
-  belongs_to :actor, class_name: "User", optional: true
+  belongs_to :actor, polymorphic: true, optional: true
   validates :action, presence: true
 
   def self.ransackable_attributes(auth_object = nil)

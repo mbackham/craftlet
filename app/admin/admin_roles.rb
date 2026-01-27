@@ -76,37 +76,4 @@ ActiveAdmin.register AdminRole do
 
     f.actions
   end
-
-  # Custom action to manage permissions
-  member_action :manage_permissions, method: :get do
-    @role = AdminRole.find(params[:id])
-    @all_permissions = AdminPermission.all.order(:code)
-  end
-
-  member_action :update_permissions, method: :post do
-    @role = AdminRole.find(params[:id])
-    permission_ids = params[:permission_ids] || []
-    
-    before_permissions = @role.admin_permission_ids
-    @role.admin_permission_ids = permission_ids
-    
-    if @role.save
-      # Log the permission change
-      controller.send(:log_custom_action,
-        'assign_permissions',
-        target: @role,
-        before: { permission_ids: before_permissions },
-        after: { permission_ids: @role.admin_permission_ids }
-      )
-      
-      redirect_to admin_admin_role_path(@role), notice: '权限更新成功'
-    else
-      flash[:error] = '权限更新失败'
-      render :manage_permissions
-    end
-  end
-
-  action_item :manage_permissions, only: :show do
-    link_to '管理权限', manage_permissions_admin_admin_role_path(admin_role)
-  end
 end

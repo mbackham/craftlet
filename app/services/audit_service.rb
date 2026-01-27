@@ -42,14 +42,31 @@ class AuditService
     def build_audit_data(action:, actor:, target:, before:, after:, metadata:, request:)
       data = {
         action: action,
-        actor: actor,
         metadata: metadata
       }
+
+      # Add actor information (polymorphic)
+      if actor
+        data[:actor_type] = actor.class.name
+        # Convert ID to UUID string format (pad with zeros if needed)
+        data[:actor_id] = format_as_uuid(actor.id)
+      else
+        # Use system as default actor
+        data[:actor_type] = 'System'
+        data[:actor_id] = '00000000-0000-0000-0000-000000000000' # UUID for system
+      end
 
       # Add target information if provided
       if target
         data[:target_type] = target.class.name
         data[:target_id] = target.id
+        # subject is an alias for target (legacy field)
+        data[:subject_type] = target.class.name
+        data[:subject_id] = target.id.is_a?(String) ? target.id : '00000000-0000-0000-0000-000000000000'
+      else
+        # Default values for required fields
+        data[:subject_type] = 'Unknown'
+        data[:subject_id] = '00000000-0000-0000-0000-000000000000'
       end
 
       # Add before/after states (filter sensitive data)
@@ -82,6 +99,15 @@ class AuditService
       ]
 
       attributes.except(*sensitive_keys)
+    end
+
+    # Convert integer ID to UUID string format
+    def format_as_uuid(id)
+      return id if id.is_a?(String) && id.match?(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+      
+      # For integer IDs, create a UUID-like string
+      # Format: 00000000-0000-0000-0000-{12 digit number}
+      sprintf('00000000-0000-0000-0000-%012d', id.to_i)
     end
   end
 end

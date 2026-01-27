@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_10_121500) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_26_083704) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -26,6 +26,44 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_10_121500) do
     t.index ["author_type", "author_id"], name: "index_active_admin_comments_on_author"
     t.index ["namespace"], name: "index_active_admin_comments_on_namespace"
     t.index ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource"
+  end
+
+  create_table "admin_permissions", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_admin_permissions_on_code", unique: true
+    t.index ["name"], name: "index_admin_permissions_on_name", unique: true
+  end
+
+  create_table "admin_role_permissions", force: :cascade do |t|
+    t.bigint "admin_role_id", null: false
+    t.bigint "admin_permission_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_permission_id"], name: "index_admin_role_permissions_on_admin_permission_id"
+    t.index ["admin_role_id", "admin_permission_id"], name: "index_admin_role_permissions_on_role_and_permission", unique: true
+    t.index ["admin_role_id"], name: "index_admin_role_permissions_on_admin_role_id"
+  end
+
+  create_table "admin_roles", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_admin_roles_on_code", unique: true
+    t.index ["name"], name: "index_admin_roles_on_name", unique: true
+  end
+
+  create_table "admin_user_roles", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "admin_role_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_role_id"], name: "index_admin_user_roles_on_admin_role_id"
+    t.index ["user_id", "admin_role_id"], name: "index_admin_user_roles_on_user_id_and_admin_role_id", unique: true
+    t.index ["user_id"], name: "index_admin_user_roles_on_user_id"
   end
 
   create_table "admin_users", force: :cascade do |t|
@@ -51,9 +89,18 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_10_121500) do
     t.jsonb "metadata", default: {}, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "target_type"
+    t.bigint "target_id"
+    t.jsonb "before"
+    t.jsonb "after"
+    t.string "request_id"
+    t.string "ip"
+    t.string "user_agent"
     t.index ["action"], name: "index_audit_logs_on_action"
     t.index ["actor_type", "actor_id"], name: "index_audit_logs_on_actor_type_and_actor_id"
+    t.index ["created_at"], name: "index_audit_logs_on_created_at"
     t.index ["subject_type", "subject_id"], name: "index_audit_logs_on_subject_type_and_subject_id"
+    t.index ["target_type", "target_id"], name: "index_audit_logs_on_target_type_and_target_id"
   end
 
   create_table "merchant_profiles", force: :cascade do |t|
@@ -237,6 +284,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_10_121500) do
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
+  add_foreign_key "admin_role_permissions", "admin_permissions"
+  add_foreign_key "admin_role_permissions", "admin_roles"
+  add_foreign_key "admin_user_roles", "admin_roles"
+  add_foreign_key "admin_user_roles", "users"
   add_foreign_key "merchant_profiles", "users"
   add_foreign_key "merchant_review_logs", "merchant_profiles"
   add_foreign_key "payment_callbacks", "payments"

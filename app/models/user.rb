@@ -40,4 +40,12 @@ class User < ApplicationRecord
                    .where(code: permission_code)
                    .exists?
   end
+
+  def self.ransackable_attributes(auth_object = nil)
+    %w[email phone nickname created_at updated_at status]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    %w[admin_roles business_roles]
+  end
 end

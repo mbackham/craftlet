@@ -7,7 +7,13 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
-AdminUser.create!(email: 'admin@example.com', password: 'password', password_confirmation: 'password') if Rails.env.development?
+# Create default admin user in development
+if Rails.env.development?
+  AdminUser.find_or_create_by!(email: 'admin@example.com') do |admin|
+    admin.password = 'password'
+    admin.password_confirmation = 'password'
+  end
+end
 
 # Admin RBAC Seeds
 admin_permissions = [
@@ -26,6 +32,14 @@ super_admin_role = AdminRole.find_or_create_by!(code: "super_admin") { |r| r.nam
 
 AdminPermission.find_each do |perm|
   AdminRolePermission.find_or_create_by!(admin_role: super_admin_role, admin_permission: perm)
+end
+
+# Assign super_admin role to default admin user
+if Rails.env.development?
+  admin_user = AdminUser.find_by(email: 'admin@example.com')
+  if admin_user
+    AdminUserRole.find_or_create_by!(user: admin_user, admin_role: super_admin_role)
+  end
 end
 
 puts "Admin RBAC seed done."

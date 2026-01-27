@@ -1,12 +1,18 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register User do
-  include Auditable
-  
   menu parent: 'RBAC管理', priority: 1
 
   permit_params :email, :phone, :nickname, :status, :password, :password_confirmation,
                 admin_role_ids: []
+
+  controller do
+    include Auditable
+    
+    after_action :audit_create, only: [:create]
+    after_action :audit_update, only: [:update]
+    after_action :audit_destroy, only: [:destroy]
+  end
 
   scope :all, default: true
   scope('活跃用户') { |scope| scope.where(status: 'active') }

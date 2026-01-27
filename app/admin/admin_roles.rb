@@ -1,11 +1,17 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register AdminRole do
-  include Auditable
-  
   menu parent: 'RBAC管理', priority: 2
 
   permit_params :name, :code, admin_permission_ids: []
+
+  controller do
+    include Auditable
+    
+    after_action :audit_create, only: [:create]
+    after_action :audit_update, only: [:update]
+    after_action :audit_destroy, only: [:destroy]
+  end
 
   index do
     selectable_column

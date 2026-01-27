@@ -1,0 +1,11 @@
+zh-CN:
+  date:
+    formats:
+      default: "%Y-%m-%d"
+      long: "%Y年%m月%d日"
+      short: "%m月%d日"
+  time:
+    formats:
+      default: "%Y-%m-%d %H:%M:%S"
+      long: "%Y年%m月%d日 %H:%M"
+      short: "%m月%d日 %H:%M"

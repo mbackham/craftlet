@@ -46,15 +46,15 @@ module AuditHelper
   # Format action with colored badge
   def action_badge(action)
     color = case action.to_s.downcase
-            when 'create' then 'green'
-            when 'update' then 'blue'
-            when 'destroy', 'delete' then 'red'
-            when 'assign', 'grant' then 'purple'
-            when 'revoke', 'remove' then 'orange'
-            else 'gray'
+            when 'create' then :ok
+            when 'update' then :yes
+            when 'destroy', 'delete' then :error
+            when 'assign', 'grant' then :warning
+            when 'revoke', 'remove' then :warning
+            else nil
             end
 
-    content_tag(:span, action, class: "status_tag #{color}")
+    status_tag(action, color)
   end
 
   # Format target link

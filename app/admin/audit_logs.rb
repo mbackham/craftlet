@@ -3,6 +3,10 @@
 ActiveAdmin.register AuditLog do
   menu parent: 'RBAC管理', priority: 4
 
+  controller do
+    helper AuditHelper
+  end
+
   # Read-only resource
   actions :index, :show
 
@@ -17,12 +21,16 @@ ActiveAdmin.register AuditLog do
   index do
     selectable_column
     id_column
-    column :action do |log|
-      action_badge(log.action)
+    column '操作', sortable: :action do |log|
+      status_tag(log.action, class: log.action.to_s.downcase)
     end
     column '操作人' do |log|
       if log.actor
-        link_to log.actor.email, admin_user_path(log.actor)
+        if log.actor.is_a?(AdminUser)
+          link_to log.actor.email, admin_admin_user_path(log.actor)
+        else
+          link_to log.actor.email, admin_user_path(log.actor)
+        end
       else
         content_tag(:span, '系统', class: 'system')
       end
@@ -30,9 +38,11 @@ ActiveAdmin.register AuditLog do
     column '目标' do |log|
       audit_target_link(log)
     end
-    column :ip
-    column :created_at
-    actions
+    column 'IP地址', :ip
+    column '创建时间' do |log|
+      l(log.created_at, format: :long) if log.created_at
+    end
+    actions name: '操作'
   end
 
   filter :action, as: :select, collection: -> {
@@ -50,27 +60,31 @@ ActiveAdmin.register AuditLog do
 
   show do
     attributes_table do
-      row :id
-      row :action do |log|
-        action_badge(log.action)
+      row 'ID', :id
+      row '操作' do |log|
+        status_tag(log.action, class: log.action.to_s.downcase)
       end
       row '操作人' do |log|
         if log.actor
-          link_to log.actor.email, admin_user_path(log.actor)
+          if log.actor.is_a?(AdminUser)
+            link_to log.actor.email, admin_admin_user_path(log.actor)
+          else
+            link_to log.actor.email, admin_user_path(log.actor)
+          end
         else
           content_tag(:span, '系统', class: 'system')
         end
       end
-      row :target_type
-      row :target_id
+      row '目标类型', :target_type
+      row '目标ID', :target_id
       row '目标' do |log|
         audit_target_link(log)
       end
-      row :request_id
-      row :ip
-      row :user_agent
-      row :created_at
-      row :updated_at
+      row '请求ID', :request_id
+      row 'IP地址', :ip
+      row 'User Agent', :user_agent
+      row '创建时间', :created_at
+      row '更新时间', :updated_at
     end
 
     panel '变更详情' do

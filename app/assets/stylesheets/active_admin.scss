@@ -100,3 +100,11 @@ body.logged_out #login .language-switcher a {
 #login img.rucaptcha-image {
   cursor: pointer;
 }
+
+// Custom status tag colors for audit logs
+.status_tag {
+  &.ok, &.create, &.green { background: #5cb85c !important; }  // Green
+  &.yes, &.update, &.blue { background: #5bc0de !important; }  // Blue
+  &.error, &.destroy, &.delete, &.red { background: #d9534f !important; }  // Red
+  &.warning, &.orange { background: #f0ad4e !important; }  // Orange
+}

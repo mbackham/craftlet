@@ -180,3 +180,15 @@ puts "Admin RBAC seed done."
 
 
 
+1. ActiveAdmin 资源（P0）
+- Users：列表/详情/筛选（手机号/邮箱/创建时间/状态/角色）
+- Roles：增删改查 + 给角色分配 permissions
+- Permissions：只读或可维护（推荐代码维护 + 后台只读）
+- AuditLogs：可筛选（actor/action/target/时间）
+2. 审计写入机制（先覆盖后台 CRUD）
+- 对 ActiveAdmin 的关键资源（Users/Roles）做到：
+  - create/update/destroy 记录审计
+- 先做一个统一入口（比如 Audit.log!），后面接 Service 继续复用
+验收标准
+- 后台能完成：创建角色、分配权限、给用户授予角色
+- 审计页面能看到上述操作的记录（谁改了什么）

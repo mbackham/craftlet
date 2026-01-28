@@ -7,8 +7,13 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       devise_scope :user do
-        post "users/sign_in", to: "api/v1/users/sessions#create", defaults: { format: :json }
-        delete "users/sign_out", to: "api/v1/users/sessions#destroy", defaults: { format: :json }
+        post "users/sign_in", to: "users/sessions#create", defaults: { format: :json }
+        delete "users/sign_out", to: "users/sessions#destroy", defaults: { format: :json }
+      end
+      
+      # 商家相关 API
+      resource :merchant, only: [], controller: 'merchants' do
+        get :status
       end
     end
   end

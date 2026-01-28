@@ -1,194 +1,26 @@
-目标
-新增后台 RBAC 四张表：
-admin_roles、admin_permissions、admin_user_roles、admin_role_permissions
-新增审计表：audit_logs
-在 User 里新增关联：admin_roles（不影响你原来的 roles）
-seed 一套超级管理员权限（可重复执行）
-云端 staging 可 db:migrate/db:seed
-
-
-步骤1）生成 migrations + models
-在项目根目录执行：
-
-bundle exec rails g model AdminRole name:string code:string
-bundle exec rails g model AdminPermission name:string code:string
-bundle exec rails g model AdminUserRole user:references admin_role:references
-bundle exec rails g model AdminRolePermission admin_role:references admin_permission:references
-
-bundle exec rails g model AuditLog actor:references action:string target_type:string target_id:bigint before:jsonb after:jsonb request_id:string ip:string user_agent:string
-2）修改 migration：加唯一索引（非常重要）
-打开 db/migrate/*create_admin_roles*.rb：
-
-class CreateAdminRoles < ActiveRecord::Migration[7.0]
-  def change
-    create_table :admin_roles do |t|
-      t.string :name, null: false
-      t.string :code, null: false
-      t.timestamps
-    end
-
-    add_index :admin_roles, :code, unique: true
-    add_index :admin_roles, :name, unique: true
-  end
-end
-db/migrate/*create_admin_permissions*.rb：
-
-class CreateAdminPermissions < ActiveRecord::Migration[7.0]
-  def change
-    create_table :admin_permissions do |t|
-      t.string :name, null: false
-      t.string :code, null: false
-      t.timestamps
-    end
-
-    add_index :admin_permissions, :code, unique: true
-    add_index :admin_permissions, :name, unique: true
-  end
-end
-db/migrate/*create_admin_user_roles*.rb（注意外键）：
-
-class CreateAdminUserRoles < ActiveRecord::Migration[7.0]
-  def change
-    create_table :admin_user_roles do |t|
-      t.references :user, null: false, foreign_key: true
-      t.references :admin_role, null: false, foreign_key: true
-      t.timestamps
-    end
-
-    add_index :admin_user_roles, [:user_id, :admin_role_id], unique: true
-  end
-end
-db/migrate/*create_admin_role_permissions*.rb：
-
-class CreateAdminRolePermissions < ActiveRecord::Migration[7.0]
-  def change
-    create_table :admin_role_permissions do |t|
-      t.references :admin_role, null: false, foreign_key: true
-      t.references :admin_permission, null: false, foreign_key: true
-      t.timestamps
-    end
-
-    add_index :admin_role_permissions, [:admin_role_id, :admin_permission_id], unique: true
-  end
-end
-db/migrate/*create_audit_logs*.rb（actor 指向 users）：
-
-class CreateAuditLogs < ActiveRecord::Migration[7.0]
-  def change
-    create_table :audit_logs do |t|
-      t.references :actor, null: true, foreign_key: { to_table: :users }
-      t.string :action, null: false
-
-      t.string :target_type
-      t.bigint :target_id
-
-      t.jsonb :before
-      t.jsonb :after
-
-      t.string :request_id
-      t.string :ip
-      t.string :user_agent
-
-      t.timestamps
-    end
-
-    add_index :audit_logs, [:target_type, :target_id]
-    add_index :audit_logs, :action
-    add_index :audit_logs, :created_at
-  end
-end
-3）写 Model 关联（不会影响你现有 customer/merchant 体系）
-3.1 在 app/models/user.rb 里新增这些关联
-你现有的 has_many :roles 不动，只加下面这些（放在文件里合适位置即可）：
-
-has_many :admin_user_roles, dependent: :destroy
-has_many :admin_roles, through: :admin_user_roles
-
-has_many :audit_logs, foreign_key: :actor_id, dependent: :nullify
-并新增两个方法（不影响你现有 has_role?，名字不同）：
-
-def admin_has_role?(code)
-  admin_roles.where(code: code).exists?
-end
-
-def admin_can?(permission_code)
-  AdminPermission.joins(admin_roles: :admin_user_roles)
-                 .where(admin_user_roles: { user_id: id })
-                 .where(code: permission_code)
-                 .exists?
-end
-3.2 新增后台 RBAC 的 model 文件
-app/models/admin_role.rb
-
-class AdminRole < ApplicationRecord
-  has_many :admin_user_roles, dependent: :destroy
-  has_many :users, through: :admin_user_roles
-
-  has_many :admin_role_permissions, dependent: :destroy
-  has_many :admin_permissions, through: :admin_role_permissions
-end
-app/models/admin_permission.rb
-class AdminPermission < ApplicationRecord
-  has_many :admin_role_permissions, dependent: :destroy
-  has_many :admin_roles, through: :admin_role_permissions
-end
-app/models/admin_user_role.rb
-
-class AdminUserRole < ApplicationRecord
-  belongs_to :user
-  belongs_to :admin_role
-
-  validates :user_id, uniqueness: { scope: :admin_role_id }
-end
-app/models/admin_role_permission.rb
-
-class AdminRolePermission < ApplicationRecord
-  belongs_to :admin_role
-  belongs_to :admin_permission
-
-  validates :admin_role_id, uniqueness: { scope: :admin_permission_id }
-end
-app/models/audit_log.rb
-class AuditLog < ApplicationRecord
-  belongs_to :actor, class_name: "User", optional: true
-  validates :action, presence: true
-end
-4）跑迁移（本地）
-bundle exec rails db:migrate
-5）写 seeds（创建 super_admin + 权限，并可重复执行）
-编辑 db/seeds.rb，加入：
-admin_permissions = [
-  { name: "后台访问", code: "admin.access" },
-  { name: "后台用户查看", code: "admin.users.read" },
-  { name: "后台角色管理", code: "admin.roles.manage" },
-  { name: "后台权限查看", code: "admin.permissions.read" },
-  { name: "后台审计查看", code: "admin.audit_logs.read" }
-]
-
-admin_permissions.each do |p|
-  AdminPermission.find_or_create_by!(code: p[:code]) { |perm| perm.name = p[:name] }
-end
-
-super_admin_role = AdminRole.find_or_create_by!(code: "super_admin") { |r| r.name = "超级管理员" }
-
-AdminPermission.find_each do |perm|
-  AdminRolePermission.find_or_create_by!(admin_role: super_admin_role, admin_permission: perm)
-end
-
-puts "Admin RBAC seed done."
-执行：bundle exec rails db:seed
-
-
-
-1. ActiveAdmin 资源（P0）
-- Users：列表/详情/筛选（手机号/邮箱/创建时间/状态/角色）
-- Roles：增删改查 + 给角色分配 permissions
-- Permissions：只读或可维护（推荐代码维护 + 后台只读）
-- AuditLogs：可筛选（actor/action/target/时间）
-2. 审计写入机制（先覆盖后台 CRUD）
-- 对 ActiveAdmin 的关键资源（Users/Roles）做到：
-  - create/update/destroy 记录审计
-- 先做一个统一入口（比如 Audit.log!），后面接 Service 继续复用
-验收标准
-- 后台能完成：创建角色、分配权限、给用户授予角色
-- 审计页面能看到上述操作的记录（谁改了什么）
+商家入驻审批（字段齐全 + 流程跑通 + OSS 资料位）
+1. DB migrations（商家入驻相关）
+- merchants（含 status：submitted/approved/rejected/suspended）
+- merchant_kyc_profiles（营业执照号、法人身份证、开户地址等）
+- merchant_documents（doc_type、oss_key/url、状态）
+- merchant_approvals（审批流水：approved/rejected、comment、actor）
+ 后台商家列表页面（筛选、搜索）
+ 后台商家详情页面（查看资料）
+ 审核操作（批准/拒绝 + 原因）
+ 审核历史记录（ReviewLog）
+ 审核通知（邮件/站内信）
+ API：商家查询审核状态
+身份证号等敏感字段：本周先保证“能存、能脱敏展示”，加密可下周加强（但至少做脱敏与权限控制）。
+2. ActiveAdmin：Merchants 审批页面
+- Merchant 列表：按 status 筛选
+- Merchant 详情：展示 kyc profile + documents（OSS 链接预览/下载）
+- 两个关键 action：
+  - Approve（写 approvals + audit + merchants.status=approved）
+  - Reject（写 reason + approvals + audit + merchants.status=rejected）
+work验收标准
+- 商家资料能录入（哪怕先通过 rails console/seed 造数据）
+- 后台可以审批通过/驳回，并可追溯审批历史与审计日志
+后台管理商家 完整 CRUD
+ 审核状态机（pending → approved/rejected）
+ 后台审核页面（可批量操作）
+ API 接口

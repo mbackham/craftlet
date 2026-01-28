@@ -35,7 +35,7 @@ ActiveAdmin.register User do
       user.admin_roles.pluck(:name).join(', ')
     end
     column :created_at
-    actions
+    actions name: '操作'
   end
 
   filter :email

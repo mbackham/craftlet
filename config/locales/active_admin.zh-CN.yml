@@ -155,3 +155,55 @@ zh-CN:
       block: "列表"
       grid: "网格"
       blog: "博客"
+
+  # 商家模型
+  activerecord:
+    models:
+      merchant_profile: 商家资料
+      merchant_review_log: 审批记录
+    attributes:
+      merchant_profile:
+        id: ID
+        shop_name: 店铺名称
+        status: 审核状态
+        address_province: 省份
+        address_city: 城市
+        address_district: 区县
+        address_detail: 详细地址
+        license_file_key: 营业执照
+        idcard_front_key: 身份证正面
+        idcard_back_key: 身份证反面
+        bank_name: 开户银行
+        bank_branch: 开户支行
+        bank_account_no: 银行账号
+        deposit_amount: 保证金金额
+        approved_at: 审批通过时间
+        rejected_at: 拒绝时间
+        reject_reason: 拒绝原因
+        created_at: 创建时间
+        updated_at: 更新时间
+        user: 关联用户
+      merchant_review_log:
+        id: ID
+        action: 操作类型
+        note: 备注
+        created_at: 操作时间
+        operator: 操作人
+        merchant_profile: 商家资料
+
+  # 商家状态翻译
+  merchant_statuses:
+    pending: 待提交
+    submitted: 待审核
+    approved: 已通过
+    rejected: 已拒绝
+    suspended: 已停用
+
+  # 审批操作翻译
+  merchant_review_actions:
+    submit: 提交审核
+    approve: 审核通过
+    reject: 审核拒绝
+    suspend: 停用
+    unsuspend: 恢复
+    update: 更新资料

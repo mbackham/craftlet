@@ -26,13 +26,14 @@ ActiveAdmin.register User do
     column :phone
     column :nickname
     column :status do |user|
-      status_tag user.status, class: user.status == 'active' ? 'yes' : 'no'
+      label = user.status == 'active' ? '活跃' : '已禁用'
+      status_tag label, class: user.status == 'active' ? 'yes' : 'no'
     end
     column '业务角色' do |user|
-      user.roles.pluck(:role_type).join(', ')
+      user.roles.pluck(:role_type).join(', ').presence || '-'
     end
     column '管理角色' do |user|
-      user.admin_roles.pluck(:name).join(', ')
+      user.admin_roles.pluck(:name).join(', ').presence || '-'
     end
     column :created_at
     actions name: '操作'
@@ -41,7 +42,7 @@ ActiveAdmin.register User do
   filter :email
   filter :phone
   filter :nickname
-  filter :status, as: :select, collection: ['active', 'disabled']
+  filter :status, as: :select, collection: [['活跃', 'active'], ['已禁用', 'disabled']]
   # Disabled: admin_roles filter - use Scopes instead (有管理角色)
   filter :created_at
 
@@ -52,7 +53,8 @@ ActiveAdmin.register User do
       row :phone
       row :nickname
       row :status do |user|
-        status_tag user.status, class: user.status == 'active' ? 'yes' : 'no'
+        label = user.status == 'active' ? '活跃' : '已禁用'
+        status_tag label, class: user.status == 'active' ? 'yes' : 'no'
       end
       row :avatar_key
       row :disabled_at
@@ -63,9 +65,9 @@ ActiveAdmin.register User do
 
     panel '业务角色' do
       table_for user.roles do
-        column :role_type
-        column :is_active do |role|
-          status_tag role.is_active
+        column('角色类型') { |role| role.role_type }
+        column('是否激活') do |role|
+          status_tag(role.is_active ? '是' : '否', class: role.is_active ? 'yes' : 'no')
         end
         column :created_at
       end
@@ -130,21 +132,36 @@ ActiveAdmin.register User do
   # Member actions
   member_action :activate, method: :put do
     user = User.find(params[:id])
-    user.update(status: 'active', disabled_at: nil, disabled_reason: nil)
     
-    controller.send(:log_custom_action, 'activate', target: user)
-    
-    redirect_to admin_user_path(user), notice: '用户已激活'
+    service = Users::UnsuspendService.new(
+      user: user,
+      admin_user: current_admin_user,
+      request: request
+    ).call
+
+    if service.success?
+      redirect_to admin_user_path(user), notice: '用户已激活'
+    else
+      redirect_to admin_user_path(user), alert: "操作失败: #{service.error}"
+    end
   end
 
   member_action :deactivate, method: :put do
     user = User.find(params[:id])
     reason = params[:reason] || '管理员停用'
-    user.update(status: 'disabled', disabled_at: Time.current, disabled_reason: reason)
     
-    controller.send(:log_custom_action, 'deactivate', target: user, metadata: { reason: reason })
-    
-    redirect_to admin_user_path(user), notice: '用户已停用'
+    service = Users::SuspendService.new(
+      user: user,
+      admin_user: current_admin_user,
+      reason: reason,
+      request: request
+    ).call
+
+    if service.success?
+      redirect_to admin_user_path(user), notice: '用户已停用'
+    else
+      redirect_to admin_user_path(user), alert: "操作失败: #{service.error}"
+    end
   end
 
   action_item :activate, only: :show, if: proc { user.status == 'disabled' } do

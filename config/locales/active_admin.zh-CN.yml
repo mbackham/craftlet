@@ -159,9 +159,59 @@ zh-CN:
   # 商家模型
   activerecord:
     models:
+      user: 用户
+      admin_user: 管理员
+      admin_role: 管理角色
+      admin_permission: 管理权限
+      audit_log: 审计日志
       merchant_profile: 商家资料
       merchant_review_log: 审批记录
+      element: 元素
+      order: 订单
+      payment: 支付
+      refund: 退款
     attributes:
+      user:
+        id: ID
+        email: 邮箱
+        phone: 手机号
+        nickname: 昵称
+        status: 状态
+        avatar_key: 头像
+        disabled_at: 禁用时间
+        disabled_reason: 禁用原因
+        created_at: 创建时间
+        updated_at: 更新时间
+      admin_user:
+        id: ID
+        email: 邮箱
+        role: 角色
+        current_sign_in_at: 最近登录
+        sign_in_count: 登录次数
+        created_at: 创建时间
+        updated_at: 更新时间
+      admin_role:
+        id: ID
+        code: 角色代码
+        name: 角色名称
+        created_at: 创建时间
+        updated_at: 更新时间
+      admin_permission:
+        id: ID
+        code: 权限代码
+        name: 权限名称
+        created_at: 创建时间
+        updated_at: 更新时间
+      audit_log:
+        id: ID
+        action: 操作类型
+        actor_type: 操作人类型
+        actor_id: 操作人ID
+        target_type: 目标类型
+        target_id: 目标ID
+        ip: IP地址
+        user_agent: 用户代理
+        created_at: 创建时间
       merchant_profile:
         id: ID
         shop_name: 店铺名称
@@ -190,6 +240,55 @@ zh-CN:
         created_at: 操作时间
         operator: 操作人
         merchant_profile: 商家资料
+      element:
+        id: ID
+        name: 名称
+        category: 分类
+        price: 价格
+        status: 状态
+        description: 描述
+        oss_key: OSS Key
+        thumbnail_key: 缩略图
+        shelved_at: 上架时间
+        unshelved_at: 下架时间
+        created_at: 创建时间
+        updated_at: 更新时间
+      order:
+        id: ID
+        order_no: 订单号
+        status: 状态
+        total_amount: 总金额
+        currency: 币种
+        customer_id: 买家ID
+        merchant_id: 商家ID
+        paid_at: 支付时间
+        completed_at: 完成时间
+        canceled_at: 取消时间
+        created_at: 创建时间
+        updated_at: 更新时间
+      payment:
+        id: ID
+        order_id: 订单ID
+        channel: 支付渠道
+        amount: 金额
+        currency: 币种
+        status: 状态
+        provider_trade_no: 第三方交易号
+        paid_at: 支付时间
+        created_at: 创建时间
+        updated_at: 更新时间
+      refund:
+        id: ID
+        order_id: 订单ID
+        payment_id: 支付ID
+        amount: 退款金额
+        reason: 退款原因
+        status: 状态
+        provider_refund_no: 第三方退款号
+        succeeded_at: 成功时间
+        created_at: 创建时间
+        updated_at: 更新时间
+
 
   # 商家状态翻译
   merchant_statuses:

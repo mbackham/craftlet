@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register AdminPermission do
-  menu parent: 'RBAC管理', priority: 3
+  menu parent: 'RBAC管理', priority: 3, label: '管理权限'
 
   # Read-only resource (permissions are code-managed via seeds)
   actions :index, :show
@@ -17,7 +17,7 @@ ActiveAdmin.register AdminPermission do
       permission.admin_roles.count
     end
     column :created_at
-    actions
+    actions name: '操作'
   end
 
   filter :code

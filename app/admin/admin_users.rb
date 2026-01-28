@@ -1,5 +1,5 @@
 ActiveAdmin.register AdminUser do
-  menu if: proc { authorized?(:read, AdminUser) }
+  menu parent: 'RBAC管理', priority: 5, label: '管理员账号'
 
   permit_params :email, :password, :password_confirmation, :role
 
@@ -11,7 +11,7 @@ ActiveAdmin.register AdminUser do
     column :current_sign_in_at
     column :sign_in_count
     column :created_at
-    actions
+    actions name: '操作'
   end
 
   filter :email
@@ -31,3 +31,4 @@ ActiveAdmin.register AdminUser do
   end
 
 end
+

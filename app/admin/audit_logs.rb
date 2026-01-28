@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register AuditLog do
-  menu parent: 'RBAC管理', priority: 4
+  menu parent: 'RBAC管理', priority: 4, label: '审计日志'
 
   controller do
     helper AuditHelper

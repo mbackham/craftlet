@@ -277,44 +277,17 @@ ActiveAdmin.register MerchantProfile do
   # === Member Actions ===
   member_action :approve, method: :put do
     merchant_profile = MerchantProfile.find(params[:id])
-    
-    unless merchant_profile.can_approve?
-      redirect_to admin_merchant_profile_path(merchant_profile), 
-                  alert: '当前状态不允许审批操作'
-      return
+    service = Merchants::ApproveService.new(
+      merchant_profile: merchant_profile,
+      admin_user: current_admin_user,
+      request: request
+    ).call
+
+    if service.success?
+      redirect_to admin_merchant_profile_path(merchant_profile), notice: '商家审核已通过！'
+    else
+      redirect_to admin_merchant_profile_path(merchant_profile), alert: "操作失败: #{service.error}"
     end
-
-    ActiveRecord::Base.transaction do
-      old_status = merchant_profile.status
-      
-      admin_uuid = MerchantProfile.format_admin_id_as_uuid(current_admin_user.id)
-      
-      merchant_profile.update!(
-        status: 'approved',
-        approved_at: Time.current,
-        approved_by_admin_id: admin_uuid
-      )
-
-      merchant_profile.review_logs.create!(
-        action: 'approve',
-        operator_admin_id: admin_uuid,
-        note: '审核通过'
-      )
-
-      AuditService.log!(
-        action: 'approve',
-        actor: current_admin_user,
-        target: merchant_profile,
-        before: { status: old_status },
-        after: { status: 'approved' },
-        metadata: { action_type: 'merchant_approval' },
-        request: request
-      )
-    end
-
-    redirect_to admin_merchant_profile_path(merchant_profile), notice: '商家审核已通过！'
-  rescue ActiveRecord::RecordInvalid => e
-    redirect_to admin_merchant_profile_path(merchant_profile), alert: "操作失败: #{e.message}"
   end
 
   member_action :reject, method: [:get, :put] do
@@ -369,43 +342,18 @@ ActiveAdmin.register MerchantProfile do
     # PUT: 处理拒绝操作
     reject_reason = params[:reject_reason].presence || params[:reason].presence
     
-    if reject_reason.blank?
-      redirect_to admin_merchant_profile_path(merchant_profile), 
-                  alert: '请填写拒绝原因'
-      return
+    service = Merchants::RejectService.new(
+      merchant_profile: merchant_profile,
+      admin_user: current_admin_user,
+      reason: reject_reason,
+      request: request
+    ).call
+
+    if service.success?
+      redirect_to admin_merchant_profile_path(merchant_profile), notice: '商家申请已拒绝'
+    else
+      redirect_to admin_merchant_profile_path(merchant_profile), alert: "操作失败: #{service.error}"
     end
-
-    ActiveRecord::Base.transaction do
-      old_status = merchant_profile.status
-      admin_uuid = MerchantProfile.format_admin_id_as_uuid(current_admin_user.id)
-      
-      merchant_profile.update!(
-        status: 'rejected',
-        rejected_at: Time.current,
-        rejected_by_admin_id: admin_uuid,
-        reject_reason: reject_reason
-      )
-
-      merchant_profile.review_logs.create!(
-        action: 'reject',
-        operator_admin_id: admin_uuid,
-        note: reject_reason
-      )
-
-      AuditService.log!(
-        action: 'reject',
-        actor: current_admin_user,
-        target: merchant_profile,
-        before: { status: old_status },
-        after: { status: 'rejected', reject_reason: reject_reason },
-        metadata: { action_type: 'merchant_rejection', reason: reject_reason },
-        request: request
-      )
-    end
-
-    redirect_to admin_merchant_profile_path(merchant_profile), notice: '商家申请已拒绝'
-  rescue ActiveRecord::RecordInvalid => e
-    redirect_to admin_merchant_profile_path(merchant_profile), alert: "操作失败: #{e.message}"
   end
 
   member_action :suspend, method: :put do

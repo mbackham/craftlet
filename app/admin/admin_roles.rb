@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register AdminRole do
-  menu parent: 'RBAC管理', priority: 2
+  menu parent: 'RBAC管理', priority: 2, label: '管理角色'
 
   permit_params :name, :code, admin_permission_ids: []
 
@@ -27,7 +27,7 @@ ActiveAdmin.register AdminRole do
       role.users.count
     end
     column :created_at
-    actions
+    actions name: '操作'
   end
 
   filter :code
@@ -61,7 +61,9 @@ ActiveAdmin.register AdminRole do
           link_to user.email, admin_user_path(user)
         end
         column :phone
-        column :status
+        column :status do |u|
+          u.status == 'active' ? '活跃' : '已禁用'
+        end
         column :created_at
       end
     end

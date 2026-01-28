@@ -219,3 +219,57 @@ zh-CN:
     unsuspend: 恢复
     activate: 激活
     deactivate: 禁用
+    shelf: 上架
+    unshelf: 下架
+
+  # 元素状态翻译
+  element_statuses:
+    draft: 草稿
+    on_shelf: 已上架
+    off_shelf: 已下架
+
+  # 元素分类翻译
+  element_categories:
+    background: 背景
+    character: 角色
+    prop: 道具
+    effect: 特效
+    font: 字体
+
+  # 订单状态翻译
+  order_statuses:
+    created: 待支付
+    paid: 已支付
+    accepted: 已接单
+    producing: 制作中
+    delivered: 已发货
+    completed: 已完成
+    canceled: 已取消
+    refunded: 已退款
+
+  # 支付状态翻译
+  payment_statuses:
+    init: 初始化
+    pending: 处理中
+    paid: 已支付
+    failed: 支付失败
+    refunded: 已退款
+
+  # 支付渠道翻译
+  payment_channels:
+    wechat: 微信支付
+    alipay: 支付宝
+    bank_transfer: 银行转账
+
+  # 退款状态翻译
+  refund_statuses:
+    init: 初始化
+    pending: 处理中
+    succeeded: 退款成功
+    failed: 退款失败
+
+  # 竞价状态翻译
+  bid_statuses:
+    pending: 待处理
+    accepted: 已接受
+    rejected: 已拒绝

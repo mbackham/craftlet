@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_26_083704) do
+ActiveRecord::Schema[7.1].define(version: 2026_01_28_062234) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -103,6 +103,35 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_26_083704) do
     t.index ["target_type", "target_id"], name: "index_audit_logs_on_target_type_and_target_id"
   end
 
+  create_table "bids", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.uuid "bidder_id", null: false
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bidder_id"], name: "index_bids_on_bidder_id"
+    t.index ["order_id"], name: "index_bids_on_order_id"
+    t.index ["status"], name: "index_bids_on_status"
+  end
+
+  create_table "elements", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "category"
+    t.string "status", default: "draft", null: false
+    t.decimal "price", precision: 10, scale: 2
+    t.string "oss_key"
+    t.string "thumbnail_key"
+    t.text "description"
+    t.datetime "shelved_at"
+    t.datetime "unshelved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_elements_on_category"
+    t.index ["created_at"], name: "index_elements_on_created_at"
+    t.index ["status"], name: "index_elements_on_status"
+  end
+
   create_table "merchant_profiles", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "shop_name", null: false
@@ -144,6 +173,20 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_26_083704) do
     t.index ["action"], name: "index_merchant_review_logs_on_action"
     t.index ["merchant_profile_id"], name: "index_merchant_review_logs_on_merchant_profile_id"
     t.index ["operator_admin_id"], name: "index_merchant_review_logs_on_operator_admin_id"
+  end
+
+  create_table "order_items", force: :cascade do |t|
+    t.bigint "order_id", null: false
+    t.string "item_type", null: false
+    t.bigint "item_id", null: false
+    t.string "name"
+    t.decimal "unit_price", precision: 10, scale: 2
+    t.integer "quantity", default: 1
+    t.decimal "subtotal", precision: 10, scale: 2
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["item_type", "item_id"], name: "index_order_items_on_item_type_and_item_id"
+    t.index ["order_id"], name: "index_order_items_on_order_id"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -288,8 +331,10 @@ ActiveRecord::Schema[7.1].define(version: 2026_01_26_083704) do
   add_foreign_key "admin_role_permissions", "admin_roles"
   add_foreign_key "admin_user_roles", "admin_roles"
   add_foreign_key "admin_user_roles", "users"
+  add_foreign_key "bids", "orders"
   add_foreign_key "merchant_profiles", "users"
   add_foreign_key "merchant_review_logs", "merchant_profiles"
+  add_foreign_key "order_items", "orders"
   add_foreign_key "payment_callbacks", "payments"
   add_foreign_key "payments", "orders"
   add_foreign_key "refunds", "orders"

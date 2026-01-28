@@ -21,8 +21,21 @@ ActiveAdmin.register AuditLog do
   index do
     selectable_column
     id_column
-    column '操作', sortable: :action do |log|
-      status_tag(log.action, class: log.action.to_s.downcase)
+    column '状态', sortable: :action do |log|
+      action_label = I18n.t("audit_actions.#{log.action}", default: log.action.to_s.humanize)
+      action_color = case log.action.to_s
+                     when 'create' then 'yes'
+                     when 'update' then 'warning'
+                     when 'destroy' then 'error'
+                     when 'approve' then 'yes'
+                     when 'reject' then 'error'
+                     when 'suspend' then 'no'
+                     when 'unsuspend' then 'yes'
+                     when 'activate' then 'yes'
+                     when 'deactivate' then 'no'
+                     else nil
+                     end
+      status_tag(action_label, class: action_color)
     end
     column '操作人' do |log|
       if log.actor

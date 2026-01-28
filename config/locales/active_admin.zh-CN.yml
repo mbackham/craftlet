@@ -207,3 +207,15 @@ zh-CN:
     suspend: 停用
     unsuspend: 恢复
     update: 更新资料
+
+  # 审计日志操作翻译
+  audit_actions:
+    create: 创建
+    update: 更新
+    destroy: 删除
+    approve: 审核通过
+    reject: 审核拒绝
+    suspend: 停用
+    unsuspend: 恢复
+    activate: 激活
+    deactivate: 禁用

@@ -345,3 +345,159 @@ mkdir -p /root/backups
 crontab -e
 # 添加: 0 2 * * * /root/backup-db.sh
 ```
+
+---
+
+## 九、使用 Capistrano 自动化部署
+
+### 1. 首次设置
+
+#### 本地准备
+```bash
+# 安装 Capistrano gems（已在 Gemfile 中配置）
+bundle install
+
+# 修改 config/deploy.rb 中的仓库地址
+# set :repo_url, "git@github.com:YOUR_USERNAME/craftlet.git"
+```
+
+#### 服务器准备
+```bash
+# 1. 确保服务器可以 SSH 无密码登录
+ssh-copy-id root@154.219.107.73
+
+# 2. 在服务器上创建共享目录
+ssh root@154.219.107.73
+mkdir -p /var/www/craftlet/shared/config
+mkdir -p /var/www/craftlet/shared/log
+mkdir -p /var/www/craftlet/shared/tmp/pids
+mkdir -p /var/www/craftlet/shared/tmp/cache
+mkdir -p /var/www/craftlet/shared/tmp/sockets
+mkdir -p /var/www/craftlet/shared/vendor/bundle
+mkdir -p /var/www/craftlet/shared/public/system
+mkdir -p /var/www/craftlet/shared/storage
+
+# 3. 上传 .env 文件到服务器
+scp .env.production root@154.219.107.73:/var/www/craftlet/shared/.env
+
+# 4. 上传 master.key
+scp config/master.key root@154.219.107.73:/var/www/craftlet/shared/config/master.key
+
+# 5. 确保服务器已添加 GitHub SSH Key
+ssh root@154.219.107.73
+ssh-keygen -t ed25519 -C "server@komaprogram.xyz"
+cat ~/.ssh/id_ed25519.pub
+# 将输出的公钥添加到 GitHub 仓库的 Deploy Keys
+```
+
+### 2. 部署命令
+
+```bash
+# 检查部署配置
+bundle exec cap production deploy:check
+
+# 执行完整部署
+bundle exec cap production deploy
+
+# 部署指定分支
+BRANCH=feature-xxx bundle exec cap production deploy
+
+# 回滚到上一个版本
+bundle exec cap production deploy:rollback
+```
+
+### 3. 常用运维命令
+
+```bash
+# 查看应用状态
+bundle exec cap production app:status
+
+# 查看 Rails 日志
+bundle exec cap production logs:rails
+
+# 查看 Puma 日志
+bundle exec cap production logs:puma
+
+# 查看 Sidekiq 日志
+bundle exec cap production logs:sidekiq
+
+# 数据库备份
+bundle exec cap production db:backup
+
+# 清理缓存
+bundle exec cap production app:clear_cache
+
+# 打开远程 Rails 控制台
+bundle exec cap production rails:console
+
+# 运行数据库种子
+bundle exec cap production rails:seed
+
+# 重启 Puma
+bundle exec cap production puma:restart
+
+# 重启 Sidekiq
+bundle exec cap production sidekiq:restart
+```
+
+### 4. 部署流程说明
+
+Capistrano 执行 `cap production deploy` 时会自动完成：
+
+1. ✅ 从 GitHub 拉取最新代码
+2. ✅ 创建新的 release 目录
+3. ✅ 链接共享文件（.env, master.key, log, storage 等）
+4. ✅ 安装 Ruby gems（bundle install）
+5. ✅ 预编译 Assets（rails assets:precompile）
+6. ✅ 运行数据库迁移（rails db:migrate）
+7. ✅ 重启 Puma 和 Sidekiq
+8. ✅ 清理旧版本（保留最近 5 个）
+
+### 5. 目录结构
+
+部署后服务器目录结构：
+```
+/var/www/craftlet/
+├── current -> /var/www/craftlet/releases/20260129xxxxxx  # 当前版本符号链接
+├── releases/                                              # 所有发布版本
+│   ├── 20260129010000/
+│   ├── 20260129020000/
+│   └── ...
+├── shared/                                                # 共享文件
+│   ├── .env                                               # 环境变量
+│   ├── config/
+│   │   └── master.key
+│   ├── log/
+│   │   └── production.log
+│   ├── tmp/
+│   │   ├── pids/
+│   │   ├── cache/
+│   │   └── sockets/
+│   ├── vendor/
+│   │   └── bundle/
+│   └── storage/
+└── repo/                                                  # Git 仓库缓存
+```
+
+### 6. 故障排查
+
+```bash
+# 查看最近部署日志
+cat log/capistrano.log
+
+# SSH 到服务器检查
+ssh root@154.219.107.73
+
+# 检查服务状态
+systemctl status craftlet-web
+systemctl status craftlet-sidekiq
+
+# 检查进程
+ps aux | grep puma
+ps aux | grep sidekiq
+
+# 手动重启服务
+systemctl restart craftlet-web
+systemctl restart craftlet-sidekiq
+```
+

@@ -97,6 +97,14 @@ group :development do
   gem "binding_of_caller"
   gem "pry-rails"
 
+  # === Deployment ===
+  gem "capistrano", "~> 3.18", require: false
+  gem "capistrano-rails", "~> 1.6", require: false
+  gem "capistrano-rbenv", "~> 2.2", require: false
+  gem "capistrano-bundler", "~> 2.1", require: false
+  gem "capistrano3-puma", "~> 6.0", require: false
+  gem "capistrano-sidekiq", "~> 2.3", require: false
+
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
   # gem "rack-mini-profiler"
 

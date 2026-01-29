@@ -40,3 +40,4 @@ vendor/cache
 .env
 vendor/bundle
 vendor/cache
+.env.production

@@ -5,6 +5,12 @@ lock "~> 3.20.0"
 
 # Application configuration
 set :application, "craftlet"
+set :ssh_options, {
+  keys: %w(~/.ssh/id_ed25519),
+  forward_agent: false,
+  auth_methods: %w(publickey),
+  verify_host_key: :never
+}
 set :repo_url, "git@github.com:mbackham/craftlet.git"
 
 # Default branch is :main

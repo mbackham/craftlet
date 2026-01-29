@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register User do
-  menu parent: 'RBAC管理', priority: 1
+  menu parent: proc { I18n.t('admin.menu.rbac') }, priority: 1
 
   permit_params :email, :phone, :nickname, :status, :password, :password_confirmation,
                 admin_role_ids: []
@@ -15,9 +15,15 @@ ActiveAdmin.register User do
   end
 
   scope :all, default: true
-  scope('活跃用户') { |scope| scope.where(status: 'active') }
-  scope('已禁用') { |scope| scope.where(status: 'disabled') }
-  scope('有管理角色') { |scope| scope.joins(:admin_roles).distinct }
+  scope :active, label: proc { I18n.t('admin.scopes.active_users') } do |scope|
+    scope.where(status: 'active')
+  end
+  scope :disabled, label: proc { I18n.t('admin.scopes.disabled_users') } do |scope|
+    scope.where(status: 'disabled')
+  end
+  scope :with_admin_role, label: proc { I18n.t('admin.scopes.has_admin_role') } do |scope|
+    scope.joins(:admin_roles).distinct
+  end
 
   index do
     selectable_column
@@ -26,24 +32,28 @@ ActiveAdmin.register User do
     column :phone
     column :nickname
     column :status do |user|
-      label = user.status == 'active' ? '活跃' : '已禁用'
+      label = I18n.t("user_statuses.#{user.status}", default: user.status)
       status_tag label, class: user.status == 'active' ? 'yes' : 'no'
     end
-    column '业务角色' do |user|
+    column I18n.t('admin.columns.business_role') do |user|
       user.roles.pluck(:role_type).join(', ').presence || '-'
     end
-    column '管理角色' do |user|
+    column I18n.t('admin.columns.admin_role') do |user|
       user.admin_roles.pluck(:name).join(', ').presence || '-'
     end
     column :created_at
-    actions name: '操作'
+    actions name: I18n.t('admin.columns.actions')
   end
 
   filter :email
   filter :phone
   filter :nickname
-  filter :status, as: :select, collection: [['活跃', 'active'], ['已禁用', 'disabled']]
-  # Disabled: admin_roles filter - use Scopes instead (有管理角色)
+  filter :status, as: :select, collection: -> {
+    [
+      [I18n.t('user_statuses.active'), 'active'],
+      [I18n.t('user_statuses.disabled'), 'disabled']
+    ]
+  }
   filter :created_at
 
   show do
@@ -53,7 +63,7 @@ ActiveAdmin.register User do
       row :phone
       row :nickname
       row :status do |user|
-        label = user.status == 'active' ? '活跃' : '已禁用'
+        label = I18n.t("user_statuses.#{user.status}", default: user.status)
         status_tag label, class: user.status == 'active' ? 'yes' : 'no'
       end
       row :avatar_key
@@ -63,33 +73,36 @@ ActiveAdmin.register User do
       row :updated_at
     end
 
-    panel '业务角色' do
+    panel I18n.t('admin.panels.business_roles') do
       table_for user.roles do
-        column('角色类型') { |role| role.role_type }
-        column('是否激活') do |role|
-          status_tag(role.is_active ? '是' : '否', class: role.is_active ? 'yes' : 'no')
+        column I18n.t('admin.columns.business_role') do |role|
+          role.role_type
+        end
+        column :status do |role|
+          label = role.is_active ? I18n.t('active_admin.status_tag.yes') : I18n.t('active_admin.status_tag.no')
+          status_tag(label, class: role.is_active ? 'yes' : 'no')
         end
         column :created_at
       end
     end
 
-    panel '管理角色' do
+    panel I18n.t('admin.panels.admin_roles') do
       if user.admin_roles.any?
         table_for user.admin_roles do
           column :code do |role|
             link_to role.code, admin_admin_role_path(role)
           end
           column :name
-          column '权限' do |role|
+          column I18n.t('admin.panels.assigned_permissions') do |role|
             role.admin_permissions.pluck(:code).join(', ')
           end
         end
       else
-        para '无管理角色'
+        para I18n.t('admin.messages.no_admin_roles')
       end
     end
 
-    panel '最近审计日志' do
+    panel I18n.t('admin.panels.recent_audit_logs') do
       table_for user.audit_logs.order(created_at: :desc).limit(10) do
         column :action do |log|
           action_badge(log.action)
@@ -98,32 +111,32 @@ ActiveAdmin.register User do
         column :target_id
         column :ip
         column :created_at
-        column :详情 do |log|
-          link_to '查看', admin_audit_log_path(log)
+        column I18n.t('admin.actions.view') do |log|
+          link_to I18n.t('admin.actions.view'), admin_audit_log_path(log)
         end
       end
     end
   end
 
   form do |f|
-    f.inputs '基本信息' do
+    f.inputs I18n.t('admin.panels.basic_info') do
       f.input :email
       f.input :phone
       f.input :nickname
       f.input :status, as: :select, collection: ['active', 'disabled'], include_blank: false
     end
 
-    f.inputs '密码' do
-      f.input :password, hint: '留空则不修改密码'
+    f.inputs I18n.t('admin.panels.password') do
+      f.input :password, hint: I18n.t('admin.forms.password_hint')
       f.input :password_confirmation
     end
 
-    f.inputs '管理角色分配' do
+    f.inputs I18n.t('admin.panels.admin_role_assignment') do
       f.input :admin_roles,
               as: :check_boxes,
               collection: AdminRole.all.order(:code),
               label_method: ->(r) { "#{r.name} (#{r.code})" },
-              hint: '选择要分配给此用户的管理角色'
+              hint: I18n.t('admin.forms.role_assignment_hint')
     end
 
     f.actions
@@ -140,15 +153,15 @@ ActiveAdmin.register User do
     ).call
 
     if service.success?
-      redirect_to admin_user_path(user), notice: '用户已激活'
+      redirect_to admin_user_path(user), notice: I18n.t('admin.notices.user_activated')
     else
-      redirect_to admin_user_path(user), alert: "操作失败: #{service.error}"
+      redirect_to admin_user_path(user), alert: I18n.t('admin.notices.operation_failed', error: service.error)
     end
   end
 
   member_action :deactivate, method: :put do
     user = User.find(params[:id])
-    reason = params[:reason] || '管理员停用'
+    reason = params[:reason] || 'Admin deactivation'
     
     service = Users::SuspendService.new(
       user: user,
@@ -158,20 +171,19 @@ ActiveAdmin.register User do
     ).call
 
     if service.success?
-      redirect_to admin_user_path(user), notice: '用户已停用'
+      redirect_to admin_user_path(user), notice: I18n.t('admin.notices.user_deactivated')
     else
-      redirect_to admin_user_path(user), alert: "操作失败: #{service.error}"
+      redirect_to admin_user_path(user), alert: I18n.t('admin.notices.operation_failed', error: service.error)
     end
   end
 
   action_item :activate, only: :show, if: proc { user.status == 'disabled' } do
-    link_to '激活用户', activate_admin_user_path(user), method: :put, 
-            data: { confirm: '确认激活此用户？' }
+    link_to I18n.t('admin.actions.activate'), activate_admin_user_path(user), method: :put, 
+            data: { confirm: I18n.t('admin.confirmations.activate_user') }
   end
 
   action_item :deactivate, only: :show, if: proc { user.status == 'active' } do
-    link_to '停用用户', deactivate_admin_user_path(user), method: :put,
-            data: { confirm: '确认停用此用户？\n请输入停用原因：', 
-                    prompt: '停用原因' }
+    link_to I18n.t('admin.actions.deactivate'), deactivate_admin_user_path(user), method: :put,
+            data: { confirm: I18n.t('admin.confirmations.deactivate_user') }
   end
 end

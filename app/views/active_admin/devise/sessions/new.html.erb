@@ -6,41 +6,27 @@
     <%= link_to t("active_admin.language.en"), url_for(params.permit!.to_h.merge(locale: "en")) %>
   </div>
 
-  <% admin_tab_checked = flash[:alert].present? || flash[:error].present? || params[:login_tab] == "admin" %>
-  <div class="login-tabs">
-    <input type="radio" name="login_tab" id="login-tab-merchant" <%= "checked" unless admin_tab_checked %>>
-    <label for="login-tab-merchant" class="login-tab-label"><%= t("active_admin.login_tabs.merchant") %></label>
-    <input type="radio" name="login_tab" id="login-tab-admin" <%= "checked" if admin_tab_checked %>>
-    <label for="login-tab-admin" class="login-tab-label"><%= t("active_admin.login_tabs.admin") %></label>
-
-    <div class="login-tab-panels">
-      <div class="login-tab-panel login-tab-merchant">
-        <p class="login-tab-hint"><%= t("active_admin.login_tabs.merchant_hint") %></p>
-      </div>
-
-      <div class="login-tab-panel login-tab-admin">
-        <% scope = Devise::Mapping.find_scope!(resource_name) %>
-        <%= active_admin_form_for(resource, as: resource_name, url: send(:"#{scope}_session_path"), html: { id: "session_new" }) do |f|
-          f.inputs do
-            resource.class.authentication_keys.each_with_index { |key, index|
-              f.input key,
-                      label: t("active_admin.devise.#{key}.title"),
-                      input_html: { autofocus: index.zero? && admin_tab_checked }
-            }
-            f.input :password, label: t("active_admin.devise.password.title")
-            f.input :_rucaptcha,
-                    as: :rucaptcha,
-                    label: t("rucaptcha.label"),
-                    hint: t("rucaptcha.hint"),
-                    required: true
-            f.input :remember_me, label: t("active_admin.devise.login.remember_me"), as: :boolean if devise_mapping.rememberable?
-          end
-          f.actions do
-            f.action :submit, label: t("active_admin.devise.login.submit"), button_html: { value: t("active_admin.devise.login.submit") }
-          end
-        end %>
-        <%= render partial: "active_admin/devise/shared/links" %>
-      </div>
-    </div>
+  <div class="login-form-container">
+    <% scope = Devise::Mapping.find_scope!(resource_name) %>
+    <%= active_admin_form_for(resource, as: resource_name, url: send(:"#{scope}_session_path"), html: { id: "session_new" }) do |f|
+      f.inputs do
+        resource.class.authentication_keys.each_with_index { |key, index|
+          f.input key,
+                  label: t("active_admin.devise.#{key}.title"),
+                  input_html: { autofocus: index.zero? }
+        }
+        f.input :password, label: t("active_admin.devise.password.title")
+        f.input :_rucaptcha,
+                as: :rucaptcha,
+                label: t("rucaptcha.label"),
+                hint: t("rucaptcha.hint"),
+                required: true
+        f.input :remember_me, label: t("active_admin.devise.login.remember_me"), as: :boolean if devise_mapping.rememberable?
+      end
+      f.actions do
+        f.action :submit, label: t("active_admin.devise.login.submit"), button_html: { value: t("active_admin.devise.login.submit") }
+      end
+    end %>
+    <%= render partial: "active_admin/devise/shared/links" %>
   </div>
 </div>

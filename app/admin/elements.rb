@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Element do
-  menu parent: '运营管理', priority: 1, label: '元素库'
+  menu parent: proc { I18n.t('admin.menu.operations') }, priority: 1, label: proc { I18n.t('admin.labels.elements') }
 
   permit_params :name, :category, :status, :price, :oss_key, :thumbnail_key, :description
 
@@ -16,9 +16,9 @@ ActiveAdmin.register Element do
 
   # === Scopes ===
   scope :all, default: true
-  scope('草稿') { |scope| scope.draft }
-  scope('已上架') { |scope| scope.on_shelf }
-  scope('已下架') { |scope| scope.off_shelf }
+  scope :draft, label: proc { I18n.t('admin.scopes.draft') }
+  scope :on_shelf, label: proc { I18n.t('admin.scopes.on_shelf') }
+  scope :off_shelf, label: proc { I18n.t('admin.scopes.off_shelf') }
 
   # === Filters ===
   filter :name
@@ -37,14 +37,14 @@ ActiveAdmin.register Element do
   index do
     selectable_column
     id_column
-    column '名称', :name
-    column '分类' do |el|
+    column I18n.t('admin.columns.name'), :name
+    column I18n.t('admin.columns.category') do |el|
       I18n.t("element_categories.#{el.category}", default: el.category) if el.category
     end
-    column '价格' do |el|
+    column I18n.t('admin.columns.price') do |el|
       number_to_currency(el.price, unit: '¥') if el.price
     end
-    column '状态' do |el|
+    column I18n.t('admin.columns.status') do |el|
       status_color = case el.status
                      when 'on_shelf' then 'yes'
                      when 'off_shelf' then 'no'
@@ -53,19 +53,19 @@ ActiveAdmin.register Element do
       status_tag I18n.t("element_statuses.#{el.status}", default: el.status.humanize),
                  class: status_color
     end
-    column '上架时间', :shelved_at
-    column '创建时间', :created_at
-    actions name: '操作'
+    column I18n.t('admin.columns.shelf_time'), :shelved_at
+    column I18n.t('admin.columns.created_time'), :created_at
+    actions name: I18n.t('admin.columns.actions')
   end
 
   # === Show ===
-  show title: proc { |el| "元素 - #{el.name}" } do
+  show title: proc { |el| I18n.t('admin.titles.element', name: el.name) } do
     attributes_table do
       row('ID') { |el| el.id }
-      row('名称') { |el| el.name }
-      row('分类') { |el| I18n.t("element_categories.#{el.category}", default: el.category) if el.category }
-      row('价格') { |el| number_to_currency(el.price, unit: '¥') if el.price }
-      row('状态') do |el|
+      row(I18n.t('admin.columns.name')) { |el| el.name }
+      row(I18n.t('admin.columns.category')) { |el| I18n.t("element_categories.#{el.category}", default: el.category) if el.category }
+      row(I18n.t('admin.columns.price')) { |el| number_to_currency(el.price, unit: '¥') if el.price }
+      row(I18n.t('admin.columns.status')) do |el|
         status_color = case el.status
                        when 'on_shelf' then 'yes'
                        when 'off_shelf' then 'no'
@@ -74,44 +74,44 @@ ActiveAdmin.register Element do
         status_tag I18n.t("element_statuses.#{el.status}", default: el.status.humanize),
                    class: status_color
       end
-      row('描述') { |el| el.description }
+      row(:description) { |el| el.description }
       row('OSS Key') { |el| el.oss_key }
-      row('缩略图 Key') { |el| el.thumbnail_key }
-      row('上架时间') { |el| l(el.shelved_at, format: :long) if el.shelved_at }
-      row('下架时间') { |el| l(el.unshelved_at, format: :long) if el.unshelved_at }
-      row('创建时间') { |el| l(el.created_at, format: :long) if el.created_at }
-      row('更新时间') { |el| l(el.updated_at, format: :long) if el.updated_at }
+      row(:thumbnail_key) { |el| el.thumbnail_key }
+      row(I18n.t('admin.columns.shelf_time')) { |el| l(el.shelved_at, format: :long) if el.shelved_at }
+      row(:unshelved_at) { |el| l(el.unshelved_at, format: :long) if el.unshelved_at }
+      row(:created_at) { |el| l(el.created_at, format: :long) if el.created_at }
+      row(:updated_at) { |el| l(el.updated_at, format: :long) if el.updated_at }
     end
 
-    panel '审计日志' do
+    panel I18n.t('admin.panels.audit_logs') do
       audit_logs = AuditLog.where(target_type: 'Element', target_id: element.id)
                            .order(created_at: :desc).limit(10)
       if audit_logs.any?
         table_for audit_logs do
-          column('操作') { |log| status_tag log.action }
-          column('操作人') { |log| log.actor&.email || '系统' }
-          column('时间') { |log| l(log.created_at, format: :long) if log.created_at }
+          column(I18n.t('admin.columns.status')) { |log| status_tag log.action }
+          column(I18n.t('admin.columns.operator')) { |log| log.actor&.email || I18n.t('admin.messages.system') }
+          column(I18n.t('admin.columns.created_time')) { |log| l(log.created_at, format: :long) if log.created_at }
         end
       else
-        para '暂无审计日志'
+        para I18n.t('admin.messages.no_audit_logs')
       end
     end
   end
 
   # === Form ===
   form do |f|
-    f.inputs '基本信息' do
+    f.inputs I18n.t('admin.panels.basic_info') do
       f.input :name
       f.input :category, as: :select, collection: Element::CATEGORIES.map { |c|
         [I18n.t("element_categories.#{c}", default: c.humanize), c]
-      }, include_blank: '请选择分类'
+      }, include_blank: I18n.t('admin.forms.select_category')
       f.input :price
       f.input :description
     end
 
-    f.inputs '文件信息' do
-      f.input :oss_key, hint: 'OSS 文件 Key'
-      f.input :thumbnail_key, hint: '缩略图 OSS Key'
+    f.inputs do
+      f.input :oss_key, hint: I18n.t('admin.forms.oss_key_hint')
+      f.input :thumbnail_key, hint: I18n.t('admin.forms.thumbnail_hint')
     end
 
     f.actions
@@ -122,7 +122,7 @@ ActiveAdmin.register Element do
     element = Element.find(params[:id])
     
     unless element.can_shelf?
-      redirect_to admin_element_path(element), alert: '当前状态不允许上架'
+      redirect_to admin_element_path(element), alert: I18n.t('admin.alerts.status_not_allow_shelf')
       return
     end
 
@@ -141,16 +141,16 @@ ActiveAdmin.register Element do
       )
     end
 
-    redirect_to admin_element_path(element), notice: '元素已上架'
+    redirect_to admin_element_path(element), notice: I18n.t('admin.notices.element_shelved')
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to admin_element_path(element), alert: "操作失败: #{e.message}"
+    redirect_to admin_element_path(element), alert: I18n.t('admin.notices.operation_failed', error: e.message)
   end
 
   member_action :unshelf, method: :put do
     element = Element.find(params[:id])
     
     unless element.can_unshelf?
-      redirect_to admin_element_path(element), alert: '当前状态不允许下架'
+      redirect_to admin_element_path(element), alert: I18n.t('admin.alerts.status_not_allow_unshelf')
       return
     end
 
@@ -169,23 +169,23 @@ ActiveAdmin.register Element do
       )
     end
 
-    redirect_to admin_element_path(element), notice: '元素已下架'
+    redirect_to admin_element_path(element), notice: I18n.t('admin.notices.element_unshelved')
   rescue ActiveRecord::RecordInvalid => e
-    redirect_to admin_element_path(element), alert: "操作失败: #{e.message}"
+    redirect_to admin_element_path(element), alert: I18n.t('admin.notices.operation_failed', error: e.message)
   end
 
   # === Action Items ===
   action_item :shelf, only: :show, if: proc { element.can_shelf? } do
-    link_to '上架', shelf_admin_element_path(element),
+    link_to I18n.t('admin.actions.shelf'), shelf_admin_element_path(element),
             method: :put,
-            data: { confirm: '确认上架该元素？' },
+            data: { confirm: I18n.t('admin.confirmations.shelf_element') },
             class: 'action-item-button'
   end
 
   action_item :unshelf, only: :show, if: proc { element.can_unshelf? } do
-    link_to '下架', unshelf_admin_element_path(element),
+    link_to I18n.t('admin.actions.unshelf'), unshelf_admin_element_path(element),
             method: :put,
-            data: { confirm: '确认下架该元素？' },
+            data: { confirm: I18n.t('admin.confirmations.unshelf_element') },
             class: 'action-item-button'
   end
 
@@ -195,7 +195,7 @@ ActiveAdmin.register Element do
       next unless element.can_shelf?
       element.shelf!
     end
-    redirect_to collection_path, notice: "已批量上架 #{ids.size} 个元素"
+    redirect_to collection_path, notice: "#{I18n.t('admin.messages.batch_shelved')} #{ids.size}"
   end
 
   batch_action :unshelf do |ids|
@@ -203,7 +203,7 @@ ActiveAdmin.register Element do
       next unless element.can_unshelf?
       element.unshelf!
     end
-    redirect_to collection_path, notice: "已批量下架 #{ids.size} 个元素"
+    redirect_to collection_path, notice: "#{I18n.t('admin.messages.batch_unshelved')} #{ids.size}"
   end
 
   # === CSV Export ===

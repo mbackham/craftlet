@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register AdminPermission do
-  menu parent: 'RBAC管理', priority: 3, label: '管理权限'
+  menu parent: proc { I18n.t('admin.menu.rbac') }, priority: 3, label: proc { I18n.t('admin.labels.admin_permissions') }
 
   # Read-only resource (permissions are code-managed via seeds)
   actions :index, :show
@@ -13,11 +13,11 @@ ActiveAdmin.register AdminPermission do
       content_tag(:code, permission.code)
     end
     column :name
-    column '关联角色数' do |permission|
+    column I18n.t('admin.columns.related_roles') do |permission|
       permission.admin_roles.count
     end
     column :created_at
-    actions name: '操作'
+    actions name: I18n.t('admin.columns.actions')
   end
 
   filter :code
@@ -35,7 +35,7 @@ ActiveAdmin.register AdminPermission do
       row :updated_at
     end
 
-    panel '拥有此权限的角色' do
+    panel I18n.t('admin.panels.roles_with_permission') do
       table_for admin_permission.admin_roles do
         column :id
         column :code do |role|
@@ -44,7 +44,7 @@ ActiveAdmin.register AdminPermission do
         column :name do |role|
           link_to role.name, admin_admin_role_path(role)
         end
-        column '用户数' do |role|
+        column I18n.t('admin.columns.user_count') do |role|
           role.users.count
         end
       end

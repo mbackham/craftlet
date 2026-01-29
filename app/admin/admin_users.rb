@@ -1,5 +1,5 @@
 ActiveAdmin.register AdminUser do
-  menu parent: 'RBAC管理', priority: 5, label: '管理员账号'
+  menu parent: proc { I18n.t('admin.menu.rbac') }, priority: 5, label: proc { I18n.t('admin.labels.admin_users') }
 
   permit_params :email, :password, :password_confirmation, :role
 
@@ -11,7 +11,7 @@ ActiveAdmin.register AdminUser do
     column :current_sign_in_at
     column :sign_in_count
     column :created_at
-    actions name: '操作'
+    actions name: I18n.t('admin.columns.actions')
   end
 
   filter :email
@@ -31,4 +31,3 @@ ActiveAdmin.register AdminUser do
   end
 
 end
-

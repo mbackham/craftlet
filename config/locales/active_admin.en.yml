@@ -1,0 +1,410 @@
+en:
+  activerecord:
+    models:
+      user: User
+      admin_user: Admin User
+      admin_role: Admin Role
+      admin_permission: Admin Permission
+      audit_log: Audit Log
+      merchant_profile: Merchant Profile
+      merchant_review_log: Review Log
+      element: Element
+      order: Order
+      payment: Payment
+      refund: Refund
+    attributes:
+      user:
+        id: ID
+        email: Email
+        phone: Phone
+        nickname: Nickname
+        status: Status
+        avatar_key: Avatar
+        disabled_at: Disabled At
+        disabled_reason: Disabled Reason
+        created_at: Created At
+        updated_at: Updated At
+      admin_user:
+        id: ID
+        email: Email
+        role: Role
+        current_sign_in_at: Last Login
+        sign_in_count: Login Count
+        created_at: Created At
+        updated_at: Updated At
+      admin_role:
+        id: ID
+        code: Role Code
+        name: Role Name
+        created_at: Created At
+        updated_at: Updated At
+      admin_permission:
+        id: ID
+        code: Permission Code
+        name: Permission Name
+        created_at: Created At
+        updated_at: Updated At
+      audit_log:
+        id: ID
+        action: Action
+        actor_type: Actor Type
+        actor_id: Actor ID
+        target_type: Target Type
+        target_id: Target ID
+        ip: IP Address
+        user_agent: User Agent
+        created_at: Created At
+      merchant_profile:
+        id: ID
+        shop_name: Shop Name
+        status: Status
+        address_province: Province
+        address_city: City
+        address_district: District
+        address_detail: Address Detail
+        license_file_key: Business License
+        idcard_front_key: ID Card Front
+        idcard_back_key: ID Card Back
+        bank_name: Bank Name
+        bank_branch: Bank Branch
+        bank_account_no: Bank Account No.
+        deposit_amount: Deposit Amount
+        approved_at: Approved At
+        rejected_at: Rejected At
+        reject_reason: Rejection Reason
+        created_at: Created At
+        updated_at: Updated At
+        user: User
+      merchant_review_log:
+        id: ID
+        action: Action
+        note: Note
+        created_at: Created At
+        operator: Operator
+        merchant_profile: Merchant Profile
+      element:
+        id: ID
+        name: Name
+        category: Category
+        price: Price
+        status: Status
+        description: Description
+        oss_key: OSS Key
+        thumbnail_key: Thumbnail
+        shelved_at: Shelved At
+        unshelved_at: Unshelved At
+        created_at: Created At
+        updated_at: Updated At
+      order:
+        id: ID
+        order_no: Order No.
+        status: Status
+        total_amount: Total Amount
+        currency: Currency
+        customer_id: Customer ID
+        merchant_id: Merchant ID
+        paid_at: Paid At
+        completed_at: Completed At
+        canceled_at: Canceled At
+        created_at: Created At
+        updated_at: Updated At
+      payment:
+        id: ID
+        order_id: Order ID
+        channel: Channel
+        amount: Amount
+        currency: Currency
+        status: Status
+        provider_trade_no: Provider Trade No.
+        paid_at: Paid At
+        created_at: Created At
+        updated_at: Updated At
+      refund:
+        id: ID
+        order_id: Order ID
+        payment_id: Payment ID
+        amount: Amount
+        reason: Reason
+        status: Status
+        provider_refund_no: Provider Refund No.
+        succeeded_at: Succeeded At
+        created_at: Created At
+        updated_at: Updated At
+
+  # Merchant statuses
+  merchant_statuses:
+    pending: Pending Submission
+    submitted: Under Review
+    approved: Approved
+    rejected: Rejected
+    suspended: Suspended
+
+  # Merchant review actions
+  merchant_review_actions:
+    submit: Submit for Review
+    approve: Approve
+    reject: Reject
+    suspend: Suspend
+    unsuspend: Resume
+    update: Update
+
+  # Audit actions
+  audit_actions:
+    create: Create
+    update: Update
+    destroy: Delete
+    approve: Approve
+    reject: Reject
+    suspend: Suspend
+    unsuspend: Resume
+    activate: Activate
+    deactivate: Deactivate
+    shelf: Shelf
+    unshelf: Unshelf
+
+  # Element statuses
+  element_statuses:
+    draft: Draft
+    on_shelf: On Shelf
+    off_shelf: Off Shelf
+
+  # Element categories
+  element_categories:
+    background: Background
+    character: Character
+    prop: Prop
+    effect: Effect
+    font: Font
+
+  # Order statuses
+  order_statuses:
+    created: Pending Payment
+    paid: Paid
+    accepted: Accepted
+    producing: In Production
+    delivered: Delivered
+    completed: Completed
+    canceled: Canceled
+    refunded: Refunded
+
+  # Payment statuses
+  payment_statuses:
+    init: Initialized
+    pending: Processing
+    paid: Paid
+    failed: Failed
+    refunded: Refunded
+
+  # Payment channels
+  payment_channels:
+    wechat: WeChat Pay
+    alipay: Alipay
+    bank_transfer: Bank Transfer
+
+  # Refund statuses
+  refund_statuses:
+    init: Initialized
+    pending: Processing
+    succeeded: Succeeded
+    failed: Failed
+
+  # Bid statuses
+  bid_statuses:
+    pending: Pending
+    accepted: Accepted
+    rejected: Rejected
+
+  # User status
+  user_statuses:
+    active: Active
+    disabled: Disabled
+
+  # Admin panel custom labels
+  admin:
+    menu:
+      rbac: RBAC
+      merchants: Merchants
+      operations: Operations
+      orders: Orders
+    labels:
+      admin_users: Admin Users
+      admin_roles: Admin Roles
+      admin_permissions: Admin Permissions
+      audit_logs: Audit Logs
+      merchant_profiles: Merchant Review
+      elements: Element Library
+      orders: Order List
+      payments: Payment Records
+      refunds: Refund Records
+      users: Users
+    columns:
+      actions: Actions
+      permission_count: Permission Count
+      user_count: User Count
+      related_roles: Related Roles
+      status: Status
+      operator: Operator
+      target: Target
+      ip_address: IP Address
+      created_time: Created Time
+      shop_name: Shop Name
+      related_user: Related User
+      province_city: Province/City
+      submit_time: Submit Time
+      approval_time: Approval Time
+      name: Name
+      category: Category
+      price: Price
+      shelf_time: Shelf Time
+      order_no: Order No.
+      buyer: Buyer
+      merchant: Merchant
+      amount: Amount
+      payment_time: Payment Time
+      related_order: Related Order
+      channel: Channel
+      provider_trade_no: Provider Trade No.
+      related_payment: Related Payment
+      reason: Reason
+      success_time: Success Time
+      business_role: Business Role
+      admin_role: Admin Role
+    panels:
+      basic_info: Basic Information
+      password: Password
+      admin_role_assignment: Admin Role Assignment
+      business_roles: Business Roles
+      admin_roles: Admin Roles
+      recent_audit_logs: Recent Audit Logs
+      assigned_permissions: Assigned Permissions
+      users_with_role: Users with this Role
+      roles_with_permission: Roles with this Permission
+      role_info: Role Info
+      permission_assignment: Permission Assignment
+      change_details: Change Details
+      change_comparison: Change Comparison
+      before_data: Before Data
+      after_data: After Data
+      related_user: Related User
+      address_info: Address Info
+      kyc_info: KYC Documents
+      bank_info: Bank Account Info
+      rejection_info: Rejection Info
+      approval_info: Approval Info
+      review_history: Review History
+      audit_logs: Audit Logs
+      order_info: Order Info
+      timeline: Timeline
+      order_items: Order Items
+      bid_records: Bid Records
+      payment_records: Payment Records
+      refund_records: Refund Records
+      related_refunds: Related Refunds
+    actions:
+      view: View
+      approve: Approve
+      reject: Reject
+      suspend: Suspend
+      resume: Resume
+      activate: Activate User
+      deactivate: Deactivate User
+      shelf: Shelf
+      unshelf: Unshelf
+    messages:
+      no_data: No data
+      no_changes: No changes
+      system: System
+      unknown: Unknown
+      no_business_roles: No business roles
+      no_admin_roles: No admin roles
+      no_audit_logs: No audit logs
+      no_review_history: No review history
+      not_uploaded: Not uploaded
+      not_filled: Not filled
+      no_order_items: No order items
+      no_bid_records: No bid records
+      no_payment_records: No payment records
+      no_refund_records: No refund records
+      no_related_refunds: No related refunds
+      batch_approved: Batch approved
+      batch_rejected: Batch rejected
+      batch_shelved: Batch shelved
+      batch_unshelved: Batch unshelved
+    confirmations:
+      approve_merchant: "Confirm approval of this merchant application?"
+      reject_merchant: "Confirm rejection of this merchant application?"
+      suspend_merchant: "Confirm suspension of this merchant?"
+      resume_merchant: "Confirm resuming this merchant?"
+      activate_user: "Confirm activating this user?"
+      deactivate_user: "Confirm deactivating this user?"
+      shelf_element: "Confirm shelving this element?"
+      unshelf_element: "Confirm unshelving this element?"
+    forms:
+      select_user: "Select User"
+      only_users_without_merchant: "Only shows users without merchant profile"
+      select_category: "Select Category"
+      password_hint: "Leave blank to keep current password"
+      role_code_hint: "Role code, lowercase with underscores, e.g. content_manager"
+      role_name_hint: "Role name, e.g. Content Manager"
+      role_assignment_hint: "Select admin roles to assign to this user"
+      oss_key_hint: "OSS file key"
+      thumbnail_hint: "Thumbnail OSS key"
+      license_hint: "Business license OSS key"
+      idcard_front_hint: "ID card front OSS key"
+      idcard_back_hint: "ID card back OSS key"
+    scopes:
+      today: Today
+      this_week: This Week
+      create_action: Create Actions
+      update_action: Update Actions
+      delete_action: Delete Actions
+      active_users: Active Users
+      disabled_users: Disabled Users
+      has_admin_role: Has Admin Role
+      pending_review: Pending Review
+      approved: Approved
+      rejected: Rejected
+      suspended: Suspended
+      pending_submit: Pending Submit
+      draft: Draft
+      on_shelf: On Shelf
+      off_shelf: Off Shelf
+      pending_payment: Pending Payment
+      paid: Paid
+      in_progress: In Progress
+      completed: Completed
+      canceled: Canceled
+      refunded: Refunded
+      processing: Processing
+      succeeded: Succeeded
+      failed: Failed
+    titles:
+      merchant_profile: "Merchant Profile - %{name}"
+      element: "Element - %{name}"
+      order: "Order - %{order_no}"
+      payment_record: "Payment Record #%{id}"
+      refund_record: "Refund Record #%{id}"
+      reject_merchant: "Reject Merchant Application"
+    rejection_form:
+      title: "Reject Merchant Application"
+      merchant_label: "Merchant"
+      reason_label: "Please enter rejection reason:"
+      reason_placeholder: "Please explain the rejection reason..."
+      confirm_btn: "Confirm Rejection"
+      cancel_btn: "Cancel"
+    notices:
+      merchant_approved: "Merchant application approved!"
+      merchant_rejected: "Merchant application rejected"
+      merchant_suspended: "Merchant has been suspended"
+      merchant_resumed: "Merchant has been resumed"
+      user_activated: "User has been activated"
+      user_deactivated: "User has been deactivated"
+      element_shelved: "Element has been shelved"
+      element_unshelved: "Element has been unshelved"
+      operation_failed: "Operation failed: %{error}"
+    alerts:
+      status_not_allow_reject: "Current status does not allow rejection"
+      only_suspend_approved: "Can only suspend approved merchants"
+      only_resume_suspended: "Can only resume suspended merchants"
+      status_not_allow_shelf: "Current status does not allow shelving"
+      status_not_allow_unshelf: "Current status does not allow unshelving"

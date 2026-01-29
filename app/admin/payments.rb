@@ -1,17 +1,25 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Payment do
-  menu parent: '订单管理', priority: 2, label: '支付记录'
+  menu parent: proc { I18n.t('admin.menu.orders') }, priority: 2, label: proc { I18n.t('admin.labels.payments') }
 
   # Read-only
   actions :index, :show
 
   # === Scopes ===
   scope :all, default: true
-  scope('待支付') { |scope| scope.where(status: %w[init pending]) }
-  scope('已支付') { |scope| scope.where(status: 'paid') }
-  scope('支付失败') { |scope| scope.where(status: 'failed') }
-  scope('已退款') { |scope| scope.where(status: 'refunded') }
+  scope :pending, label: proc { I18n.t('admin.scopes.pending_payment') } do |scope|
+    scope.where(status: %w[init pending])
+  end
+  scope :paid, label: proc { I18n.t('admin.scopes.paid') } do |scope|
+    scope.where(status: 'paid')
+  end
+  scope :failed, label: proc { I18n.t('admin.scopes.failed') } do |scope|
+    scope.where(status: 'failed')
+  end
+  scope :refunded, label: proc { I18n.t('admin.scopes.refunded') } do |scope|
+    scope.where(status: 'refunded')
+  end
 
   # === Filters ===
   filter :order_id
@@ -30,16 +38,16 @@ ActiveAdmin.register Payment do
   index do
     selectable_column
     id_column
-    column '关联订单' do |payment|
+    column I18n.t('admin.columns.related_order') do |payment|
       link_to payment.order.order_no, admin_order_path(payment.order) if payment.order
     end
-    column '渠道' do |payment|
+    column I18n.t('admin.columns.channel') do |payment|
       payment.channel_label
     end
-    column '金额' do |payment|
+    column I18n.t('admin.columns.amount') do |payment|
       number_to_currency(payment.amount, unit: payment.currency == 'CNY' ? '¥' : '$')
     end
-    column '状态' do |payment|
+    column I18n.t('admin.columns.status') do |payment|
       status_color = case payment.status
                      when 'paid' then 'yes'
                      when 'failed' then 'error'
@@ -48,22 +56,22 @@ ActiveAdmin.register Payment do
                      end
       status_tag payment.status_label, class: status_color
     end
-    column '第三方交易号', :provider_trade_no
-    column '支付时间', :paid_at
-    column '创建时间', :created_at
-    actions name: '操作', defaults: false do |payment|
-      item '查看', admin_payment_path(payment)
+    column I18n.t('admin.columns.provider_trade_no'), :provider_trade_no
+    column I18n.t('admin.columns.payment_time'), :paid_at
+    column I18n.t('admin.columns.created_time'), :created_at
+    actions name: I18n.t('admin.columns.actions'), defaults: false do |payment|
+      item I18n.t('admin.actions.view'), admin_payment_path(payment)
     end
   end
 
   # === Show ===
-  show title: proc { |p| "支付记录 ##{p.id}" } do
+  show title: proc { |p| I18n.t('admin.titles.payment_record', id: p.id) } do
     attributes_table do
       row('ID') { |p| p.id }
-      row('关联订单') { |p| link_to p.order.order_no, admin_order_path(p.order) if p.order }
-      row('渠道') { |p| p.channel_label }
-      row('金额') { |p| number_to_currency(p.amount, unit: p.currency == 'CNY' ? '¥' : '$') }
-      row('状态') do |p|
+      row(I18n.t('admin.columns.related_order')) { |p| link_to p.order.order_no, admin_order_path(p.order) if p.order }
+      row(I18n.t('admin.columns.channel')) { |p| p.channel_label }
+      row(I18n.t('admin.columns.amount')) { |p| number_to_currency(p.amount, unit: p.currency == 'CNY' ? '¥' : '$') }
+      row(I18n.t('admin.columns.status')) do |p|
         status_color = case p.status
                        when 'paid' then 'yes'
                        when 'failed' then 'error'
@@ -72,23 +80,23 @@ ActiveAdmin.register Payment do
                        end
         status_tag p.status_label, class: status_color
       end
-      row('第三方交易号') { |p| p.provider_trade_no }
-      row('幂等键') { |p| p.idempotency_key }
-      row('支付时间') { |p| l(p.paid_at, format: :long) if p.paid_at }
-      row('创建时间') { |p| l(p.created_at, format: :long) if p.created_at }
+      row(I18n.t('admin.columns.provider_trade_no')) { |p| p.provider_trade_no }
+      row(:idempotency_key) { |p| p.idempotency_key }
+      row(I18n.t('admin.columns.payment_time')) { |p| l(p.paid_at, format: :long) if p.paid_at }
+      row(:created_at) { |p| l(p.created_at, format: :long) if p.created_at }
     end
 
-    panel '关联退款' do
+    panel I18n.t('admin.panels.related_refunds') do
       if payment.refunds.any?
         table_for payment.refunds do
           column('ID') { |r| link_to r.id, admin_refund_path(r) }
-          column('金额') { |r| number_to_currency(r.amount, unit: '¥') }
-          column('原因') { |r| r.reason }
-          column('状态') { |r| status_tag r.status_label }
-          column('时间') { |r| l(r.created_at, format: :short) if r.created_at }
+          column(I18n.t('admin.columns.amount')) { |r| number_to_currency(r.amount, unit: '¥') }
+          column(I18n.t('admin.columns.reason')) { |r| r.reason }
+          column(I18n.t('admin.columns.status')) { |r| status_tag r.status_label }
+          column(:created_at) { |r| l(r.created_at, format: :short) if r.created_at }
         end
       else
-        para '暂无关联退款'
+        para I18n.t('admin.messages.no_related_refunds')
       end
     end
   end
@@ -96,7 +104,7 @@ ActiveAdmin.register Payment do
   # === CSV Export ===
   csv do
     column :id
-    column('订单号') { |p| p.order&.order_no }
+    column(I18n.t('admin.columns.order_no')) { |p| p.order&.order_no }
     column :channel
     column :amount
     column :currency

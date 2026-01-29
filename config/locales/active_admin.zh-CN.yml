@@ -372,3 +372,198 @@ zh-CN:
     pending: 待处理
     accepted: 已接受
     rejected: 已拒绝
+
+  # 用户状态翻译
+  user_statuses:
+    active: 活跃
+    disabled: 已禁用
+
+  # 后台管理自定义标签
+  admin:
+    menu:
+      rbac: RBAC管理
+      merchants: 商家管理
+      operations: 运营管理
+      orders: 订单管理
+    labels:
+      admin_users: 管理员账号
+      admin_roles: 管理角色
+      admin_permissions: 管理权限
+      audit_logs: 审计日志
+      merchant_profiles: 商家审核
+      elements: 元素库
+      orders: 订单列表
+      payments: 支付记录
+      refunds: 退款记录
+      users: 用户
+    columns:
+      actions: 操作
+      permission_count: 权限数
+      user_count: 用户数
+      related_roles: 关联角色数
+      status: 状态
+      operator: 操作人
+      target: 目标
+      ip_address: IP地址
+      created_time: 创建时间
+      shop_name: 店铺名称
+      related_user: 关联用户
+      province_city: 省/市
+      submit_time: 提交时间
+      approval_time: 审批时间
+      name: 名称
+      category: 分类
+      price: 价格
+      shelf_time: 上架时间
+      order_no: 订单号
+      buyer: 买家
+      merchant: 商家
+      amount: 金额
+      payment_time: 支付时间
+      related_order: 关联订单
+      channel: 渠道
+      provider_trade_no: 第三方交易号
+      related_payment: 关联支付
+      reason: 原因
+      success_time: 成功时间
+      business_role: 业务角色
+      admin_role: 管理角色
+    panels:
+      basic_info: 基本信息
+      password: 密码
+      admin_role_assignment: 管理角色分配
+      business_roles: 业务角色
+      admin_roles: 管理角色
+      recent_audit_logs: 最近审计日志
+      assigned_permissions: 已分配的权限
+      users_with_role: 拥有此角色的用户
+      roles_with_permission: 拥有此权限的角色
+      role_info: 角色信息
+      permission_assignment: 权限分配
+      change_details: 变更详情
+      change_comparison: 变更对比
+      before_data: 变更前数据 (Before)
+      after_data: 变更后数据 (After)
+      related_user: 关联用户
+      address_info: 地址信息
+      kyc_info: KYC 资料
+      bank_info: 银行账户信息
+      rejection_info: 拒绝信息
+      approval_info: 审批信息
+      review_history: 审批历史
+      audit_logs: 审计日志
+      order_info: 订单信息
+      timeline: 时间线
+      order_items: 订单明细
+      bid_records: 竞价记录
+      payment_records: 支付记录
+      refund_records: 退款记录
+      related_refunds: 关联退款
+    actions:
+      view: 查看
+      approve: 通过审核
+      reject: 拒绝申请
+      suspend: 停用商家
+      resume: 恢复商家
+      activate: 激活用户
+      deactivate: 停用用户
+      shelf: 上架
+      unshelf: 下架
+    messages:
+      no_data: 无
+      no_changes: 无变更数据
+      system: 系统
+      unknown: 未知
+      no_business_roles: 无业务角色
+      no_admin_roles: 无管理角色
+      no_audit_logs: 暂无审计日志
+      no_review_history: 暂无审批记录
+      not_uploaded: 未上传
+      not_filled: 未填写
+      no_order_items: 暂无订单明细
+      no_bid_records: 暂无竞价记录
+      no_payment_records: 暂无支付记录
+      no_refund_records: 暂无退款记录
+      no_related_refunds: 暂无关联退款
+      batch_approved: 已批量通过
+      batch_rejected: 已批量拒绝
+      batch_shelved: 已批量上架
+      batch_unshelved: 已批量下架
+    confirmations:
+      approve_merchant: "确认通过该商家的审核申请？"
+      reject_merchant: "确认拒绝该商家的申请？"
+      suspend_merchant: "确认停用该商家？"
+      resume_merchant: "确认恢复该商家？"
+      activate_user: "确认激活此用户？"
+      deactivate_user: "确认停用此用户？"
+      shelf_element: "确认上架该元素？"
+      unshelf_element: "确认下架该元素？"
+    forms:
+      select_user: "请选择用户"
+      only_users_without_merchant: "只显示尚未创建商家资料的用户"
+      select_category: "请选择分类"
+      password_hint: "留空则不修改密码"
+      role_code_hint: "角色代码，英文小写+下划线，如: content_manager"
+      role_name_hint: "角色名称，如: 内容管理员"
+      role_assignment_hint: "选择要分配给此用户的管理角色"
+      oss_key_hint: "OSS 文件 Key"
+      thumbnail_hint: "缩略图 OSS Key"
+      license_hint: "营业执照 OSS Key"
+      idcard_front_hint: "身份证正面 OSS Key"
+      idcard_back_hint: "身份证反面 OSS Key"
+    scopes:
+      today: 今天
+      this_week: 本周
+      create_action: 创建操作
+      update_action: 更新操作
+      delete_action: 删除操作
+      active_users: 活跃用户
+      disabled_users: 已禁用
+      has_admin_role: 有管理角色
+      pending_review: 待审核
+      approved: 已通过
+      rejected: 已拒绝
+      suspended: 已停用
+      pending_submit: 待提交
+      draft: 草稿
+      on_shelf: 已上架
+      off_shelf: 已下架
+      pending_payment: 待支付
+      paid: 已支付
+      in_progress: 进行中
+      completed: 已完成
+      canceled: 已取消
+      refunded: 已退款
+      processing: 处理中
+      succeeded: 已成功
+      failed: 已失败
+    titles:
+      merchant_profile: "商家资料 - %{name}"
+      element: "元素 - %{name}"
+      order: "订单 - %{order_no}"
+      payment_record: "支付记录 #%{id}"
+      refund_record: "退款记录 #%{id}"
+      reject_merchant: "拒绝商家申请"
+    rejection_form:
+      title: "拒绝商家申请"
+      merchant_label: "商家"
+      reason_label: "请输入拒绝原因："
+      reason_placeholder: "请说明拒绝原因..."
+      confirm_btn: "确认拒绝"
+      cancel_btn: "取消"
+    notices:
+      merchant_approved: "商家审核已通过！"
+      merchant_rejected: "商家申请已拒绝"
+      merchant_suspended: "商家已停用"
+      merchant_resumed: "商家已恢复"
+      user_activated: "用户已激活"
+      user_deactivated: "用户已停用"
+      element_shelved: "元素已上架"
+      element_unshelved: "元素已下架"
+      operation_failed: "操作失败: %{error}"
+    alerts:
+      status_not_allow_reject: "当前状态不允许拒绝操作"
+      only_suspend_approved: "只能停用已通过审核的商家"
+      only_resume_suspended: "只能解除已停用的商家"
+      status_not_allow_shelf: "当前状态不允许上架"
+      status_not_allow_unshelf: "当前状态不允许下架"

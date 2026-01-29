@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register AuditLog do
-  menu parent: 'RBAC管理', priority: 4, label: '审计日志'
+  menu parent: proc { I18n.t('admin.menu.rbac') }, priority: 4, label: proc { I18n.t('admin.labels.audit_logs') }
 
   controller do
     helper AuditHelper
@@ -12,16 +12,26 @@ ActiveAdmin.register AuditLog do
 
   # Custom scopes for common queries
   scope :all, default: true
-  scope('今天') { |scope| scope.where('created_at >= ?', Time.current.beginning_of_day) }
-  scope('本周') { |scope| scope.where('created_at >= ?', Time.current.beginning_of_week) }
-  scope('创建操作') { |scope| scope.where(action: 'create') }
-  scope('更新操作') { |scope| scope.where(action: 'update') }
-  scope('删除操作') { |scope| scope.where(action: 'destroy') }
+  scope :today, label: proc { I18n.t('admin.scopes.today') } do |scope|
+    scope.where('created_at >= ?', Time.current.beginning_of_day)
+  end
+  scope :this_week, label: proc { I18n.t('admin.scopes.this_week') } do |scope|
+    scope.where('created_at >= ?', Time.current.beginning_of_week)
+  end
+  scope :create_actions, label: proc { I18n.t('admin.scopes.create_action') } do |scope|
+    scope.where(action: 'create')
+  end
+  scope :update_actions, label: proc { I18n.t('admin.scopes.update_action') } do |scope|
+    scope.where(action: 'update')
+  end
+  scope :destroy_actions, label: proc { I18n.t('admin.scopes.delete_action') } do |scope|
+    scope.where(action: 'destroy')
+  end
 
   index do
     selectable_column
     id_column
-    column '状态', sortable: :action do |log|
+    column I18n.t('admin.columns.status'), sortable: :action do |log|
       action_label = I18n.t("audit_actions.#{log.action}", default: log.action.to_s.humanize)
       action_color = case log.action.to_s
                      when 'create' then 'yes'
@@ -37,7 +47,7 @@ ActiveAdmin.register AuditLog do
                      end
       status_tag(action_label, class: action_color)
     end
-    column '操作人' do |log|
+    column I18n.t('admin.columns.operator') do |log|
       if log.actor
         if log.actor.is_a?(AdminUser)
           link_to log.actor.email, admin_admin_user_path(log.actor)
@@ -45,26 +55,22 @@ ActiveAdmin.register AuditLog do
           link_to log.actor.email, admin_user_path(log.actor)
         end
       else
-        content_tag(:span, '系统', class: 'system')
+        content_tag(:span, I18n.t('admin.messages.system'), class: 'system')
       end
     end
-    column '目标' do |log|
+    column I18n.t('admin.columns.target') do |log|
       audit_target_link(log)
     end
-    column 'IP地址', :ip
-    column '创建时间' do |log|
+    column I18n.t('admin.columns.ip_address'), :ip
+    column I18n.t('admin.columns.created_time') do |log|
       l(log.created_at, format: :long) if log.created_at
     end
-    actions name: '操作'
+    actions name: I18n.t('admin.columns.actions')
   end
 
   filter :action, as: :select, collection: -> {
     AuditLog.distinct.pluck(:action).compact.sort
   }
-  # Disabled: actor_id filter causes UUID/bigint type mismatch
-  # filter :actor_id, as: :select, collection: -> {
-  #   User.joins(:audit_logs).distinct.pluck(:email, :id)
-  # }, label: '操作人'
   filter :target_type, as: :select, collection: -> {
     AuditLog.distinct.pluck(:target_type).compact.sort
   }
@@ -74,10 +80,10 @@ ActiveAdmin.register AuditLog do
   show do
     attributes_table do
       row 'ID', :id
-      row '操作' do |log|
+      row I18n.t('admin.columns.status') do |log|
         status_tag(log.action, class: log.action.to_s.downcase)
       end
-      row '操作人' do |log|
+      row I18n.t('admin.columns.operator') do |log|
         if log.actor
           if log.actor.is_a?(AdminUser)
             link_to log.actor.email, admin_admin_user_path(log.actor)
@@ -85,45 +91,45 @@ ActiveAdmin.register AuditLog do
             link_to log.actor.email, admin_user_path(log.actor)
           end
         else
-          content_tag(:span, '系统', class: 'system')
+          content_tag(:span, I18n.t('admin.messages.system'), class: 'system')
         end
       end
-      row '目标类型', :target_type
-      row '目标ID', :target_id
-      row '目标' do |log|
+      row :target_type
+      row :target_id
+      row I18n.t('admin.columns.target') do |log|
         audit_target_link(log)
       end
-      row '请求ID', :request_id
-      row 'IP地址', :ip
+      row :request_id
+      row I18n.t('admin.columns.ip_address'), :ip
       row 'User Agent', :user_agent
-      row '创建时间', :created_at
-      row '更新时间', :updated_at
+      row :created_at
+      row :updated_at
     end
 
-    panel '变更详情' do
+    panel I18n.t('admin.panels.change_details') do
       if audit_log.before.present? || audit_log.after.present?
         div do
-          h3 '变更对比'
+          h3 I18n.t('admin.panels.change_comparison')
           audit_diff(audit_log.before, audit_log.after)
         end
       else
-        para '无变更数据'
+        para I18n.t('admin.messages.no_changes')
       end
     end
 
-    panel '变更前数据 (Before)' do
+    panel I18n.t('admin.panels.before_data') do
       if audit_log.before.present?
         format_audit_json(audit_log.before)
       else
-        para '无'
+        para I18n.t('admin.messages.no_data')
       end
     end
 
-    panel '变更后数据 (After)' do
+    panel I18n.t('admin.panels.after_data') do
       if audit_log.after.present?
         format_audit_json(audit_log.after)
       else
-        para '无'
+        para I18n.t('admin.messages.no_data')
       end
     end
 
@@ -131,7 +137,7 @@ ActiveAdmin.register AuditLog do
       if audit_log.metadata.present?
         format_audit_json(audit_log.metadata)
       else
-        para '无'
+        para I18n.t('admin.messages.no_data')
       end
     end
   end
@@ -140,7 +146,7 @@ ActiveAdmin.register AuditLog do
   csv do
     column :id
     column :action
-    column('操作人') { |log| log.actor&.email || '系统' }
+    column(I18n.t('admin.columns.operator')) { |log| log.actor&.email || I18n.t('admin.messages.system') }
     column :target_type
     column :target_id
     column :ip

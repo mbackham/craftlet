@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register AdminRole do
-  menu parent: 'RBAC管理', priority: 2, label: '管理角色'
+  menu parent: proc { I18n.t('admin.menu.rbac') }, priority: 2, label: proc { I18n.t('admin.labels.admin_roles') }
 
   permit_params :name, :code, admin_permission_ids: []
 
@@ -20,14 +20,14 @@ ActiveAdmin.register AdminRole do
       content_tag(:code, role.code)
     end
     column :name
-    column '权限数' do |role|
+    column I18n.t('admin.columns.permission_count') do |role|
       role.admin_permissions.count
     end
-    column '用户数' do |role|
+    column I18n.t('admin.columns.user_count') do |role|
       role.users.count
     end
     column :created_at
-    actions name: '操作'
+    actions name: I18n.t('admin.columns.actions')
   end
 
   filter :code
@@ -45,7 +45,7 @@ ActiveAdmin.register AdminRole do
       row :updated_at
     end
 
-    panel '已分配的权限' do
+    panel I18n.t('admin.panels.assigned_permissions') do
       table_for admin_role.admin_permissions.order(:code) do
         column :code do |permission|
           link_to permission.code, admin_admin_permission_path(permission)
@@ -54,7 +54,7 @@ ActiveAdmin.register AdminRole do
       end
     end
 
-    panel '拥有此角色的用户' do
+    panel I18n.t('admin.panels.users_with_role') do
       table_for admin_role.users.order(:email) do
         column :id
         column :email do |user|
@@ -62,7 +62,7 @@ ActiveAdmin.register AdminRole do
         end
         column :phone
         column :status do |u|
-          u.status == 'active' ? '活跃' : '已禁用'
+          I18n.t("user_statuses.#{u.status}", default: u.status)
         end
         column :created_at
       end
@@ -70,12 +70,12 @@ ActiveAdmin.register AdminRole do
   end
 
   form do |f|
-    f.inputs '角色信息' do
-      f.input :code, hint: '角色代码，英文小写+下划线，如: content_manager'
-      f.input :name, hint: '角色名称，如: 内容管理员'
+    f.inputs I18n.t('admin.panels.role_info') do
+      f.input :code, hint: I18n.t('admin.forms.role_code_hint')
+      f.input :name, hint: I18n.t('admin.forms.role_name_hint')
     end
 
-    f.inputs '权限分配' do
+    f.inputs I18n.t('admin.panels.permission_assignment') do
       f.input :admin_permissions,
               as: :check_boxes,
               collection: AdminPermission.all.order(:code),

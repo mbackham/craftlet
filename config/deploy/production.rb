@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Production server configuration
-server "154.219.107.73", user: "root", roles: %w[app db web]
+server "154.219.107.73", user: "deploy", roles: %w[app db web]
 
 # SSH options
 set :ssh_options, {

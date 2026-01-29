@@ -57,11 +57,11 @@ set :assets_roles, [:web, :app]
 
 # Puma configuration
 set :puma_systemctl_user, :system
-set :puma_service_unit_name, "craftlet-web"
+set :puma_service_unit_name, "craftlet"
 
-# Sidekiq configuration
-set :sidekiq_systemctl_user, :system
-set :sidekiq_service_unit_name, "craftlet-sidekiq"
+# Sidekiq configuration (commented out - using existing systemd service)
+# set :sidekiq_systemctl_user, :system
+# set :sidekiq_service_unit_name, "craftlet-sidekiq"
 
 # Custom tasks
 namespace :deploy do

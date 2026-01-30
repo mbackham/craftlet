@@ -5,9 +5,9 @@ server "154.219.107.73", user: "deploy", roles: %w[app db web]
 
 # SSH options
 set :ssh_options, {
-  keys: %w[~/.ssh/id_rsa],
-  forward_agent: true,
-  auth_methods: %w[publickey password]
+  keys: %w[~/.ssh/id_ed25519],
+  forward_agent: false,
+  auth_methods: %w[publickey]
 }
 
 # Server-specific settings

@@ -104,7 +104,8 @@ group :development do
   gem "capistrano-bundler", "~> 2.1", require: false
   gem "capistrano3-puma", "~> 6.0", require: false
   gem "capistrano-sidekiq", "~> 2.3", require: false
-
+  gem "ed25519", "~> 1.3", require: false           # 新增
+  gem "bcrypt_pbkdf", "~> 1.1", require: false      # 新增
   # Add speed badges [https://github.com/MiniProfiler/rack-mini-profiler]
   # gem "rack-mini-profiler"
 

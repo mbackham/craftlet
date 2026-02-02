@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register AuditLog do
-  menu parent: proc { I18n.t('admin.menu.rbac') }, priority: 4, label: proc { I18n.t('admin.labels.audit_logs') }
+  menu parent: 'rbac_menu', priority: 4, label: proc { I18n.t('admin.labels.audit_logs') }
 
   controller do
     helper AuditHelper

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register User do
-  menu parent: proc { I18n.t('admin.menu.rbac') }, priority: 1
+  menu parent: 'rbac_menu', priority: 1
 
   permit_params :email, :phone, :nickname, :status, :password, :password_confirmation,
                 admin_role_ids: []

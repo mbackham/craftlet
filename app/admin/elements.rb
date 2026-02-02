@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Element do
-  menu parent: proc { I18n.t('admin.menu.operations') }, priority: 1, label: proc { I18n.t('admin.labels.elements') }
+  menu parent: 'operations_menu', priority: 1, label: proc { I18n.t('admin.labels.elements') }
 
   permit_params :name, :category, :status, :price, :oss_key, :thumbnail_key, :description
 

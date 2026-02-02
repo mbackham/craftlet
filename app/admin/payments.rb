@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Payment do
-  menu parent: proc { I18n.t('admin.menu.orders') }, priority: 2, label: proc { I18n.t('admin.labels.payments') }
+  menu parent: 'orders_menu', priority: 2, label: proc { I18n.t('admin.labels.payments') }
 
   # Read-only
   actions :index, :show

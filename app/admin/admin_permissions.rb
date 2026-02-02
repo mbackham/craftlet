@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register AdminPermission do
-  menu parent: proc { I18n.t('admin.menu.rbac') }, priority: 3, label: proc { I18n.t('admin.labels.admin_permissions') }
+  menu parent: 'rbac_menu', priority: 3, label: proc { I18n.t('admin.labels.admin_permissions') }
 
   # Read-only resource (permissions are code-managed via seeds)
   actions :index, :show

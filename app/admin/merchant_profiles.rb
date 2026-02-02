@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register MerchantProfile do
-  menu parent: proc { I18n.t('admin.menu.merchants') }, priority: 1, label: proc { I18n.t('admin.labels.merchant_profiles') }
+  menu parent: 'merchants_menu', priority: 1, label: proc { I18n.t('admin.labels.merchant_profiles') }
 
   permit_params :user_id, :shop_name, :status, :address_province, :address_city, 
                 :address_district, :address_detail, :license_file_key,

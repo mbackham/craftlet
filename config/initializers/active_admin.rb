@@ -273,6 +273,22 @@ ActiveAdmin.setup do |config|
       admin.add_current_user_to_menu menu
       admin.add_logout_button_to_menu menu
     end
+
+    # Define parent menu items with translated labels
+    admin.build_menu :default do |menu|
+      menu.add id: 'rbac_menu',
+               label: proc { I18n.t('admin.menu.rbac') },
+               priority: 10
+      menu.add id: 'merchants_menu',
+               label: proc { I18n.t('admin.menu.merchants') },
+               priority: 20
+      menu.add id: 'operations_menu',
+               label: proc { I18n.t('admin.menu.operations') },
+               priority: 30
+      menu.add id: 'orders_menu',
+               label: proc { I18n.t('admin.menu.orders') },
+               priority: 40
+    end
   end
 
   # == Download Links

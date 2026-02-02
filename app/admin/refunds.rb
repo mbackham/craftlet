@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Refund do
-  menu parent: proc { I18n.t('admin.menu.orders') }, priority: 3, label: proc { I18n.t('admin.labels.refunds') }
+  menu parent: 'orders_menu', priority: 3, label: proc { I18n.t('admin.labels.refunds') }
 
   # Read-only
   actions :index, :show

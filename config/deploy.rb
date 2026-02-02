@@ -72,8 +72,9 @@ set :puma_preload_app, true
 set :puma_init_active_record, true
 
 # 使用 systemd 管理 Puma
+set :puma_service_unit_name, "puma"  # 重要！指定服务名为 puma
 set :puma_systemctl_user, :system
-set :puma_service_unit_name, "craftlet"
+set :puma_enable_socket_service, false
 
 # Capistrano Puma 插件设置
 set :puma_role, :app

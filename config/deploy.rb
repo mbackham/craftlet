@@ -62,8 +62,22 @@ set :rails_env, "production"
 set :assets_roles, [:web, :app]
 
 # Puma configuration
+set :puma_bind, "tcp://0.0.0.0:3000"
+set :puma_conf, -> { "#{shared_path}/config/puma.rb" }
+set :puma_state, -> { "#{shared_path}/tmp/pids/puma.state" }
+set :puma_pid, -> { "#{shared_path}/tmp/pids/puma.pid" }
+set :puma_workers, 2
+set :puma_threads, [5, 5]
+set :puma_preload_app, true
+set :puma_init_active_record, true
+
+# 使用 systemd 管理 Puma
 set :puma_systemctl_user, :system
 set :puma_service_unit_name, "craftlet"
+
+# Capistrano Puma 插件设置
+set :puma_role, :app
+set :puma_env, fetch(:rack_env, fetch(:rails_env, "production"))
 
 # Sidekiq configuration (commented out - using existing systemd service)
 # set :sidekiq_systemctl_user, :system

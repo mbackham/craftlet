@@ -1,0 +1,49 @@
+en:
+  activerecord:
+    models:
+      feedback: User Feedback
+    attributes:
+      feedback:
+        tracking_number: Tracking Number
+        feedback_type: Feedback Type
+        subject: Subject
+        content: Content
+        status: Status
+        priority: Priority
+        user: Related User
+        user_type: User Type
+        submitter_name: Submitter Name
+        submitter_email: Submitter Email
+        submitter_phone: Submitter Phone
+        page_url: Page URL
+        user_agent: User Agent
+        ip_address: IP Address
+        screenshots: Screenshots
+        admin_user: Handler
+        admin_note: Internal Note
+        response: Response
+        resolved_at: Resolved At
+        created_at: Submitted At
+        updated_at: Updated At
+        
+        feedback_types:
+          bug_report: Bug Report
+          feature_request: Feature Request
+          complaint: Complaint
+          other: Other
+          
+        statuses:
+          pending: Pending
+          reviewing: Reviewing
+          resolved: Resolved
+          closed: Closed
+          
+        priorities:
+          low: Low
+          medium: Medium
+          high: High
+          urgent: Urgent
+  
+  active_admin:
+    feedback:
+      menu: User Feedback

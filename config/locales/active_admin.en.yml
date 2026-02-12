@@ -378,6 +378,9 @@ en:
       processing: Processing
       succeeded: Succeeded
       failed: Failed
+      feedback_pending: Pending
+      feedback_reviewing: Reviewing
+      feedback_resolved: Resolved
     titles:
       merchant_profile: "Merchant Profile - %{name}"
       element: "Element - %{name}"

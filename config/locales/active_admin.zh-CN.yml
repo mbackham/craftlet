@@ -537,6 +537,9 @@ zh-CN:
       processing: 处理中
       succeeded: 已成功
       failed: 已失败
+      feedback_pending: 待处理
+      feedback_reviewing: 处理中
+      feedback_resolved: 已解决
     titles:
       merchant_profile: "商家资料 - %{name}"
       element: "元素 - %{name}"

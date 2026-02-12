@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_12_031750) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_12_081025) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -130,6 +130,36 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_12_031750) do
     t.index ["category"], name: "index_elements_on_category"
     t.index ["created_at"], name: "index_elements_on_created_at"
     t.index ["status"], name: "index_elements_on_status"
+  end
+
+  create_table "feedbacks", force: :cascade do |t|
+    t.string "tracking_number", null: false, comment: "追踪号"
+    t.string "feedback_type", default: "other", null: false, comment: "反馈类型"
+    t.string "subject", null: false, comment: "标题"
+    t.text "content", null: false, comment: "内容"
+    t.string "status", default: "pending", null: false, comment: "状态"
+    t.string "priority", default: "medium", comment: "优先级"
+    t.bigint "user_id", comment: "用户ID"
+    t.string "user_type", comment: "用户类型"
+    t.string "submitter_name", comment: "提交者姓名"
+    t.string "submitter_email", null: false, comment: "提交者邮箱"
+    t.string "submitter_phone", comment: "提交者电话"
+    t.string "page_url", comment: "页面URL"
+    t.text "user_agent", comment: "浏览器信息"
+    t.inet "ip_address", comment: "IP地址"
+    t.bigint "admin_user_id", comment: "处理人ID"
+    t.text "admin_note", comment: "内部备注"
+    t.datetime "resolved_at", comment: "解决时间"
+    t.text "response", comment: "回复内容"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["admin_user_id"], name: "index_feedbacks_on_admin_user_id"
+    t.index ["created_at"], name: "index_feedbacks_on_created_at"
+    t.index ["feedback_type"], name: "index_feedbacks_on_feedback_type"
+    t.index ["status"], name: "index_feedbacks_on_status"
+    t.index ["submitter_email"], name: "index_feedbacks_on_submitter_email"
+    t.index ["tracking_number"], name: "index_feedbacks_on_tracking_number", unique: true
+    t.index ["user_id"], name: "index_feedbacks_on_user_id"
   end
 
   create_table "merchant_profiles", force: :cascade do |t|
@@ -341,6 +371,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_12_031750) do
   add_foreign_key "admin_user_roles", "admin_roles"
   add_foreign_key "admin_user_roles", "users"
   add_foreign_key "bids", "orders"
+  add_foreign_key "feedbacks", "admin_users", on_delete: :nullify
+  add_foreign_key "feedbacks", "users", on_delete: :nullify
   add_foreign_key "merchant_profiles", "users"
   add_foreign_key "merchant_review_logs", "merchant_profiles"
   add_foreign_key "order_items", "orders"

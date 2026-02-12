@@ -15,6 +15,13 @@ Rails.application.routes.draw do
       resource :merchant, only: [], controller: 'merchants' do
         get :status
       end
+      
+      # 反馈相关 API
+      resources :feedbacks, only: [:create, :show] do
+        collection do
+          get :captcha
+        end
+      end
     end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html

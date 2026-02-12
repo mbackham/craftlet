@@ -1,0 +1,49 @@
+zh-CN:
+  activerecord:
+    models:
+      feedback: 用户反馈
+    attributes:
+      feedback:
+        tracking_number: 追踪号
+        feedback_type: 反馈类型
+        subject: 标题
+        content: 内容
+        status: 状态
+        priority: 优先级
+        user: 关联用户
+        user_type: 用户类型
+        submitter_name: 提交者姓名
+        submitter_email: 提交者邮箱
+        submitter_phone: 联系电话
+        page_url: 页面URL
+        user_agent: 浏览器信息
+        ip_address: IP地址
+        screenshots: 截图
+        admin_user: 处理人
+        admin_note: 内部备注
+        response: 回复内容
+        resolved_at: 解决时间
+        created_at: 提交时间
+        updated_at: 更新时间
+        
+        feedback_types:
+          bug_report: Bug报告
+          feature_request: 功能建议
+          complaint: 投诉
+          other: 其他
+          
+        statuses:
+          pending: 待处理
+          reviewing: 处理中
+          resolved: 已解决
+          closed: 已关闭
+          
+        priorities:
+          low: 低
+          medium: 中
+          high: 高
+          urgent: 紧急
+  
+  active_admin:
+    feedback:
+      menu: 用户反馈

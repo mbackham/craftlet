@@ -58,6 +58,28 @@ class Rack::Attack
     end
   end
 
+  # --- 反馈提交限流 (按 IP) ---
+  # 同一 IP，1小时内最多 3 次反馈提交
+  throttle("feedbacks/ip", limit: 3, period: 1.hour) do |req|
+    if req.path == "/api/v1/feedbacks" && req.post?
+      req.ip
+    end
+  end
+
+  # --- 反馈提交限流 (按 Email) ---
+  # 同一邮箱，1天内最多 5 次反馈提交
+  throttle("feedbacks/email", limit: 5, period: 1.day) do |req|
+    if req.path == "/api/v1/feedbacks" && req.post?
+      begin
+        body = JSON.parse(req.body.read)
+        req.body.rewind
+        body.dig("feedback", "submitter_email")&.downcase&.strip
+      rescue JSON::ParserError
+        nil
+      end
+    end
+  end
+
   # --- 全局限流 (按 IP) ---
   # 同一 IP，每分钟最多 300 次请求（排除静态资源和健康检查）
   throttle("req/ip", limit: 300, period: 1.minute) do |req|

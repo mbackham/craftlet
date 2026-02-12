@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body { font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+    .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+    .content { background: #fff; padding: 30px; border: 1px solid #e1e8ed; }
+    .feedback-box { background: #f7f9fa; padding: 20px; margin: 20px 0; border-left: 4px solid #667eea; border-radius: 4px; }
+    .footer { text-align: center; padding: 20px; color: #657786; font-size: 12px; }
+    .button { display: inline-block; padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 6px; margin: 10px 0; }
+    .tracking { background: #fff3cd; padding: 10px 15px; border-radius: 4px; display: inline-block; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>✅ 感谢您的反馈！</h1>
+    </div>
+    
+    <div class="content">
+      <p>尊敬的 <strong><%= @feedback.submitter_name %></strong>，</p>
+      
+      <p>我们已经收到您的反馈，感谢您帮助我们改进产品！</p>
+      
+      <p>您的追踪号：<span class="tracking"><%= @feedback.tracking_number %></span></p>
+      
+      <div class="feedback-box">
+        <h3 style="margin-top: 0;"><%= @feedback.subject %></h3>
+        <p><%= simple_format(@feedback.content) %></p>
+        <% if @feedback.screenshots.attached? %>
+          <p><strong>附件：</strong><%= @feedback.screenshots.count %> 张截图</p>
+        <% end %>
+      </div>
+      
+      <h4>接下来会发生什么？</h4>
+      <ul>
+        <li>我们的团队会在 <strong>48 小时内</strong>审查您的反馈</li>
+        <li>处理完成后，我们会通过邮件通知您</li>
+        <li>如有需要，我们可能会联系您获取更多信息</li>
+      </ul>
+      
+      <p style="text-align: center; margin: 30px 0;">
+        <a href="<%= root_url %>" class="button">返回首页</a>
+      </p>
+    </div>
+    
+    <div class="footer">
+      <p>如有紧急问题，请联系：<a href="mailto:support@craftlet.com">support@craftlet.com</a></p>
+      <p>&copy; <%= Time.current.year %> Craftlet. All rights reserved.</p>
+    </div>
+  </div>
+</body>
+</html>

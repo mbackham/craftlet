@@ -26,6 +26,9 @@ gem "rucaptcha"
 # === Authorization ===
 gem "pundit"
 
+# === Rate Limiting ===
+gem "rack-attack"
+
 # === State machine ===
 gem "aasm"
 

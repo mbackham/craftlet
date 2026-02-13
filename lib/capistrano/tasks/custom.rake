@@ -11,7 +11,7 @@ namespace :logs do
   desc "Tail Puma logs"
   task :puma do
     on roles(:app) do
-      execute "journalctl -u craftlet-web -f"
+      execute "journalctl -u puma -f"
     end
   end
 
@@ -40,8 +40,8 @@ namespace :app do
   desc "Check application status"
   task :status do
     on roles(:app) do
-      execute "systemctl status craftlet-web --no-pager"
-      execute "systemctl status craftlet-sidekiq --no-pager"
+      execute "systemctl status puma --no-pager"
+      # execute "systemctl status craftlet-sidekiq --no-pager"
     end
   end
 

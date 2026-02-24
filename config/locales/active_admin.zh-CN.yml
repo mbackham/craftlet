@@ -425,6 +425,10 @@ zh-CN:
       provider_trade_no: 第三方交易号
       related_payment: 关联支付
       reason: 原因
+      refund_request_reason: 退款申请原因
+      reject_reason: 拒绝原因
+      rejected_at: 拒绝时间
+      approved_at: 审批通过时间
       success_time: 成功时间
       business_role: 业务角色
       admin_role: 管理角色
@@ -459,6 +463,8 @@ zh-CN:
       payment_records: 支付记录
       refund_records: 退款记录
       related_refunds: 关联退款
+      refund_rejection_info: 拒绝信息
+      refund_approval_info: 审批通过信息
     actions:
       view: 查看
       approve: 通过审核
@@ -469,6 +475,8 @@ zh-CN:
       deactivate: 停用用户
       shelf: 上架
       unshelf: 下架
+      approve_refund: 审批通过
+      reject_refund: 拒绝退款
     messages:
       no_data: 无
       no_changes: 无变更数据
@@ -485,6 +493,7 @@ zh-CN:
       no_payment_records: 暂无支付记录
       no_refund_records: 暂无退款记录
       no_related_refunds: 暂无关联退款
+      no_reject_reason: 未填写拒绝原因
       batch_approved: 已批量通过
       batch_rejected: 已批量拒绝
       batch_shelved: 已批量上架
@@ -498,6 +507,7 @@ zh-CN:
       deactivate_user: "确认停用此用户？"
       shelf_element: "确认上架该元素？"
       unshelf_element: "确认下架该元素？"
+      approve_refund: "确认通过该退款申请？审批后将异步提交给支付渠道处理。"
     forms:
       select_user: "请选择用户"
       only_users_without_merchant: "只显示尚未创建商家资料的用户"
@@ -554,6 +564,8 @@ zh-CN:
       reason_placeholder: "请说明拒绝原因..."
       confirm_btn: "确认拒绝"
       cancel_btn: "取消"
+      refund_title: "拒绝退款申请"
+      refund_id_label: "退款记录"
     notices:
       merchant_approved: "商家审核已通过！"
       merchant_rejected: "商家申请已拒绝"
@@ -564,9 +576,17 @@ zh-CN:
       element_shelved: "元素已上架"
       element_unshelved: "元素已下架"
       operation_failed: "操作失败: %{error}"
+      refund_approved: "退款申请已通过，正在异步处理中"
+      refund_rejected: "退款申请已拒绝"
     alerts:
       status_not_allow_reject: "当前状态不允许拒绝操作"
       only_suspend_approved: "只能停用已通过审核的商家"
       only_resume_suspended: "只能解除已停用的商家"
       status_not_allow_shelf: "当前状态不允许上架"
       status_not_allow_unshelf: "当前状态不允许下架"
+      refund_status_not_allow_reject: "当前退款状态不允许拒绝（只有 init 状态可操作）"
+    errors:
+      refund_approve_invalid_status: "退款状态不允许审批（当前: %{status}，需要: init）"
+      refund_reject_invalid_status: "退款状态不允许拒绝（当前: %{status}，需要: init）"
+    defaults:
+      reject_reason: "审核拒绝"

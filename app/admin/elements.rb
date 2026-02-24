@@ -16,9 +16,9 @@ ActiveAdmin.register Element do
 
   # === Scopes ===
   scope :all, default: true
-  scope :draft, label: proc { I18n.t('admin.scopes.draft') }
-  scope :on_shelf, label: proc { I18n.t('admin.scopes.on_shelf') }
-  scope :off_shelf, label: proc { I18n.t('admin.scopes.off_shelf') }
+  scope proc { I18n.t('admin.scopes.draft') }, :draft
+  scope proc { I18n.t('admin.scopes.on_shelf') }, :on_shelf
+  scope proc { I18n.t('admin.scopes.off_shelf') }, :off_shelf
 
   # === Filters ===
   filter :name

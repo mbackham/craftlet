@@ -12,19 +12,19 @@ ActiveAdmin.register AuditLog do
 
   # Custom scopes for common queries
   scope :all, default: true
-  scope :today, label: proc { I18n.t('admin.scopes.today') } do |scope|
+  scope proc { I18n.t('admin.scopes.today') }, :today do |scope|
     scope.where('created_at >= ?', Time.current.beginning_of_day)
   end
-  scope :this_week, label: proc { I18n.t('admin.scopes.this_week') } do |scope|
+  scope proc { I18n.t('admin.scopes.this_week') }, :this_week do |scope|
     scope.where('created_at >= ?', Time.current.beginning_of_week)
   end
-  scope :create_actions, label: proc { I18n.t('admin.scopes.create_action') } do |scope|
+  scope proc { I18n.t('admin.scopes.create_action') }, :create_actions do |scope|
     scope.where(action: 'create')
   end
-  scope :update_actions, label: proc { I18n.t('admin.scopes.update_action') } do |scope|
+  scope proc { I18n.t('admin.scopes.update_action') }, :update_actions do |scope|
     scope.where(action: 'update')
   end
-  scope :destroy_actions, label: proc { I18n.t('admin.scopes.delete_action') } do |scope|
+  scope proc { I18n.t('admin.scopes.delete_action') }, :destroy_actions do |scope|
     scope.where(action: 'destroy')
   end
 

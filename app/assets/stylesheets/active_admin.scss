@@ -108,3 +108,21 @@ body.logged_out #login .language-switcher a {
   &.error, &.destroy, &.delete, &.red { background: #d9534f !important; }  // Red
   &.warning, &.orange { background: #f0ad4e !important; }  // Orange
 }
+
+// Action column links spacing in index tables
+table.index_table td.col-actions a {
+  margin-right: 6px;
+  white-space: nowrap;
+
+  &:last-child { margin-right: 0; }
+}
+
+// Rejection panel styling
+.refund-rejection-panel th {
+  color: #c0392b;
+}
+
+// Approval panel styling  
+.refund-approval-panel th {
+  color: #27ae60;
+}

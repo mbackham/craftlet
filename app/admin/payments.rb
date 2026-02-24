@@ -8,16 +8,16 @@ ActiveAdmin.register Payment do
 
   # === Scopes ===
   scope :all, default: true
-  scope :pending, label: proc { I18n.t('admin.scopes.pending_payment') } do |scope|
+  scope proc { I18n.t('admin.scopes.pending_payment') }, :pending do |scope|
     scope.where(status: %w[init pending])
   end
-  scope :paid, label: proc { I18n.t('admin.scopes.paid') } do |scope|
+  scope proc { I18n.t('admin.scopes.paid') }, :paid do |scope|
     scope.where(status: 'paid')
   end
-  scope :failed, label: proc { I18n.t('admin.scopes.failed') } do |scope|
+  scope proc { I18n.t('admin.scopes.failed') }, :failed do |scope|
     scope.where(status: 'failed')
   end
-  scope :refunded, label: proc { I18n.t('admin.scopes.refunded') } do |scope|
+  scope proc { I18n.t('admin.scopes.refunded') }, :refunded do |scope|
     scope.where(status: 'refunded')
   end
 

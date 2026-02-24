@@ -5,37 +5,42 @@ module Refunds
     attr_reader :refund, :admin_user, :result
 
     def initialize(refund:, admin_user:, request: nil)
-      @refund = refund
+      @refund     = refund
       @admin_user = admin_user
-      @request = request
-      @result = { success: false, error: nil }
+      @request    = request
+      @result     = { success: false, error: nil }
     end
 
     def call
-      validate!
-      
       ActiveRecord::Base.transaction do
-        old_status = refund.status
+        # 悲观锁：防止并发重复审批
+        @refund = refund.lock!
 
-        refund.update!(status: 'pending')
+        validate!
+
+        old_status = refund.status
+        refund.update!(status: "pending")
 
         AuditService.log!(
-          action: 'approve',
-          actor: admin_user,
-          target: refund,
-          before: { status: old_status },
-          after: { status: 'pending' },
-          metadata: { action_type: 'refund_approval' },
-          request: @request
+          action:   "approve",
+          actor:    admin_user,
+          target:   refund,
+          before:   { status: old_status },
+          after:    { status: "pending" },
+          metadata: { action_type: "refund_approval" },
+          request:  @request
         )
 
-        # Enqueue async job for refund processing
+        # 异步处理退款（下周接真实 Provider）
         Refunds::ProcessRefundJob.perform_later(refund.id)
       end
 
       @result[:success] = true
       self
     rescue ActiveRecord::RecordInvalid => e
+      @result[:error] = e.message
+      self
+    rescue => e
       @result[:error] = e.message
       self
     end
@@ -51,7 +56,10 @@ module Refunds
     private
 
     def validate!
-      raise ActiveRecord::RecordInvalid.new(refund), '退款状态不允许审批' unless refund.status == 'init'
+      unless refund.status == "init"
+        raise ActiveRecord::RecordInvalid.new(refund),
+              I18n.t("admin.errors.refund_approve_invalid_status", status: refund.status)
+      end
     end
   end
 end

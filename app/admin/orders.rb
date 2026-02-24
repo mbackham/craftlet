@@ -8,24 +8,25 @@ ActiveAdmin.register Order do
 
   # === Scopes ===
   scope :all, default: true
-  scope :pending_payment, label: proc { I18n.t('admin.scopes.pending_payment') } do |scope|
+  scope proc { I18n.t('admin.scopes.pending_payment') }, :pending_payment do |scope|
     scope.where(status: 'created')
   end
-  scope :paid, label: proc { I18n.t('admin.scopes.paid') } do |scope|
+  scope proc { I18n.t('admin.scopes.paid') }, :paid do |scope|
     scope.where(status: 'paid')
   end
-  scope :in_progress, label: proc { I18n.t('admin.scopes.in_progress') } do |scope|
+  scope proc { I18n.t('admin.scopes.in_progress') }, :in_progress do |scope|
     scope.where(status: %w[accepted producing])
   end
-  scope :completed, label: proc { I18n.t('admin.scopes.completed') } do |scope|
+  scope proc { I18n.t('admin.scopes.completed') }, :completed do |scope|
     scope.where(status: 'completed')
   end
-  scope :canceled, label: proc { I18n.t('admin.scopes.canceled') } do |scope|
+  scope proc { I18n.t('admin.scopes.canceled') }, :canceled do |scope|
     scope.where(status: 'canceled')
   end
-  scope :refunded, label: proc { I18n.t('admin.scopes.refunded') } do |scope|
+  scope proc { I18n.t('admin.scopes.refunded') }, :refunded do |scope|
     scope.where(status: 'refunded')
   end
+
 
   # === Filters ===
   filter :order_no

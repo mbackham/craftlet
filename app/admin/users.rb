@@ -15,13 +15,13 @@ ActiveAdmin.register User do
   end
 
   scope :all, default: true
-  scope :active, label: proc { I18n.t('admin.scopes.active_users') } do |scope|
+  scope proc { I18n.t('admin.scopes.active_users') }, :active do |scope|
     scope.where(status: 'active')
   end
-  scope :disabled, label: proc { I18n.t('admin.scopes.disabled_users') } do |scope|
+  scope proc { I18n.t('admin.scopes.disabled_users') }, :disabled do |scope|
     scope.where(status: 'disabled')
   end
-  scope :with_admin_role, label: proc { I18n.t('admin.scopes.has_admin_role') } do |scope|
+  scope proc { I18n.t('admin.scopes.has_admin_role') }, :with_admin_role do |scope|
     scope.joins(:admin_roles).distinct
   end
 

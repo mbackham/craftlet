@@ -266,6 +266,10 @@ en:
       provider_trade_no: Provider Trade No.
       related_payment: Related Payment
       reason: Reason
+      refund_request_reason: Refund Request Reason
+      reject_reason: Rejection Reason
+      rejected_at: Rejected At
+      approved_at: Approved At
       success_time: Success Time
       business_role: Business Role
       admin_role: Admin Role
@@ -300,6 +304,8 @@ en:
       payment_records: Payment Records
       refund_records: Refund Records
       related_refunds: Related Refunds
+      refund_rejection_info: Rejection Info
+      refund_approval_info: Approval Info
     actions:
       view: View
       approve: Approve
@@ -310,6 +316,8 @@ en:
       deactivate: Deactivate User
       shelf: Shelf
       unshelf: Unshelf
+      approve_refund: Approve Refund
+      reject_refund: Reject Refund
     messages:
       no_data: No data
       no_changes: No changes
@@ -326,6 +334,7 @@ en:
       no_payment_records: No payment records
       no_refund_records: No refund records
       no_related_refunds: No related refunds
+      no_reject_reason: No rejection reason provided
       batch_approved: Batch approved
       batch_rejected: Batch rejected
       batch_shelved: Batch shelved
@@ -339,6 +348,7 @@ en:
       deactivate_user: "Confirm deactivating this user?"
       shelf_element: "Confirm shelving this element?"
       unshelf_element: "Confirm unshelving this element?"
+      approve_refund: "Confirm approval of this refund? It will be submitted to the payment provider for processing."
     forms:
       select_user: "Select User"
       only_users_without_merchant: "Only shows users without merchant profile"
@@ -395,6 +405,8 @@ en:
       reason_placeholder: "Please explain the rejection reason..."
       confirm_btn: "Confirm Rejection"
       cancel_btn: "Cancel"
+      refund_title: "Reject Refund"
+      refund_id_label: "Refund Record"
     notices:
       merchant_approved: "Merchant application approved!"
       merchant_rejected: "Merchant application rejected"
@@ -405,9 +417,17 @@ en:
       element_shelved: "Element has been shelved"
       element_unshelved: "Element has been unshelved"
       operation_failed: "Operation failed: %{error}"
+      refund_approved: "Refund approved, processing asynchronously"
+      refund_rejected: "Refund has been rejected"
     alerts:
       status_not_allow_reject: "Current status does not allow rejection"
       only_suspend_approved: "Can only suspend approved merchants"
       only_resume_suspended: "Can only resume suspended merchants"
       status_not_allow_shelf: "Current status does not allow shelving"
       status_not_allow_unshelf: "Current status does not allow unshelving"
+      refund_status_not_allow_reject: "Current refund status does not allow rejection (only init status)"
+    errors:
+      refund_approve_invalid_status: "Refund status does not allow approval (current: %{status}, required: init)"
+      refund_reject_invalid_status: "Refund status does not allow rejection (current: %{status}, required: init)"
+    defaults:
+      reject_reason: "Rejected"

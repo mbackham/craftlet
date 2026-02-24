@@ -5,35 +5,40 @@ module Refunds
     attr_reader :refund, :admin_user, :reason, :result
 
     def initialize(refund:, admin_user:, reason: nil, request: nil)
-      @refund = refund
+      @refund     = refund
       @admin_user = admin_user
-      @reason = reason || '审核拒绝'
-      @request = request
-      @result = { success: false, error: nil }
+      @reason     = reason.presence || I18n.t("admin.defaults.reject_reason")
+      @request    = request
+      @result     = { success: false, error: nil }
     end
 
     def call
-      validate!
-      
       ActiveRecord::Base.transaction do
-        old_status = refund.status
+        # 悲观锁：防止并发重复拒绝
+        @refund = refund.lock!
 
-        refund.update!(status: 'failed')
+        validate!
+
+        old_status = refund.status
+        refund.update!(status: "failed")
 
         AuditService.log!(
-          action: 'reject',
-          actor: admin_user,
-          target: refund,
-          before: { status: old_status },
-          after: { status: 'failed' },
-          metadata: { action_type: 'refund_rejection', reason: reason },
-          request: @request
+          action:   "reject",
+          actor:    admin_user,
+          target:   refund,
+          before:   { status: old_status },
+          after:    { status: "failed" },
+          metadata: { action_type: "refund_rejection", reason: reason },
+          request:  @request
         )
       end
 
       @result[:success] = true
       self
     rescue ActiveRecord::RecordInvalid => e
+      @result[:error] = e.message
+      self
+    rescue => e
       @result[:error] = e.message
       self
     end
@@ -49,7 +54,10 @@ module Refunds
     private
 
     def validate!
-      raise ActiveRecord::RecordInvalid.new(refund), '退款状态不允许拒绝' unless refund.status == 'init'
+      unless refund.status == "init"
+        raise ActiveRecord::RecordInvalid.new(refund),
+              I18n.t("admin.errors.refund_reject_invalid_status", status: refund.status)
+      end
     end
   end
 end

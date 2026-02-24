@@ -31,11 +31,11 @@ ActiveAdmin.register MerchantProfile do
 
   # === Scopes ===
   scope :all, default: true
-  scope :submitted, label: proc { I18n.t('admin.scopes.pending_review') }
-  scope :approved, label: proc { I18n.t('admin.scopes.approved') }
-  scope :rejected, label: proc { I18n.t('admin.scopes.rejected') }
-  scope :suspended, label: proc { I18n.t('admin.scopes.suspended') }
-  scope :pending, label: proc { I18n.t('admin.scopes.pending_submit') }
+  scope proc { I18n.t('admin.scopes.pending_review') }, :submitted
+  scope proc { I18n.t('admin.scopes.approved') }, :approved
+  scope proc { I18n.t('admin.scopes.rejected') }, :rejected
+  scope proc { I18n.t('admin.scopes.suspended') }, :suspended
+  scope proc { I18n.t('admin.scopes.pending_submit') }, :pending
 
   # === Filters ===
   filter :shop_name

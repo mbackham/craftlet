@@ -38,7 +38,7 @@ end
 if Rails.env.development?
   admin_user = AdminUser.find_by(email: 'admin@example.com')
   if admin_user
-    AdminUserRole.find_or_create_by!(user: admin_user, admin_role: super_admin_role)
+    AdminUserRole.find_or_create_by!(user_id: admin_user.id, admin_role: super_admin_role)
   end
 end
 
@@ -61,6 +61,25 @@ merchant_permissions.each do |p|
 end
 
 puts "Merchant permissions seed done."
+
+# === 退款管理权限 ===
+refund_permissions = [
+  { name: "查看退款", code: "refund:read" },
+  { name: "退款审批", code: "refund:approve" }
+]
+
+refund_permissions.each do |p|
+  AdminPermission.find_or_create_by!(code: p[:code]) { |perm| perm.name = p[:name] }
+end
+
+# 将退款权限添加到超级管理员角色
+refund_permissions.each do |p|
+  perm = AdminPermission.find_by(code: p[:code])
+  AdminRolePermission.find_or_create_by!(admin_role: super_admin_role, admin_permission: perm) if perm
+end
+
+puts "Refund permissions seed done."
+
 
 # === 商家测试数据 (仅开发环境) ===
 if Rails.env.development?

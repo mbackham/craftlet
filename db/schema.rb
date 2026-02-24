@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_12_081025) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_24_060826) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -130,6 +130,27 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_12_081025) do
     t.index ["category"], name: "index_elements_on_category"
     t.index ["created_at"], name: "index_elements_on_created_at"
     t.index ["status"], name: "index_elements_on_status"
+  end
+
+  create_table "faq_categories", force: :cascade do |t|
+    t.jsonb "name", default: {}, null: false
+    t.string "slug"
+    t.integer "sort", default: 0
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["slug"], name: "index_faq_categories_on_slug", unique: true
+  end
+
+  create_table "faqs", force: :cascade do |t|
+    t.jsonb "question", default: {}, null: false
+    t.jsonb "answer", default: {}, null: false
+    t.bigint "faq_category_id"
+    t.integer "sort", default: 0
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["faq_category_id"], name: "index_faqs_on_faq_category_id"
   end
 
   create_table "feedbacks", force: :cascade do |t|
@@ -286,6 +307,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_12_081025) do
     t.datetime "paid_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "request_payload", default: {}, null: false
+    t.jsonb "response_payload", default: {}, null: false
+    t.jsonb "notify_payload", default: {}, null: false
     t.index ["idempotency_key"], name: "index_payments_on_idempotency_key", unique: true
     t.index ["order_id"], name: "index_payments_on_order_id"
     t.index ["provider_trade_no"], name: "index_payments_on_provider_trade_no", unique: true
@@ -305,6 +329,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_12_081025) do
     t.datetime "succeeded_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "request_payload", default: {}, null: false
+    t.jsonb "response_payload", default: {}, null: false
+    t.jsonb "notify_payload", default: {}, null: false
     t.index ["idempotency_key"], name: "index_refunds_on_idempotency_key", unique: true
     t.index ["order_id"], name: "index_refunds_on_order_id"
     t.index ["payment_id"], name: "index_refunds_on_payment_id"

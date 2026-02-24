@@ -19,7 +19,8 @@ class Refund < ApplicationRecord
 
   # === Ransack Configuration ===
   def self.ransackable_attributes(auth_object = nil)
-    %w[id order_id payment_id amount reason status provider_refund_no succeeded_at created_at]
+    %w[id order_id payment_id amount reason status provider_refund_no succeeded_at created_at
+       request_payload response_payload notify_payload]
   end
 
   def self.ransackable_associations(auth_object = nil)

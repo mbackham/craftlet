@@ -1,3 +1,78 @@
+<% if flash[:alert].present? %>
+<div id="el-message-alert" class="el-message el-message--error" role="alert">
+  <i class="el-message__icon el-icon-error">✕</i>
+  <p class="el-message__content"><%= flash[:alert] %></p>
+  <button class="el-message__closeBtn" onclick="document.getElementById('el-message-alert').style.display='none'">✕</button>
+</div>
+<% end %>
+
+<style>
+  .el-message {
+    min-width: 380px;
+    box-sizing: border-box;
+    border-radius: 4px;
+    border-width: 1px;
+    border-style: solid;
+    position: fixed;
+    left: 50%;
+    top: 20px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    z-index: 9999;
+    font-size: 14px;
+    line-height: 1;
+    animation: el-message-fadein 0.3s ease;
+    box-shadow: 0 2px 12px 0 rgba(0,0,0,.1);
+  }
+  .el-message--error {
+    background-color: #fef0f0;
+    border-color: #fde2e2;
+    color: #f56c6c;
+  }
+  .el-message__icon {
+    margin-right: 10px;
+    font-style: normal;
+    font-size: 16px;
+  }
+  .el-message__content {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .el-message__closeBtn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: #c0c4cc;
+    font-size: 14px;
+    padding: 0;
+  }
+  .el-message__closeBtn:hover { color: #909399; }
+  @keyframes el-message-fadein {
+    from { opacity: 0; top: 0; }
+    to   { opacity: 1; top: 20px; }
+  }
+</style>
+
+<script>
+  (function() {
+    var msg = document.getElementById('el-message-alert');
+    if (msg) {
+      setTimeout(function() {
+        msg.style.transition = 'opacity 0.4s';
+        msg.style.opacity = '0';
+        setTimeout(function() { msg.style.display = 'none'; }, 400);
+      }, 3000);
+    }
+  })();
+</script>
+
 <div id="login">
   <h2><%= active_admin_application.site_title(self) %> <%= title t("active_admin.devise.login.title") %></h2>
 

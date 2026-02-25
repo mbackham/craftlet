@@ -1,16 +1,28 @@
 # frozen_string_literal: true
 
 module Payments
-  # WeChat Pay provider skeleton.
+  # WeChat Pay provider.
   #
-  # In mock mode (when WECHAT_MCH_ID is blank) all calls return synthetic data
-  # so the rest of the pipeline can be exercised without real credentials.
-  # Replace the `mock_*` methods with real WechatPay / wx_pay gem calls next week.
+  # MOCK MODE: Active when WECHAT_MCH_ID is blank (no real credentials).
+  # In mock mode all calls return synthetic data so the full pipeline can be
+  # exercised without real credentials.
+  #
+  # ⚠️  STUB (Pending Business License):
+  #   The `else` branches of create_payment / create_refund and the real
+  #   verify_callback signature logic must be implemented once the merchant
+  #   registration with WeChat Pay is complete.
+  #
+  # Real implementation guide (WeChat Pay API v3):
+  #   - create_refund: POST /v3/refund/domestic/refunds
+  #     * Sign request body with RSA-SHA256 using merchant private key
+  #     * Header: Authorization: WECHATPAY2-SHA256-RSA2048 ...
+  #   - verify_callback: Decrypt AES-256-GCM resource field; validate
+  #     Wechatpay-Serial / Wechatpay-Signature header with HMAC-SHA256.
   class WechatProvider < BaseProvider
     CONFIG = Rails.application.config.payment_providers[:wechat]
 
     def create_payment(payment:)
-      request = build_payment_request(payment)
+      build_payment_request(payment) # build request struct (used in real mode)
 
       if mock_mode?
         Rails.logger.info("[WechatProvider] MOCK create_payment for payment##{payment.id}")
@@ -20,8 +32,10 @@ module Payments
           raw: raw
         )
       else
-        # TODO: replace with real WeChat Pay JSAPI/Native call
-        err_response("WeChat Pay real integration not yet implemented")
+        # TODO: replace with real WeChat Pay JSAPI/Native call once license obtained
+        # Example:
+        #   WechatPay::V3::Order.create(params: build_payment_request(payment))
+        err_response("WeChat Pay real integration not yet implemented — pending business license")
       end
     rescue => e
       Rails.logger.error("[WechatProvider] create_payment error: #{e.message}")
@@ -37,16 +51,42 @@ module Payments
           raw: raw
         )
       else
-        err_response("WeChat Pay real refund integration not yet implemented")
+        # TODO: POST /v3/refund/domestic/refunds once license obtained
+        # Required params:
+        #   out_trade_no:  refund.payment.provider_trade_no
+        #   out_refund_no: refund.idempotency_key   # idempotency key (unique per refund)
+        #   amount.refund: (refund.amount * 100).to_i
+        #   amount.total:  (refund.payment.amount * 100).to_i
+        #   amount.currency: "CNY"
+        # Sign with RSA-SHA256 merchant private key (API v3)
+        err_response("WeChat Pay real refund integration not yet implemented — pending business license")
       end
     rescue => e
       Rails.logger.error("[WechatProvider] create_refund error: #{e.message}")
       err_response(e.message)
     end
 
+    # Verifies the authenticity of an inbound WeChat Pay callback notification.
+    #
+    # MOCK MODE: always returns true.
+    #
+    # ⚠️  STUB — Real implementation (pending business license):
+    #   1. Extract headers:
+    #      - Wechatpay-Timestamp
+    #      - Wechatpay-Nonce
+    #      - Wechatpay-Signature
+    #      - Wechatpay-Serial  (platform certificate serial)
+    #   2. Build message string:
+    #      "#{timestamp}\n#{nonce}\n#{raw_body}\n"
+    #   3. Verify signature against WeChat platform public certificate
+    #      using RSA-SHA256 (PKCS#1 v1.5).
+    #   4. Decrypt payload.resource using AES-256-GCM with v3 API key.
     def verify_callback(headers:, payload:)
       return true if mock_mode?
-      # TODO: verify WeChat Pay HMAC-SHA256 signature
+
+      # TODO: implement RSA-SHA256 signature verification (WeChat Pay API v3)
+      # Reference: https://pay.weixin.qq.com/wiki/doc/apiv3/wechatpay/wechatpay4_1.shtml
+      Rails.logger.error("[WechatProvider] verify_callback: real signature verification not yet implemented")
       false
     end
 
@@ -80,11 +120,11 @@ module Payments
 
     def mock_refund_response(refund)
       {
-        return_code:      "SUCCESS",
-        result_code:      "SUCCESS",
-        refund_id:        "WXR_MOCK_#{SecureRandom.hex(8).upcase}",
-        out_refund_no:    refund.idempotency_key,
-        refund_fee:       (refund.amount * 100).to_i
+        return_code:   "SUCCESS",
+        result_code:   "SUCCESS",
+        refund_id:     "WXR_MOCK_#{SecureRandom.hex(8).upcase}",
+        out_refund_no: refund.idempotency_key,
+        refund_fee:    (refund.amount * 100).to_i
       }
     end
   end

@@ -13,12 +13,12 @@ Rails.application.routes.draw do
         post "users/sign_in", to: "users/sessions#create", defaults: { format: :json }
         delete "users/sign_out", to: "users/sessions#destroy", defaults: { format: :json }
       end
-      
+
       # 商家相关 API
       resource :merchant, only: [], controller: 'merchants' do
         get :status
       end
-      
+
       # 反馈相关 API
       resources :feedbacks, only: [:create, :show] do
         collection do
@@ -26,13 +26,20 @@ Rails.application.routes.draw do
         end
       end
     end
+
+    # 支付回调 (Payment Provider Callbacks)
+    # Not versioned — callback URLs are registered with providers and must remain stable.
+    # POST /api/payments/callbacks/wechat
+    # POST /api/payments/callbacks/alipay
+    namespace :payments do
+      scope :callbacks do
+        post :wechat, to: "callbacks#wechat"
+        post :alipay, to: "callbacks#alipay"
+      end
+    end
   end
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
-
-  # Defines the root path route ("/")
-  # root "posts#index"
 end
+

@@ -1,0 +1,29 @@
+<% # Admin view for replying to a ticket %>
+<div class="panel">
+  <h3>回复工单 #<%= @ticket.ticket_no %> — <%= @ticket.subject %></h3>
+  <div class="panel_contents">
+    <%= form_tag reply_admin_ticket_path(@ticket), method: :post do %>
+      <fieldset class="inputs">
+        <ol>
+          <li class="text input">
+            <label for="content">回复内容</label>
+            <%= text_area_tag :content, nil, rows: 6, required: true,
+                  style: "width: 100%; padding: 8px;", placeholder: "请输入回复内容..." %>
+          </li>
+          <li class="boolean input">
+            <label>
+              <%= check_box_tag :internal, "1", false %>
+              内部备注（仅运营可见）
+            </label>
+          </li>
+        </ol>
+      </fieldset>
+      <fieldset class="actions">
+        <ol>
+          <li class="action"><%= submit_tag "发送回复" %></li>
+          <li class="cancel"><%= link_to "取消", admin_ticket_path(@ticket) %></li>
+        </ol>
+      </fieldset>
+    <% end %>
+  </div>
+</div>

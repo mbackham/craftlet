@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_24_060826) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_25_080000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -351,6 +351,55 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_24_060826) do
     t.index ["user_id"], name: "index_roles_on_user_id"
   end
 
+  create_table "ticket_attachments", force: :cascade do |t|
+    t.bigint "ticket_message_id", null: false
+    t.string "file_name", null: false
+    t.string "file_type"
+    t.integer "file_size"
+    t.string "oss_key"
+    t.string "url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["ticket_message_id"], name: "index_ticket_attachments_on_ticket_message_id"
+  end
+
+  create_table "ticket_messages", force: :cascade do |t|
+    t.bigint "ticket_id", null: false
+    t.uuid "sender_id", null: false
+    t.string "sender_type", default: "User"
+    t.text "content", null: false
+    t.boolean "internal", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["sender_id"], name: "index_ticket_messages_on_sender_id"
+    t.index ["ticket_id"], name: "index_ticket_messages_on_ticket_id"
+  end
+
+  create_table "tickets", force: :cascade do |t|
+    t.string "ticket_no", null: false
+    t.string "subject", null: false
+    t.text "description"
+    t.string "category", default: "general"
+    t.string "priority", default: "normal"
+    t.string "status", default: "open", null: false
+    t.uuid "creator_id", null: false
+    t.string "creator_type", default: "User"
+    t.uuid "assignee_id"
+    t.uuid "order_id"
+    t.datetime "assigned_at"
+    t.datetime "resolved_at"
+    t.datetime "closed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["assignee_id"], name: "index_tickets_on_assignee_id"
+    t.index ["category"], name: "index_tickets_on_category"
+    t.index ["creator_id"], name: "index_tickets_on_creator_id"
+    t.index ["order_id"], name: "index_tickets_on_order_id"
+    t.index ["priority"], name: "index_tickets_on_priority"
+    t.index ["status"], name: "index_tickets_on_status"
+    t.index ["ticket_no"], name: "index_tickets_on_ticket_no", unique: true
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -408,4 +457,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_24_060826) do
   add_foreign_key "refunds", "orders"
   add_foreign_key "refunds", "payments"
   add_foreign_key "roles", "users"
+  add_foreign_key "ticket_attachments", "ticket_messages"
+  add_foreign_key "ticket_messages", "tickets"
 end

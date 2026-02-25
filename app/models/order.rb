@@ -19,7 +19,7 @@ class Order < ApplicationRecord
     end
 
     event :accept do
-      transitions from: :paid, to: :accepted
+      transitions from: :paid, to: :accepted, guard: :merchant_active?
     end
 
     event :start_producing do
@@ -57,6 +57,25 @@ class Order < ApplicationRecord
   def merchant_user
     return nil if merchant_id.blank?
     User.find_by(id: merchant_id.to_s.split('-').last.to_i)
+  end
+
+  # === Frozen Participant Guards ===
+  # Used by AASM accept guard and AssignMerchantService
+  def merchant_active?
+    user = merchant_user
+    return false unless user
+    return false unless user.status == "active"
+
+    profile = user.merchant_profile
+    return false unless profile&.approved?
+
+    true
+  end
+
+  def customer_active?
+    user = customer_user
+    return false unless user
+    user.status == "active"
   end
 
   # === Ransack Configuration ===

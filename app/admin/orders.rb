@@ -197,4 +197,40 @@ ActiveAdmin.register Order do
     column :paid_at
     column :completed_at
   end
+
+  # === Assign Merchant Action ===
+  action_item :assign_merchant, only: :show, if: proc { resource.status == "paid" } do
+    link_to "指派商家", assign_merchant_admin_order_path(resource)
+  end
+
+  member_action :assign_merchant, method: [:get, :put] do
+    @order = Order.find(params[:id])
+
+    if request.get?
+      # Render merchant selection form
+      @merchants = User.joins(:merchant_profile, :roles)
+                       .where(status: "active")
+                       .where(merchant_profiles: { status: "approved" })
+                       .where(roles: { role_type: "merchant", is_active: true })
+                       .distinct
+                       .order(:email)
+      render "admin/orders/assign_merchant"
+    elsif request.put?
+      merchant_user = User.find(params[:merchant_user_id])
+
+      service = Orders::AssignMerchantService.new(
+        order:         @order,
+        merchant_user: merchant_user,
+        admin_user:    current_admin_user,
+        request:       request
+      ).call
+
+      if service.success?
+        redirect_to admin_order_path(@order), notice: "商家指派成功：#{merchant_user.email}"
+      else
+        redirect_to assign_merchant_admin_order_path(@order), alert: "指派失败：#{service.error}"
+      end
+    end
+  end
 end
+

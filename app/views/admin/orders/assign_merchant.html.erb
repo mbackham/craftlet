@@ -1,0 +1,41 @@
+<% # Admin view for assigning a merchant to an order %>
+<%= render "active_admin/shared/title_bar" if defined?(render) && false %>
+
+<div class="panel">
+  <h3>指派商家 — 订单 #<%= @order.order_no %></h3>
+  <div class="panel_contents">
+    <% if @merchants.any? %>
+      <%= form_tag assign_merchant_admin_order_path(@order), method: :put do %>
+        <fieldset class="inputs">
+          <ol>
+            <li class="select input">
+              <label for="merchant_user_id">选择商家</label>
+              <%= select_tag :merchant_user_id,
+                    options_from_collection_for_select(
+                      @merchants, :id,
+                      ->(m) { "#{m.email} — #{m.merchant_profile&.shop_name || '未知店铺'}" }
+                    ),
+                    prompt: "请选择商家...",
+                    required: true,
+                    style: "width: 100%; padding: 8px;" %>
+            </li>
+          </ol>
+        </fieldset>
+
+        <fieldset class="actions">
+          <ol>
+            <li class="action">
+              <%= submit_tag "确认指派", data: { confirm: "确定要将此订单指派给所选商家？" } %>
+            </li>
+            <li class="cancel">
+              <%= link_to "取消", admin_order_path(@order) %>
+            </li>
+          </ol>
+        </fieldset>
+      <% end %>
+    <% else %>
+      <p>暂无可用的商家（需要状态为 active 且资质审核通过）。</p>
+      <p><%= link_to "返回订单", admin_order_path(@order) %></p>
+    <% end %>
+  </div>
+</div>

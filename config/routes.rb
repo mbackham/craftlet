@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  mount Rswag::Ui::Engine => '/api-docs'
+  mount Rswag::Api::Engine => '/api-docs'
   devise_for :admin_users, ActiveAdmin::Devise.config.merge(
     controllers: { sessions: "admin_users/sessions" }
   )
@@ -6,6 +8,7 @@ Rails.application.routes.draw do
   devise_for :users
   namespace :api do
     namespace :v1 do
+      get "/", to: "root#index"
       devise_scope :user do
         post "users/sign_in", to: "users/sessions#create", defaults: { format: :json }
         delete "users/sign_out", to: "users/sessions#destroy", defaults: { format: :json }

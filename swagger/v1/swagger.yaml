@@ -1,0 +1,280 @@
+---
+openapi: 3.0.1
+info:
+  title: Craftlet API
+  version: v1
+  description: Craftlet 平台 API 接口文档
+  contact:
+    name: Craftlet Team
+paths:
+  "/api/v1/feedbacks/captcha":
+    get:
+      summary: 获取验证码
+      tags:
+      - 反馈
+      description: 获取图片验证码，用于提交反馈时验证
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  captcha_image:
+                    type: string
+                    description: 验证码图片 (Base64)
+                  captcha_key:
+                    type: string
+                    description: 验证码 Key（提交反馈时需要）
+  "/api/v1/feedbacks":
+    post:
+      summary: 提交反馈
+      tags:
+      - 反馈
+      description: 提交用户反馈，需要先获取验证码。支持文字和截图。
+      parameters: []
+      responses:
+        '201':
+          description: 提交成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    description: 反馈 ID
+                  tracking_number:
+                    type: string
+                    description: 跟踪编号
+                  message:
+                    type: string
+                    description: 提示信息
+                  estimated_response_time:
+                    type: string
+                    description: 预计回复时间
+        '422':
+          description: 提交失败（参数错误或验证码错误）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: 错误信息
+                  details:
+                    type: array
+                    items:
+                      type: string
+                    description: 详细错误列表
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                feedback:
+                  type: object
+                  properties:
+                    feedback_type:
+                      type: string
+                      description: 反馈类型
+                    subject:
+                      type: string
+                      description: 反馈主题
+                    content:
+                      type: string
+                      description: 反馈内容
+                    submitter_name:
+                      type: string
+                      description: 提交者姓名
+                    submitter_email:
+                      type: string
+                      description: 提交者邮箱
+                    submitter_phone:
+                      type: string
+                      description: 提交者电话
+                    page_url:
+                      type: string
+                      description: 相关页面 URL
+                  required:
+                  - feedback_type
+                  - subject
+                  - content
+                _rucaptcha:
+                  type: string
+                  description: 验证码
+              required:
+              - feedback
+              - _rucaptcha
+  "/api/v1/feedbacks/{tracking_number}":
+    get:
+      summary: 查看反馈状态
+      tags:
+      - 反馈
+      description: 通过跟踪编号查询反馈处理状态
+      parameters:
+      - name: tracking_number
+        in: path
+        description: 反馈跟踪编号
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracking_number:
+                    type: string
+                    description: 跟踪编号
+                  status:
+                    type: string
+                    description: 处理状态
+                  submitted_at:
+                    type: string
+                    format: date-time
+                    description: 提交时间
+                  last_update:
+                    type: string
+                    description: 最新进展
+        '404':
+          description: 反馈不存在
+  "/api/v1/merchant/status":
+    get:
+      summary: 获取商家审核状态
+      tags:
+      - 商家
+      description: 返回当前登录用户的商家入驻审核状态。需要 JWT 认证。
+      security:
+      - Bearer: []
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                    - not_applied
+                    - pending
+                    - submitted
+                    - approved
+                    - rejected
+                    - suspended
+                    description: 审核状态
+                  shop_name:
+                    type: string
+                    nullable: true
+                    description: 店铺名称
+                  message:
+                    type: string
+                    description: 状态说明
+                  rejected_reason:
+                    type: string
+                    nullable: true
+                    description: 拒绝原因
+                  approved_at:
+                    type: string
+                    nullable: true
+                    format: date-time
+                    description: 通过时间
+                  rejected_at:
+                    type: string
+                    nullable: true
+                    format: date-time
+                    description: 拒绝时间
+                  created_at:
+                    type: string
+                    nullable: true
+                    format: date-time
+                    description: 申请时间
+        '401':
+          description: 未登录或 Token 无效
+  "/api/v1/users/sign_in":
+    post:
+      summary: 用户登录
+      tags:
+      - 认证
+      description: 使用邮箱和密码登录，返回 JWT Token
+      parameters: []
+      responses:
+        '200':
+          description: 登录成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: 用户 ID
+                      email:
+                        type: string
+                        description: 用户邮箱
+                  token:
+                    type: string
+                    description: JWT Token
+        '401':
+          description: 登录失败（邮箱或密码错误）
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    email:
+                      type: string
+                      example: user@example.com
+                      description: 用户邮箱
+                    password:
+                      type: string
+                      example: password123
+                      description: 用户密码
+                  required:
+                  - email
+                  - password
+              required:
+              - user
+  "/api/v1/users/sign_out":
+    delete:
+      summary: 用户登出
+      tags:
+      - 认证
+      description: 注销当前用户的 JWT Token
+      security:
+      - Bearer: []
+      responses:
+        '204':
+          description: 登出成功
+servers:
+- url: "{protocol}://{host}"
+  variables:
+    protocol:
+      default: http
+      enum:
+      - http
+      - https
+    host:
+      default: localhost:3000
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: '使用 JWT Token 认证。登录后获取 token，格式: Bearer {token}'

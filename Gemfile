@@ -41,6 +41,10 @@ gem "paper_trail"
 # === API ===
 gem "rack-cors"
 
+# === API Documentation ===
+gem "rswag-api"
+gem "rswag-ui"
+
 # === Pagination ===
 gem "pagy"
 
@@ -90,6 +94,10 @@ group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
   gem "dotenv-rails"
+
+  # === Testing & API Docs ===
+  gem "rspec-rails"
+  gem "rswag-specs"
 end
 
 group :development do

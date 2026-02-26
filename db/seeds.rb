@@ -80,6 +80,90 @@ end
 
 puts "Refund permissions seed done."
 
+# === 全面权限化 ===
+all_permissions = [
+  # 用户管理
+  { name: "查看用户", code: "user:read" },
+  { name: "管理用户", code: "user:manage" },
+  # 订单管理
+  { name: "查看订单", code: "order:read" },
+  # 支付管理
+  { name: "查看支付", code: "payment:read" },
+  # 工单管理
+  { name: "查看工单", code: "ticket:read" },
+  { name: "管理工单", code: "ticket:manage" },
+  # 素材管理
+  { name: "查看素材", code: "element:read" },
+  { name: "管理素材", code: "element:manage" },
+  # 风控管理
+  { name: "查看风控", code: "risk:read" },
+  { name: "管理风控", code: "risk:manage" },
+  # 反馈管理
+  { name: "查看反馈", code: "feedback:read" },
+  { name: "管理反馈", code: "feedback:manage" },
+  # 敏感信息
+  { name: "查看敏感信息明文", code: "sensitive:view_plaintext" }
+]
+
+all_permissions.each do |p|
+  AdminPermission.find_or_create_by!(code: p[:code]) { |perm| perm.name = p[:name] }
+end
+
+# 将所有权限添加到超级管理员角色
+AdminPermission.find_each do |perm|
+  AdminRolePermission.find_or_create_by!(admin_role: super_admin_role, admin_permission: perm)
+end
+
+puts "All permissions seed done."
+
+# === 运营角色 (ops) ===
+ops_role = AdminRole.find_or_create_by!(code: "ops") { |r| r.name = "运营" }
+ops_permission_codes = %w[
+  admin.access user:read order:read payment:read
+  ticket:read ticket:manage element:read element:manage
+  feedback:read feedback:manage
+]
+ops_permission_codes.each do |code|
+  perm = AdminPermission.find_by(code: code)
+  AdminRolePermission.find_or_create_by!(admin_role: ops_role, admin_permission: perm) if perm
+end
+
+puts "Ops role seed done."
+
+# === 风控角色 (risk) ===
+risk_role = AdminRole.find_or_create_by!(code: "risk") { |r| r.name = "风控" }
+risk_permission_codes = %w[
+  admin.access user:read order:read payment:read
+  merchant:read refund:read refund:approve
+  risk:read risk:manage sensitive:view_plaintext
+]
+risk_permission_codes.each do |code|
+  perm = AdminPermission.find_by(code: code)
+  AdminRolePermission.find_or_create_by!(admin_role: risk_role, admin_permission: perm) if perm
+end
+
+puts "Risk role seed done."
+
+# === 开发环境测试账号 ===
+if Rails.env.development?
+  # ops 测试账号
+  ops_admin = AdminUser.find_or_create_by!(email: 'ops@example.com') do |admin|
+    admin.password = 'password'
+    admin.password_confirmation = 'password'
+    admin.role = 'operator'
+  end
+  AdminUserRole.find_or_create_by!(user_id: ops_admin.id, admin_role: ops_role)
+
+  # risk 测试账号
+  risk_admin = AdminUser.find_or_create_by!(email: 'risk@example.com') do |admin|
+    admin.password = 'password'
+    admin.password_confirmation = 'password'
+    admin.role = 'operator'
+  end
+  AdminUserRole.find_or_create_by!(user_id: risk_admin.id, admin_role: risk_role)
+
+  puts "Dev test accounts seed done (ops@example.com, risk@example.com)."
+end
 
 # === 商家测试数据 (仅开发环境) ===
 if Rails.env.development?

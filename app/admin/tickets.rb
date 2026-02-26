@@ -192,31 +192,31 @@ ActiveAdmin.register Ticket do
   end
 
   # === Action Items (Buttons) ===
-  action_item :assign, only: :show, if: proc { resource.may_assign? } do
+  action_item :assign, only: :show, if: proc { resource.may_assign? && current_admin_user.admin_can?("ticket:manage") } do
     link_to "指派处理人", assign_admin_ticket_path(resource)
   end
 
-  action_item :start_work, only: :show, if: proc { resource.may_start_work? } do
+  action_item :start_work, only: :show, if: proc { resource.may_start_work? && current_admin_user.admin_can?("ticket:manage") } do
     link_to "开始处理", start_work_admin_ticket_path(resource), method: :put,
             data: { confirm: "确定开始处理此工单？" }
   end
 
-  action_item :resolve, only: :show, if: proc { resource.may_resolve? } do
+  action_item :resolve, only: :show, if: proc { resource.may_resolve? && current_admin_user.admin_can?("ticket:manage") } do
     link_to "标记解决", resolve_admin_ticket_path(resource), method: :put,
             data: { confirm: "确定标记此工单为已解决？" }
   end
 
-  action_item :close, only: :show, if: proc { resource.may_close? } do
+  action_item :close, only: :show, if: proc { resource.may_close? && current_admin_user.admin_can?("ticket:manage") } do
     link_to "关闭工单", close_ticket_admin_ticket_path(resource), method: :put,
             data: { confirm: "确定关闭此工单？" }
   end
 
-  action_item :reopen, only: :show, if: proc { resource.may_reopen? } do
+  action_item :reopen, only: :show, if: proc { resource.may_reopen? && current_admin_user.admin_can?("ticket:manage") } do
     link_to "重新打开", reopen_admin_ticket_path(resource), method: :put,
             data: { confirm: "确定重新打开此工单？" }
   end
 
-  action_item :reply, only: :show, if: proc { !resource.closed? } do
+  action_item :reply, only: :show, if: proc { !resource.closed? && current_admin_user.admin_can?("ticket:manage") } do
     link_to "回复", reply_admin_ticket_path(resource)
   end
 

@@ -2,24 +2,28 @@
 
 class RiskEventPolicy < ApplicationPolicy
   def index?
-    true
+    user.admin_can?("risk:read") || user.admin_can?("risk:manage")
   end
 
   def show?
-    true
+    index?
   end
 
   def ignore?
-    true
+    user.admin_can?("risk:manage")
   end
 
   def process_event?
-    true
+    user.admin_can?("risk:manage")
   end
 
   class Scope < Scope
     def resolve
-      scope.all
+      if user.admin_can?("risk:read") || user.admin_can?("risk:manage")
+        scope.all
+      else
+        scope.none
+      end
     end
   end
 end

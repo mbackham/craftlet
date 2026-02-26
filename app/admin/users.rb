@@ -8,6 +8,7 @@ ActiveAdmin.register User do
 
   controller do
     include Auditable
+    helper SensitiveFieldHelper
     
     after_action :audit_create, only: [:create]
     after_action :audit_update, only: [:update]
@@ -29,7 +30,9 @@ ActiveAdmin.register User do
     selectable_column
     id_column
     column :email
-    column :phone
+    column :phone do |user|
+      sensitive_field(user.phone, mask_method: :mask_phone, admin_user: current_admin_user)
+    end
     column :nickname
     column :status do |user|
       label = I18n.t("user_statuses.#{user.status}", default: user.status)
@@ -60,7 +63,9 @@ ActiveAdmin.register User do
     attributes_table do
       row :id
       row :email
-      row :phone
+      row :phone do |user|
+        sensitive_field(user.phone, mask_method: :mask_phone, admin_user: current_admin_user)
+      end
       row :nickname
       row :status do |user|
         label = I18n.t("user_statuses.#{user.status}", default: user.status)
@@ -177,12 +182,12 @@ ActiveAdmin.register User do
     end
   end
 
-  action_item :activate, only: :show, if: proc { user.status == 'disabled' } do
+  action_item :activate, only: :show, if: proc { user.status == 'disabled' && current_admin_user.admin_can?('user:manage') } do
     link_to I18n.t('admin.actions.activate'), activate_admin_user_path(user), method: :put, 
             data: { confirm: I18n.t('admin.confirmations.activate_user') }
   end
 
-  action_item :deactivate, only: :show, if: proc { user.status == 'active' } do
+  action_item :deactivate, only: :show, if: proc { user.status == 'active' && current_admin_user.admin_can?('user:manage') } do
     link_to I18n.t('admin.actions.deactivate'), deactivate_admin_user_path(user), method: :put,
             data: { confirm: I18n.t('admin.confirmations.deactivate_user') }
   end

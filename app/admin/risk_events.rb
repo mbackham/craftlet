@@ -43,7 +43,7 @@ ActiveAdmin.register RiskEvent do
     column("创建时间", :created_at)
     actions name: "操作", defaults: false do |event|
       item "查看", admin_risk_event_path(event)
-      if event.status == "pending"
+      if event.status == "pending" && current_admin_user.admin_can?("risk:manage")
         item "忽略", ignore_admin_risk_event_path(event), method: :put,
              data: { confirm: "确定忽略此事件？" }
         item "处理", process_event_admin_risk_event_path(event)
@@ -82,12 +82,12 @@ ActiveAdmin.register RiskEvent do
   end
 
   # === Action Items ===
-  action_item :ignore, only: :show, if: proc { resource.status == "pending" } do
+  action_item :ignore, only: :show, if: proc { resource.status == "pending" && current_admin_user.admin_can?("risk:manage") } do
     link_to "忽略", ignore_admin_risk_event_path(resource),
             method: :put, data: { confirm: "确定忽略此风控事件？" }
   end
 
-  action_item :process_event, only: :show, if: proc { resource.status == "pending" } do
+  action_item :process_event, only: :show, if: proc { resource.status == "pending" && current_admin_user.admin_can?("risk:manage") } do
     link_to "标记处理", process_event_admin_risk_event_path(resource)
   end
 

@@ -41,12 +41,12 @@ ActiveAdmin.register Feedback do
   # =============================
   # 批量操作
   # =============================
-  batch_action :mark_as_reviewing do |ids|
+  batch_action :mark_as_reviewing, if: proc { current_admin_user.admin_can?('feedback:manage') } do |ids|
     Feedback.where(id: ids).update_all(status: 'reviewing')
     redirect_to collection_path, notice: "已标记为处理中"
   end
   
-  batch_action :mark_as_resolved do |ids|
+  batch_action :mark_as_resolved, if: proc { current_admin_user.admin_can?('feedback:manage') } do |ids|
     Feedback.where(id: ids).update_all(
       status: 'resolved',
       resolved_at: Time.current,
@@ -149,7 +149,7 @@ ActiveAdmin.register Feedback do
           attributes_table_for f do
             row('姓名') { f.submitter_name }
             row('邮箱') { mail_to f.submitter_email }
-            row('电话') { f.submitter_phone }
+            row('电话') { sensitive_field(f.submitter_phone, mask_method: :mask_phone, admin_user: current_admin_user) }
             row('关联用户') do
               if f.user_id.present?
                 link_to "#{f.user_type} ##{f.user_id}", [:admin, f.user] rescue f.user_type
@@ -234,6 +234,8 @@ ActiveAdmin.register Feedback do
   # 辅助方法
   # =============================
   controller do
+    helper SensitiveFieldHelper
+
     def feedback_type_color(feedback)
       case feedback.feedback_type
       when 'bug_report' then 'error'

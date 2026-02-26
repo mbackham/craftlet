@@ -2,40 +2,44 @@
 
 class UserPolicy < ApplicationPolicy
   def index?
-    true
+    user.admin_can?("user:read") || user.admin_can?("user:manage")
   end
 
   def show?
-    true
+    index?
   end
 
   def create?
-    true
+    user.admin_can?("user:manage")
   end
 
   def update?
-    true
+    user.admin_can?("user:manage")
   end
 
   def destroy?
-    true
+    user.admin_can?("user:manage")
   end
 
   def activate?
-    true
+    user.admin_can?("user:manage")
   end
 
   def deactivate?
-    true
+    user.admin_can?("user:manage")
   end
 
   def export?
-    true
+    user.admin_can?("user:read") || user.admin_can?("user:manage")
   end
 
   class Scope < Scope
     def resolve
-      scope.all
+      if user.admin_can?("user:read") || user.admin_can?("user:manage")
+        scope.all
+      else
+        scope.none
+      end
     end
   end
 end

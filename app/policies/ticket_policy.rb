@@ -2,15 +2,15 @@
 
 class TicketPolicy < ApplicationPolicy
   def index?
-    true
+    user.admin_can?("ticket:read") || user.admin_can?("ticket:manage")
   end
 
   def show?
-    true
+    index?
   end
 
   def create?
-    true
+    user.admin_can?("ticket:manage")
   end
 
   def new?
@@ -18,7 +18,7 @@ class TicketPolicy < ApplicationPolicy
   end
 
   def update?
-    true
+    user.admin_can?("ticket:manage")
   end
 
   def destroy?
@@ -27,36 +27,40 @@ class TicketPolicy < ApplicationPolicy
 
   # Custom actions
   def assign?
-    true
+    user.admin_can?("ticket:manage")
   end
 
   def start_work?
-    true
+    user.admin_can?("ticket:manage")
   end
 
   def resolve?
-    true
+    user.admin_can?("ticket:manage")
   end
 
   def close_ticket?
-    true
+    user.admin_can?("ticket:manage")
   end
 
   def reopen?
-    true
+    user.admin_can?("ticket:manage")
   end
 
   def reply?
-    true
+    user.admin_can?("ticket:manage")
   end
 
   def assign_merchant?
-    true
+    user.admin_can?("ticket:manage")
   end
 
   class Scope < Scope
     def resolve
-      scope.all
+      if user.admin_can?("ticket:read") || user.admin_can?("ticket:manage")
+        scope.all
+      else
+        scope.none
+      end
     end
   end
 end

@@ -2,15 +2,15 @@
 
 class RiskRulePolicy < ApplicationPolicy
   def index?
-    true
+    user.admin_can?("risk:read") || user.admin_can?("risk:manage")
   end
 
   def show?
-    true
+    index?
   end
 
   def create?
-    true
+    user.admin_can?("risk:manage")
   end
 
   def new?
@@ -18,7 +18,7 @@ class RiskRulePolicy < ApplicationPolicy
   end
 
   def update?
-    true
+    user.admin_can?("risk:manage")
   end
 
   def destroy?
@@ -27,7 +27,11 @@ class RiskRulePolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      scope.all
+      if user.admin_can?("risk:read") || user.admin_can?("risk:manage")
+        scope.all
+      else
+        scope.none
+      end
     end
   end
 end

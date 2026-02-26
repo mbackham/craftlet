@@ -10,6 +10,7 @@ ActiveAdmin.register MerchantProfile do
   controller do
     include Auditable
     helper AuditHelper
+    helper SensitiveFieldHelper
 
     after_action :audit_create, only: [:create]
     after_action :audit_update, only: [:update]
@@ -145,7 +146,17 @@ ActiveAdmin.register MerchantProfile do
           attributes_table_for merchant_profile do
             row(:bank_name) { |mp| mp.bank_name }
             row(:bank_branch) { |mp| mp.bank_branch }
-            row(:bank_account_no) { |mp| mp.masked_bank_account_no || I18n.t('admin.messages.not_filled') }
+            row(:bank_account_no) { |mp|
+              if mp.bank_account_no_ciphertext.blank?
+                I18n.t('admin.messages.not_filled')
+              elsif can_view_sensitive?(current_admin_user)
+                # 有权限时显示完整账号（当前 Lockbox 解密后的值）
+                # 如 Lockbox 尚未配置 encrypts，暂显示脱敏
+                mp.respond_to?(:bank_account_no) ? (mp.bank_account_no || mp.masked_bank_account_no) : mp.masked_bank_account_no
+              else
+                mp.masked_bank_account_no
+              end
+            }
             row(:deposit_amount) { |mp| number_to_currency(mp.deposit_amount, unit: '¥') if mp.deposit_amount }
           end
         end
@@ -432,26 +443,26 @@ ActiveAdmin.register MerchantProfile do
   end
 
   # === Action Items ===
-  action_item :approve, only: :show, if: proc { merchant_profile.can_approve? } do
+  action_item :approve, only: :show, if: proc { merchant_profile.can_approve? && current_admin_user.admin_can?('merchant:approve') } do
     link_to I18n.t('admin.actions.approve'), approve_admin_merchant_profile_path(merchant_profile), 
             method: :put,
             data: { confirm: I18n.t('admin.confirmations.approve_merchant') },
             class: 'action-item-button'
   end
 
-  action_item :reject, only: :show, if: proc { merchant_profile.can_reject? } do
+  action_item :reject, only: :show, if: proc { merchant_profile.can_reject? && current_admin_user.admin_can?('merchant:approve') } do
     link_to I18n.t('admin.actions.reject'), reject_admin_merchant_profile_path(merchant_profile),
             class: 'action-item-button'
   end
 
-  action_item :suspend, only: :show, if: proc { merchant_profile.approved? } do
+  action_item :suspend, only: :show, if: proc { merchant_profile.approved? && current_admin_user.admin_can?('merchant:approve') } do
     link_to I18n.t('admin.actions.suspend'), suspend_admin_merchant_profile_path(merchant_profile),
             method: :put,
             data: { confirm: I18n.t('admin.confirmations.suspend_merchant') },
             class: 'action-item-button'
   end
 
-  action_item :unsuspend, only: :show, if: proc { merchant_profile.suspended? } do
+  action_item :unsuspend, only: :show, if: proc { merchant_profile.suspended? && current_admin_user.admin_can?('merchant:approve') } do
     link_to I18n.t('admin.actions.resume'), unsuspend_admin_merchant_profile_path(merchant_profile),
             method: :put,
             data: { confirm: I18n.t('admin.confirmations.resume_merchant') },

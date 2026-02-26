@@ -2,15 +2,15 @@
 
 class ElementPolicy < ApplicationPolicy
   def index?
-    true
+    user.admin_can?("element:read") || user.admin_can?("element:manage")
   end
 
   def show?
-    true
+    index?
   end
 
   def create?
-    user.respond_to?(:admin_can?) && user.admin_can?('element:manage')
+    user.admin_can?("element:manage")
   end
 
   def update?
@@ -31,7 +31,11 @@ class ElementPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      scope.all
+      if user.admin_can?("element:read") || user.admin_can?("element:manage")
+        scope.all
+      else
+        scope.none
+      end
     end
   end
 end

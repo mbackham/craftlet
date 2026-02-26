@@ -199,7 +199,7 @@ ActiveAdmin.register Order do
   end
 
   # === Assign Merchant Action ===
-  action_item :assign_merchant, only: :show, if: proc { resource.status == "paid" } do
+  action_item :assign_merchant, only: :show, if: proc { resource.status == "paid" && current_admin_user.admin_can?("order:read") } do
     link_to "指派商家", assign_merchant_admin_order_path(resource)
   end
 
@@ -235,7 +235,7 @@ ActiveAdmin.register Order do
 
   # === Create Refund Ticket Action ===
   action_item :create_refund_ticket, only: :show,
-              if: proc { %w[paid accepted producing delivered refunded].include?(resource.status) } do
+              if: proc { %w[paid accepted producing delivered refunded].include?(resource.status) && current_admin_user.admin_can?("ticket:manage") } do
     link_to "创建退款工单", create_refund_ticket_admin_order_path(resource),
             method: :post,
             data: { confirm: "确定要为此订单创建退款工单？" }

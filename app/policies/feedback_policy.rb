@@ -2,11 +2,11 @@
 
 class FeedbackPolicy < ApplicationPolicy
   def index?
-    true
+    user.admin_can?("feedback:read") || user.admin_can?("feedback:manage")
   end
 
   def show?
-    true
+    index?
   end
 
   def create?
@@ -14,7 +14,7 @@ class FeedbackPolicy < ApplicationPolicy
   end
 
   def update?
-    true # Admins can update status, priority, admin_note, response
+    user.admin_can?("feedback:manage")
   end
 
   def destroy?
@@ -23,7 +23,11 @@ class FeedbackPolicy < ApplicationPolicy
 
   class Scope < Scope
     def resolve
-      scope.all
+      if user.admin_can?("feedback:read") || user.admin_can?("feedback:manage")
+        scope.all
+      else
+        scope.none
+      end
     end
   end
 end

@@ -2,18 +2,22 @@
 
 class PaymentPolicy < ApplicationPolicy
   def index?
-    true
+    user.admin_can?("payment:read")
   end
 
   def show?
-    true
+    index?
   end
 
   # Read-only, no create/update/destroy
 
   class Scope < Scope
     def resolve
-      scope.all
+      if user.admin_can?("payment:read")
+        scope.all
+      else
+        scope.none
+      end
     end
   end
 end

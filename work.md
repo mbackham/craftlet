@@ -1,12 +1,11 @@
-后台第三周（重点：工单系统 + 风控基础 + 运营闭环）
-周一：工单模型与后台界面（最小可用）
+周三：风控规则/事件（先"能记录能处理"）
 - migrations：
-tickets
+risk_rules
 - 、
-ticket_messages
-- 、
-ticket_attachments
-- ActiveAdmin：Tickets 列表/详情/状态流转/指派处理人
-- 附件记录 OSS key/url（先挂链接）
-验收：能创建工单、回复、指派、关闭，审计可查。
-
+risk_events
+- 最小规则（2~3 条）：
+  - 同一用户短时高频退款申请
+  - 同一用户高金额退款
+  - 同一商家短时大量竞标/撤回
+- 后台可对 risk_event 标记：ignored/processed
+验收：触发点能写入 risk_event，后台可查看与处理。

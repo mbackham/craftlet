@@ -170,6 +170,11 @@ zh-CN:
       order: 订单
       payment: 支付
       refund: 退款
+      risk_rule: 风控规则
+      risk_event: 风控事件
+      ticket: 工单
+      ticket_message: 工单消息
+      ticket_attachment: 工单附件
     attributes:
       user:
         id: ID
@@ -288,6 +293,62 @@ zh-CN:
         succeeded_at: 成功时间
         created_at: 创建时间
         updated_at: 更新时间
+      risk_rule:
+        id: ID
+        code: 规则代码
+        name: 名称
+        description: 描述
+        category: 分类
+        severity: 严重级
+        params: 参数
+        enabled: 启用
+        created_at: 创建时间
+        updated_at: 更新时间
+      risk_event:
+        id: ID
+        risk_rule: 规则
+        risk_rule_id: 规则
+        status: 状态
+        subject_id: 主体ID
+        subject_type: 主体类型
+        trigger_source: 触发来源
+        context: 上下文
+        resolution_note: 处理备注
+        resolved_by_id: 处理人
+        resolved_at: 处理时间
+        created_at: 创建时间
+        updated_at: 更新时间
+      ticket:
+        id: ID
+        ticket_no: 工单编号
+        subject: 主题
+        description: 描述
+        category: 分类
+        priority: 优先级
+        status: 状态
+        creator_id: 创建人
+        assignee_id: 处理人
+        order_id: 关联订单
+        assigned_at: 指派时间
+        resolved_at: 解决时间
+        closed_at: 关闭时间
+        created_at: 创建时间
+        updated_at: 更新时间
+      ticket_message:
+        id: ID
+        ticket: 工单
+        content: 内容
+        internal: 内部备注
+        sender_id: 发送人
+        created_at: 创建时间
+      ticket_attachment:
+        id: ID
+        file_name: 文件名
+        file_type: 文件类型
+        file_size: 文件大小
+        oss_key: OSS Key
+        url: 链接
+        created_at: 创建时间
 
 
   # 商家状态翻译
@@ -378,6 +439,49 @@ zh-CN:
     active: 活跃
     disabled: 已禁用
 
+  # 风控严重级翻译
+  risk_severities:
+    low: 低
+    medium: 中
+    high: 高
+    critical: 紧急
+
+  # 风控分类翻译
+  risk_categories:
+    refund: 退款
+    order: 订单
+    merchant: 商家
+    general: 通用
+
+  # 风控事件状态翻译
+  risk_event_statuses:
+    pending: 待处理
+    ignored: 已忽略
+    processed: 已处理
+
+  # 工单状态翻译
+  ticket_statuses:
+    open: 待处理
+    assigned: 已指派
+    in_progress: 处理中
+    resolved: 已解决
+    closed: 已关闭
+
+  # 工单优先级翻译
+  ticket_priorities:
+    low: 低
+    normal: 普通
+    high: 高
+    urgent: 紧急
+
+  # 工单分类翻译
+  ticket_categories:
+    general: 通用
+    payment: 支付/退款
+    order: 订单
+    merchant: 商家
+    other: 其他
+
   # 后台管理自定义标签
   admin:
     menu:
@@ -395,6 +499,9 @@ zh-CN:
       orders: 订单列表
       payments: 支付记录
       refunds: 退款记录
+      risk_rules: 风控规则
+      risk_events: 风控事件
+      tickets: 工单管理
       users: 用户
     columns:
       actions: 操作

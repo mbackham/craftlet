@@ -232,5 +232,38 @@ ActiveAdmin.register Order do
       end
     end
   end
+
+  # === Create Refund Ticket Action ===
+  action_item :create_refund_ticket, only: :show,
+              if: proc { %w[paid accepted producing delivered refunded].include?(resource.status) } do
+    link_to "创建退款工单", create_refund_ticket_admin_order_path(resource),
+            method: :post,
+            data: { confirm: "确定要为此订单创建退款工单？" }
+  end
+
+  member_action :create_refund_ticket, method: :post do
+    order = Order.find(params[:id])
+    admin_uuid = AuditService.format_as_uuid(current_admin_user.id)
+
+    ticket = Ticket.create!(
+      subject:      "退款工单 — 订单 #{order.order_no}",
+      description:  "订单 #{order.order_no}，金额 ¥#{order.total_amount}，当前状态：#{order.status}",
+      category:     "payment",
+      priority:     "normal",
+      order_id:     order.id,
+      creator_id:   admin_uuid,
+      creator_type: "AdminUser"
+    )
+
+    AuditService.log!(
+      action:   "create_refund_ticket",
+      actor:    current_admin_user,
+      target:   ticket,
+      metadata: { order_id: order.id, order_no: order.order_no },
+      request:  request
+    )
+
+    redirect_to admin_ticket_path(ticket), notice: "退款工单已创建：#{ticket.ticket_no}"
+  end
 end
 

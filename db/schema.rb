@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_25_080000) do
+ActiveRecord::Schema[7.1].define(version: 2026_02_25_090000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -339,6 +339,40 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_080000) do
     t.index ["status"], name: "index_refunds_on_status"
   end
 
+  create_table "risk_events", force: :cascade do |t|
+    t.bigint "risk_rule_id", null: false
+    t.string "status", default: "pending", null: false
+    t.uuid "subject_id", null: false
+    t.string "subject_type", default: "User"
+    t.string "trigger_source"
+    t.jsonb "context", default: {}, null: false
+    t.text "resolution_note"
+    t.uuid "resolved_by_id"
+    t.datetime "resolved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["risk_rule_id", "subject_id"], name: "index_risk_events_on_risk_rule_id_and_subject_id"
+    t.index ["risk_rule_id"], name: "index_risk_events_on_risk_rule_id"
+    t.index ["status"], name: "index_risk_events_on_status"
+    t.index ["subject_id"], name: "index_risk_events_on_subject_id"
+    t.index ["trigger_source"], name: "index_risk_events_on_trigger_source"
+  end
+
+  create_table "risk_rules", force: :cascade do |t|
+    t.string "code", null: false
+    t.string "name", null: false
+    t.text "description"
+    t.string "category", default: "general"
+    t.string "severity", default: "medium"
+    t.jsonb "params", default: {}, null: false
+    t.boolean "enabled", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_risk_rules_on_category"
+    t.index ["code"], name: "index_risk_rules_on_code", unique: true
+    t.index ["enabled"], name: "index_risk_rules_on_enabled"
+  end
+
   create_table "roles", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.string "role_type", null: false
@@ -456,6 +490,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_080000) do
   add_foreign_key "payments", "orders"
   add_foreign_key "refunds", "orders"
   add_foreign_key "refunds", "payments"
+  add_foreign_key "risk_events", "risk_rules"
   add_foreign_key "roles", "users"
   add_foreign_key "ticket_attachments", "ticket_messages"
   add_foreign_key "ticket_messages", "tickets"

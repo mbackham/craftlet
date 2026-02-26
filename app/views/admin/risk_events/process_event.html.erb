@@ -1,0 +1,28 @@
+<% # Admin view for processing a risk event %>
+<div class="panel">
+  <h3>处理风控事件 #<%= @event.id %></h3>
+  <div class="panel_contents">
+    <p><strong>规则：</strong><%= @event.risk_rule.name %></p>
+    <p><strong>主体：</strong><%= @event.subject&.email || @event.subject_id %></p>
+    <p><strong>触发来源：</strong><%= @event.trigger_source %></p>
+
+    <%= form_tag process_event_admin_risk_event_path(@event), method: :put do %>
+      <fieldset class="inputs">
+        <ol>
+          <li class="text input">
+            <label for="resolution_note">处理备注</label>
+            <%= text_area_tag :resolution_note, nil, rows: 4, required: true,
+                  style: "width: 100%; padding: 8px;",
+                  placeholder: "请输入处理说明..." %>
+          </li>
+        </ol>
+      </fieldset>
+      <fieldset class="actions">
+        <ol>
+          <li class="action"><%= submit_tag "确认处理" %></li>
+          <li class="cancel"><%= link_to "取消", admin_risk_event_path(@event) %></li>
+        </ol>
+      </fieldset>
+    <% end %>
+  </div>
+</div>

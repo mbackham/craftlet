@@ -37,6 +37,15 @@ class AuditService
       nil
     end
 
+    # Convert integer ID to UUID string format (public — used by admin controllers)
+    def format_as_uuid(id)
+      return id if id.is_a?(String) && id.match?(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
+
+      # For integer IDs, create a UUID-like string
+      # Format: 00000000-0000-0000-0000-{12 digit number}
+      sprintf('00000000-0000-0000-0000-%012d', id.to_i)
+    end
+
     private
 
     def build_audit_data(action:, actor:, target:, before:, after:, metadata:, request:)
@@ -99,15 +108,6 @@ class AuditService
       ]
 
       attributes.except(*sensitive_keys)
-    end
-
-    # Convert integer ID to UUID string format
-    def format_as_uuid(id)
-      return id if id.is_a?(String) && id.match?(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
-      
-      # For integer IDs, create a UUID-like string
-      # Format: 00000000-0000-0000-0000-{12 digit number}
-      sprintf('00000000-0000-0000-0000-%012d', id.to_i)
     end
   end
 end

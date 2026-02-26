@@ -174,6 +174,47 @@ ActiveAdmin.register Refund do
         para I18n.t("admin.messages.no_audit_logs")
       end
     end
+
+    # Provider 请求/響应 payload 面板
+    if refund.request_payload.present? || refund.response_payload.present?
+      panel "Provider 请求/响应记录" do
+        if refund.request_payload.present?
+          h4 "请求 Payload (request_payload)"
+          pre JSON.pretty_generate(refund.request_payload) rescue refund.request_payload.to_s
+        end
+        if refund.response_payload.present?
+          h4 "响应 Payload (response_payload)"
+          pre JSON.pretty_generate(refund.response_payload) rescue refund.response_payload.to_s
+        end
+      end
+    end
+
+    # 回调通知 payload 面板
+    if refund.notify_payload.present?
+      panel "回调通知记录 (notify_payload)" do
+        pre JSON.pretty_generate(refund.notify_payload) rescue refund.notify_payload.to_s
+      end
+    end
+
+    # 关联工单面板
+    related_tickets = Ticket.where(order_id: refund.order_id, category: "payment")
+    if related_tickets.any?
+      panel "关联退款工单 (#{related_tickets.count})" do
+        table_for related_tickets.order(created_at: :desc) do
+          column("工单编号") { |t| link_to t.ticket_no, admin_ticket_path(t) }
+          column("主题")     { |t| t.subject }
+          column("状态") do |t|
+            color = case t.status
+                    when "closed", "resolved" then "yes"
+                    when "in_progress", "assigned" then "warning"
+                    else nil
+                    end
+            status_tag t.status_label, class: color
+          end
+          column("创建时间") { |t| l(t.created_at, format: :short) if t.created_at }
+        end
+      end
+    end
   end
 
   # === Member Actions ===
@@ -264,6 +305,23 @@ ActiveAdmin.register Refund do
     end
   end
 
+  # Retry failed refund
+  member_action :retry_refund, method: :put do
+    refund = Refund.find(params[:id])
+
+    service = Refunds::RetryRefundService.new(
+      refund:     refund,
+      admin_user: current_admin_user,
+      request:    request
+    ).call
+
+    if service.success?
+      redirect_to admin_refund_path(refund), notice: "退款重试已提交，正在处理中..."
+    else
+      redirect_to admin_refund_path(refund), alert: "重试失败：#{service.error}"
+    end
+  end
+
   # === Action Items (show page buttons) ===
 
   action_item :approve, only: :show,
@@ -282,6 +340,20 @@ ActiveAdmin.register Refund do
             class: "action-item-button"
   end
 
+  action_item :retry_refund, only: :show,
+              if: proc { resource.status == "failed" } do
+    link_to "重试退款", retry_refund_admin_refund_path(resource),
+            method: :put,
+            data: { confirm: "确定要重试此退款？将重新提交到支付渠道处理。" }
+  end
+
+  action_item :create_ticket_from_refund, only: :show,
+              if: proc { resource.order.present? } do
+    link_to "创建退款工单", create_refund_ticket_admin_order_path(resource.order),
+            method: :post,
+            data: { confirm: "确定要为此退款关联的订单创建退款工单？" }
+  end
+
   # === CSV Export ===
   csv do
     column :id
@@ -295,3 +367,4 @@ ActiveAdmin.register Refund do
     column :created_at
   end
 end
+

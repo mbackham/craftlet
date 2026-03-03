@@ -341,14 +341,14 @@ ActiveAdmin.register Refund do
   end
 
   action_item :retry_refund, only: :show,
-              if: proc { resource.status == "failed" } do
+              if: proc { resource.status == "failed" && current_admin_user.admin_can?("refund:approve") } do
     link_to "重试退款", retry_refund_admin_refund_path(resource),
             method: :put,
             data: { confirm: "确定要重试此退款？将重新提交到支付渠道处理。" }
   end
 
   action_item :create_ticket_from_refund, only: :show,
-              if: proc { resource.order.present? } do
+              if: proc { resource.order.present? && current_admin_user.admin_can?("ticket:manage") } do
     link_to "创建退款工单", create_refund_ticket_admin_order_path(resource.order),
             method: :post,
             data: { confirm: "确定要为此退款关联的订单创建退款工单？" }

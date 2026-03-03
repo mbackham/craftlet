@@ -1,5 +1,5 @@
 ActiveAdmin.register AdminUser do
-  menu parent: 'rbac_menu', priority: 5, label: proc { I18n.t('admin.labels.admin_users') }
+  menu parent: 'rbac_menu', priority: 5, label: proc { I18n.t('admin.labels.admin_users') }, if: proc { current_admin_user.admin? }
 
   permit_params :email, :password, :password_confirmation, :role
 

@@ -30,6 +30,8 @@ ActiveAdmin.register Order do
 
   # === Filters ===
   filter :order_no
+  filter :customer_id_eq, label: proc { I18n.t('admin.columns.buyer') }, as: :string
+  filter :merchant_id_eq, label: proc { I18n.t('admin.columns.merchant') }, as: :string
   filter :status, as: :select, collection: -> {
     Order.distinct.pluck(:status).compact.map { |s|
       [I18n.t("order_statuses.#{s}", default: s.humanize), s]
@@ -138,6 +140,19 @@ ActiveAdmin.register Order do
             para I18n.t('admin.messages.no_bid_records')
           end
         end
+      end
+    end
+
+    panel I18n.t('admin.panels.related_records', default: 'Related Records') do
+      div style: "display: flex; gap: 10px; margin-bottom: 10px;" do
+        # Link to all Payments for this order
+        link_to I18n.t('admin.actions.view_payments', default: 'View Payments'), admin_payments_path(q: { order_id_eq: order.id }), class: "button"
+        
+        # Link to all Refunds for this order
+        link_to I18n.t('admin.actions.view_refunds', default: 'View Refunds'), admin_refunds_path(q: { order_id_eq: order.id }), class: "button"
+        
+        # Link to Tickets related to this order
+        link_to I18n.t('admin.actions.view_tickets', default: 'View Tickets'), admin_tickets_path(q: { order_id_eq: order.id }), class: "button"
       end
     end
 

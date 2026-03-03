@@ -30,7 +30,13 @@ ActiveAdmin.register RiskEvent do
               end
       status_tag e.risk_rule.severity_label, class: color
     end
-    column("主体") { |e| e.subject&.email || e.subject_id }
+    column("主体") do |e|
+      if e.subject.is_a?(User)
+        link_to e.subject.email.presence || e.subject.phone || e.subject.id, admin_user_path(e.subject)
+      else
+        e.subject_id
+      end
+    end
     column("触发来源", :trigger_source)
     column("状态") do |e|
       color = case e.status
@@ -63,7 +69,13 @@ ActiveAdmin.register RiskEvent do
                 end
         status_tag e.risk_rule.severity_label, class: color
       end
-      row("主体")     { |e| e.subject&.email || e.subject_id }
+      row("主体") do |e|
+        if e.subject.is_a?(User)
+          link_to e.subject.email.presence || e.subject.phone || e.subject.id, admin_user_path(e.subject)
+        else
+          e.subject_id
+        end
+      end
       row("触发来源") { |e| e.trigger_source }
       row("状态") do |e|
         color = case e.status

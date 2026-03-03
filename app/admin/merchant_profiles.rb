@@ -127,14 +127,22 @@ ActiveAdmin.register MerchantProfile do
             end
             row(:idcard_front_key) do |mp|
               if mp.idcard_front_key.present?
-                link_to I18n.t('admin.actions.view'), mp.idcard_front_key, target: '_blank'
+                if can_view_sensitive?(current_admin_user)
+                  link_to I18n.t('admin.actions.view'), mp.idcard_front_key, target: '_blank'
+                else
+                  span "****", class: 'empty'
+                end
               else
                 span I18n.t('admin.messages.not_uploaded'), class: 'empty'
               end
             end
             row(:idcard_back_key) do |mp|
               if mp.idcard_back_key.present?
-                link_to I18n.t('admin.actions.view'), mp.idcard_back_key, target: '_blank'
+                if can_view_sensitive?(current_admin_user)
+                  link_to I18n.t('admin.actions.view'), mp.idcard_back_key, target: '_blank'
+                else
+                  span "****", class: 'empty'
+                end
               else
                 span I18n.t('admin.messages.not_uploaded'), class: 'empty'
               end
@@ -218,6 +226,24 @@ ActiveAdmin.register MerchantProfile do
       end
     end
 
+    panel I18n.t('admin.panels.related_records', default: 'Related Records') do
+      div style: "display: flex; gap: 10px; margin-bottom: 10px;" do
+        if merchant_profile.user
+          # Link to Orders where merchant_id corresponds to this user
+          uuid = MerchantProfile.format_admin_id_as_uuid(merchant_profile.user_id)
+          link_to I18n.t('admin.actions.view_orders', default: 'View Orders'), admin_orders_path(q: { merchant_id_eq: uuid }), class: "button"
+          
+          # Link to Tickets related to this user
+          link_to I18n.t('admin.actions.view_tickets', default: 'View Tickets'), admin_tickets_path(q: { creator_id_eq: uuid }), class: "button"
+
+          # Link to Risk Events related to this user
+          link_to I18n.t('admin.actions.view_risk_events', default: 'View Risk Events'), admin_risk_events_path(q: { subject_id_eq: uuid }), class: "button"
+        else
+          span "No associated User", class: "empty"
+        end
+      end
+    end
+
     panel I18n.t('admin.panels.recent_audit_logs') do
       audit_logs = AuditLog.where(target_type: 'MerchantProfile', target_id: merchant_profile.id)
                            .order(created_at: :desc).limit(10)
@@ -288,6 +314,7 @@ ActiveAdmin.register MerchantProfile do
   # === Member Actions ===
   member_action :approve, method: :put do
     merchant_profile = MerchantProfile.find(params[:id])
+    authorize! :approve, merchant_profile
     service = Merchants::ApproveService.new(
       merchant_profile: merchant_profile,
       admin_user: current_admin_user,
@@ -303,6 +330,7 @@ ActiveAdmin.register MerchantProfile do
 
   member_action :reject, method: [:get, :put] do
     merchant_profile = MerchantProfile.find(params[:id])
+    authorize! :reject, merchant_profile
     
     unless merchant_profile.can_reject?
       redirect_to admin_merchant_profile_path(merchant_profile), 
@@ -369,6 +397,7 @@ ActiveAdmin.register MerchantProfile do
 
   member_action :suspend, method: :put do
     merchant_profile = MerchantProfile.find(params[:id])
+    authorize! :suspend, merchant_profile
     suspend_reason = params[:reason].presence || 'Admin suspension'
     
     unless merchant_profile.approved?
@@ -408,6 +437,7 @@ ActiveAdmin.register MerchantProfile do
 
   member_action :unsuspend, method: :put do
     merchant_profile = MerchantProfile.find(params[:id])
+    authorize! :unsuspend, merchant_profile
     
     unless merchant_profile.suspended?
       redirect_to admin_merchant_profile_path(merchant_profile), 
@@ -526,8 +556,8 @@ ActiveAdmin.register MerchantProfile do
     column :address_city
     column :address_district
     column :address_detail
-    column :bank_name
-    column :bank_branch
+    column(:bank_name) { |mp| can_view_sensitive?(current_admin_user) ? mp.bank_name : '****' }
+    column(:bank_branch) { |mp| can_view_sensitive?(current_admin_user) ? mp.bank_branch : '****' }
     column :created_at
     column :approved_at
     column :rejected_at

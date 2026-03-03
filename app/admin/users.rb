@@ -147,6 +147,20 @@ ActiveAdmin.register User do
     f.actions
   end
 
+  # === CSV Export ===
+  csv do
+    column :id
+    column :email
+    column(:phone) { |user| sensitive_field(user.phone, mask_method: :mask_phone, admin_user: current_admin_user) }
+    column :nickname
+    column :status
+    column :avatar_key
+    column :disabled_at
+    column :disabled_reason
+    column :created_at
+    column :updated_at
+  end
+
   # Member actions
   member_action :activate, method: :put do
     user = User.find(params[:id])

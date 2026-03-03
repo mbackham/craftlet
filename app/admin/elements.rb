@@ -120,6 +120,7 @@ ActiveAdmin.register Element do
   # === Member Actions ===
   member_action :shelf, method: :put do
     element = Element.find(params[:id])
+    authorize! :shelf, element
     
     unless element.can_shelf?
       redirect_to admin_element_path(element), alert: I18n.t('admin.alerts.status_not_allow_shelf')
@@ -148,6 +149,7 @@ ActiveAdmin.register Element do
 
   member_action :unshelf, method: :put do
     element = Element.find(params[:id])
+    authorize! :unshelf, element
     
     unless element.can_unshelf?
       redirect_to admin_element_path(element), alert: I18n.t('admin.alerts.status_not_allow_unshelf')
@@ -175,14 +177,14 @@ ActiveAdmin.register Element do
   end
 
   # === Action Items ===
-  action_item :shelf, only: :show, if: proc { element.can_shelf? } do
+  action_item :shelf, only: :show, if: proc { element.can_shelf? && current_admin_user.admin_can?("element:manage") } do
     link_to I18n.t('admin.actions.shelf'), shelf_admin_element_path(element),
             method: :put,
             data: { confirm: I18n.t('admin.confirmations.shelf_element') },
             class: 'action-item-button'
   end
 
-  action_item :unshelf, only: :show, if: proc { element.can_unshelf? } do
+  action_item :unshelf, only: :show, if: proc { element.can_unshelf? && current_admin_user.admin_can?("element:manage") } do
     link_to I18n.t('admin.actions.unshelf'), unshelf_admin_element_path(element),
             method: :put,
             data: { confirm: I18n.t('admin.confirmations.unshelf_element') },
@@ -190,7 +192,7 @@ ActiveAdmin.register Element do
   end
 
   # === Batch Actions ===
-  batch_action :shelf do |ids|
+  batch_action :shelf, if: proc { current_admin_user.admin_can?("element:manage") } do |ids|
     batch_action_collection.find(ids).each do |element|
       next unless element.can_shelf?
       element.shelf!
@@ -198,7 +200,7 @@ ActiveAdmin.register Element do
     redirect_to collection_path, notice: "#{I18n.t('admin.messages.batch_shelved')} #{ids.size}"
   end
 
-  batch_action :unshelf do |ids|
+  batch_action :unshelf, if: proc { current_admin_user.admin_can?("element:manage") } do |ids|
     batch_action_collection.find(ids).each do |element|
       next unless element.can_unshelf?
       element.unshelf!

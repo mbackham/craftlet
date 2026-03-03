@@ -7,6 +7,7 @@ ActiveAdmin.register AdminRole do
 
   controller do
     include Auditable
+    helper SensitiveFieldHelper
     
     after_action :audit_create, only: [:create]
     after_action :audit_update, only: [:update]
@@ -60,7 +61,9 @@ ActiveAdmin.register AdminRole do
         column :email do |user|
           link_to user.email, admin_user_path(user)
         end
-        column :phone
+        column :phone do |user|
+          sensitive_field(user.phone, mask_method: :mask_phone, admin_user: current_admin_user)
+        end
         column :status do |u|
           I18n.t("user_statuses.#{u.status}", default: u.status)
         end

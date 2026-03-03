@@ -34,10 +34,18 @@ module Api
           return
         end
 
+        # Inject Request IDs into the payload
+        notify_payload = {
+          raw_payload: payload,
+          rails_request_id: request.request_id,
+          third_party_request_id: payload["transaction_id"] || payload[:transaction_id],
+          received_at: Time.current.iso8601
+        }
+
         result = ::Payments::HandleCallbackService.new(
           channel:            "wechat",
           provider_refund_no: provider_refund_no,
-          notify_payload:     payload
+          notify_payload:     notify_payload
         ).call
 
         if result.success?
@@ -69,10 +77,18 @@ module Api
           return
         end
 
+        # Inject Request IDs into the payload
+        notify_payload = {
+          raw_payload: payload.to_h,
+          rails_request_id: request.request_id,
+          third_party_request_id: payload["notify_id"] || payload["trade_no"],
+          received_at: Time.current.iso8601
+        }
+
         result = ::Payments::HandleCallbackService.new(
           channel:            "alipay",
           provider_refund_no: provider_refund_no,
-          notify_payload:     payload
+          notify_payload:     notify_payload
         ).call
 
         if result.success?

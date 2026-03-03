@@ -31,8 +31,8 @@ module Refunds
           request:  @request
         )
 
-        # 异步处理退款（下周接真实 Provider）
-        Refunds::ProcessRefundJob.perform_later(refund.id)
+        # 异步处理退款（传递 request_id 进行追踪）
+        Refunds::ProcessRefundJob.perform_later(refund.id, request_id: @request&.request_id)
       end
 
       @result[:success] = true

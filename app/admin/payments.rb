@@ -86,6 +86,32 @@ ActiveAdmin.register Payment do
       row(:created_at) { |p| l(p.created_at, format: :long) if p.created_at }
     end
 
+    if payment.status == 'failed'
+      panel I18n.t("admin.panels.payment_error_info", default: "异常信息") do
+        attributes_table_for payment do
+          row(I18n.t("admin.columns.failure_reason", default: "失败原因")) { |p| p.failure_reason }
+          row(I18n.t("admin.columns.failed_at", default: "失败时间")) { |p| l(p.updated_at, format: :long) }
+          row(I18n.t("admin.columns.third_party_error_code", default: "第三方错误码")) do |p|
+            p.response_payload&.dig('error_code') || p.response_payload&.dig('sub_code') || "-"
+          end
+        end
+
+        if current_admin_user.admin_can?("payment:manage")
+          panel I18n.t("admin.panels.raw_payload", default: "原始回调数据（仅超管或有权限者可见）") do
+            if payment.notify_payload.present?
+              h4 "Notify Payload"
+              pre JSON.pretty_generate(payment.notify_payload) rescue payment.notify_payload.to_s
+            end
+            
+            if payment.response_payload.present?
+              h4 "Response Payload"
+              pre JSON.pretty_generate(payment.response_payload) rescue payment.response_payload.to_s
+            end
+          end
+        end
+      end
+    end
+
     panel I18n.t('admin.panels.related_refunds') do
       if payment.refunds.any?
         table_for payment.refunds do

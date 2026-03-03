@@ -98,21 +98,29 @@ ActiveAdmin.register Refund do
       row(:created_at)         { |r| l(r.created_at, format: :long) if r.created_at }
     end
 
-    # 拒绝信息面板（仅当退款被拒绝时显示）
+    # 拒绝信息面板与系统失败原因（仅当退款为 failed 时显示）
     if refund.status == "failed"
       reject_log = AuditLog.where(target_type: "Refund", target_id: refund.id, action: "reject")
                            .order(created_at: :desc).first
 
-      panel I18n.t("admin.panels.refund_rejection_info"), class: "refund-rejection-panel" do
+      panel I18n.t("admin.panels.refund_rejection_info", default: "异常与拒绝信息"), class: "refund-rejection-panel" do
         attributes_table_for refund do
-          row(I18n.t("admin.columns.reject_reason")) do
+          if refund.failure_reason.present?
+            row(I18n.t("admin.columns.failure_reason", default: "系统失败原因")) { |r| r.failure_reason }
+            row(I18n.t("admin.columns.failed_at", default: "失败时间")) { |r| l(r.updated_at, format: :long) }
+            row(I18n.t("admin.columns.third_party_error_code", default: "第三方响应代码")) do |r|
+              r.response_payload&.dig('error_code') || r.response_payload&.dig('sub_code') || "-"
+            end
+          end
+
+          row(I18n.t("admin.columns.reject_reason", default: "人工拒绝原因")) do
             if reject_log&.metadata&.dig("reason").present?
               reject_log.metadata["reason"]
             else
               span I18n.t("admin.messages.no_reject_reason"), class: "empty"
             end
           end
-          row(I18n.t("admin.columns.rejected_at")) do
+          row(I18n.t("admin.columns.rejected_at", default: "人工审核时间")) do
             reject_log ? l(reject_log.created_at, format: :long) : I18n.t("admin.messages.unknown")
           end
           row(I18n.t("admin.columns.operator")) do
@@ -175,24 +183,23 @@ ActiveAdmin.register Refund do
       end
     end
 
-    # Provider 请求/響应 payload 面板
-    if refund.request_payload.present? || refund.response_payload.present?
-      panel "Provider 请求/响应记录" do
-        if refund.request_payload.present?
-          h4 "请求 Payload (request_payload)"
-          pre JSON.pretty_generate(refund.request_payload) rescue refund.request_payload.to_s
+    # Provider 请求/响应与回调通知 payload 面板
+    if current_admin_user.admin_can?("refund:approve")
+      if refund.request_payload.present? || refund.response_payload.present? || refund.notify_payload.present?
+        panel "底层数据载荷（仅高权限可见）" do
+          if refund.request_payload.present?
+            h4 "请求 Payload (request_payload)"
+            pre JSON.pretty_generate(refund.request_payload) rescue refund.request_payload.to_s
+          end
+          if refund.response_payload.present?
+            h4 "响应 Payload (response_payload)"
+            pre JSON.pretty_generate(refund.response_payload) rescue refund.response_payload.to_s
+          end
+          if refund.notify_payload.present?
+            h4 "回调通知记录 (notify_payload)"
+            pre JSON.pretty_generate(refund.notify_payload) rescue refund.notify_payload.to_s
+          end
         end
-        if refund.response_payload.present?
-          h4 "响应 Payload (response_payload)"
-          pre JSON.pretty_generate(refund.response_payload) rescue refund.response_payload.to_s
-        end
-      end
-    end
-
-    # 回调通知 payload 面板
-    if refund.notify_payload.present?
-      panel "回调通知记录 (notify_payload)" do
-        pre JSON.pretty_generate(refund.notify_payload) rescue refund.notify_payload.to_s
       end
     end
 

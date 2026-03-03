@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_02_25_090000) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_03_090737) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -310,6 +310,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_090000) do
     t.jsonb "request_payload", default: {}, null: false
     t.jsonb "response_payload", default: {}, null: false
     t.jsonb "notify_payload", default: {}, null: false
+    t.string "failure_reason", limit: 500
     t.index ["idempotency_key"], name: "index_payments_on_idempotency_key", unique: true
     t.index ["order_id"], name: "index_payments_on_order_id"
     t.index ["provider_trade_no"], name: "index_payments_on_provider_trade_no", unique: true
@@ -332,6 +333,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_02_25_090000) do
     t.jsonb "request_payload", default: {}, null: false
     t.jsonb "response_payload", default: {}, null: false
     t.jsonb "notify_payload", default: {}, null: false
+    t.string "failure_reason", limit: 500
     t.index ["idempotency_key"], name: "index_refunds_on_idempotency_key", unique: true
     t.index ["order_id"], name: "index_refunds_on_order_id"
     t.index ["payment_id"], name: "index_refunds_on_payment_id"

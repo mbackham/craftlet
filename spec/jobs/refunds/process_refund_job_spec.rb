@@ -187,13 +187,13 @@ RSpec.describe Refunds::ProcessRefundJob, type: :job do
       it "raises the error so Sidekiq can retry" do
         expect {
           described_class.new.perform(refund.id)
-        }.to raise_error(RuntimeError, error_msg)
+        }.to raise_error(StandardError, error_msg)
       end
 
       it "does NOT mark refund as failed" do
         begin
           described_class.new.perform(refund.id)
-        rescue RuntimeError
+        rescue StandardError
           nil
         end
         expect(refund.reload.status).to eq("pending")

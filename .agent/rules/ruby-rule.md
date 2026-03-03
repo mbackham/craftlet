@@ -25,3 +25,22 @@ trigger: always_on
    - Priority 1: Check `puma.stdout.log` for `NameError` / `Uninitialized constant`.
    - Priority 2: Verify Rails boot status locally.
    - Priority 3: Check Nginx logs.
+
+## 4. ActiveAdmin View Context & Helper Inclusion
+**Context:** ActiveAdmin's view DSL (`index`, `show`, `form`, `csv`) runs inside an isolated Arbre rendering context. Custom Helper methods defined in `app/helpers/` (e.g., data masking, formatting methods) are NOT automatically available in this context.
+- **Rule:** In ActiveAdmin resource files (`app/admin/*.rb`), if ANY custom Helper method is used (e.g., `sensitive_field`), you **MUST** explicitly declare `helper YourCustomHelper` inside the resource's `controller do ... end` block.
+  - **✅ Correct:**
+    ```ruby
+    ActiveAdmin.register User do
+      controller do
+        helper SensitiveFieldHelper # <--- MUST explicitly include
+      end
+      
+      index do
+        column(:phone) { |u| sensitive_field(u.phone, mask_method: :mask_phone, admin_user: current_admin_user) }
+      end
+    end
+    ```
+  - **❌ FORBIDDEN:**
+    Calling `sensitive_field` directly inside `index` or `show` blocks without including the helper in the `controller` block. This passes syntax checks and boot checks, but triggers `NoMethodError` at page render time causing a 500 crash.
+- **Why this matters:** Unlike Zeitwerk boot errors (caught by Rule 1 & 3), this error only surfaces at **runtime during page rendering**. `zeitwerk:check` and `boot_ok` will NOT catch it.

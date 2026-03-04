@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_04_112225) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_04_133949) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -492,6 +492,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_04_112225) do
   add_foreign_key "admin_user_roles", "admin_roles"
   add_foreign_key "admin_user_roles", "admin_users", column: "user_id"
   add_foreign_key "bids", "orders"
+  add_foreign_key "faqs", "faq_categories"
   add_foreign_key "feedbacks", "admin_users", on_delete: :nullify
   add_foreign_key "feedbacks", "users", on_delete: :nullify
   add_foreign_key "merchant_profiles", "users"

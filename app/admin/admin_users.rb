@@ -25,6 +25,9 @@ ActiveAdmin.register AdminUser do
       else
         render :edit
       end
+    rescue ActiveRecord::RecordInvalid => e
+      @admin_user.errors.add(:base, e.record.errors.full_messages.join(", "))
+      render :edit
     end
 
     def create

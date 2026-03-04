@@ -7,7 +7,7 @@ class AdminUser < ApplicationRecord
   enum :role, { admin: "admin", operator: "operator" }, default: "admin"
 
   # Admin RBAC associations
-  has_many :admin_user_roles, foreign_key: :user_id, dependent: :destroy
+  has_many :admin_user_roles, foreign_key: :user_id, dependent: :destroy, inverse_of: :user
   has_many :admin_roles, through: :admin_user_roles
 
   validates :role, presence: true, inclusion: { in: roles.keys }

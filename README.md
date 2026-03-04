@@ -37,3 +37,7 @@ bundle exec sidekiq
 bundle exec cap production deploy:check
 第 2 步：执行部署
 bundle exec cap production deploy
+第 3 步：执行部署
+
+什么时候才需要执行 bundle exec cap production rails:seed？ 只有当你（或者我）修改了 
+db/seeds.rb

@@ -48,4 +48,12 @@ class AdminUserPolicy < ApplicationPolicy
   def admin?
     user&.admin?
   end
+
+  def permitted_attributes
+    if admin?
+      [:email, :password, :password_confirmation, :role, admin_role_ids: []]
+    else
+      []
+    end
+  end
 end

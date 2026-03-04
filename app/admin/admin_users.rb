@@ -3,6 +3,17 @@ ActiveAdmin.register AdminUser do
 
   permit_params :email, :password, :password_confirmation, :role, admin_role_ids: []
 
+  # 编辑用户时如果密码留空，则不更新密码（Devise + ActiveAdmin 经典处理）
+  controller do
+    def update
+      if params[:admin_user][:password].blank?
+        params[:admin_user].delete(:password)
+        params[:admin_user].delete(:password_confirmation)
+      end
+      super
+    end
+  end
+
   index do
     selectable_column
     id_column

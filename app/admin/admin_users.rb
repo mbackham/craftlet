@@ -4,13 +4,46 @@ ActiveAdmin.register AdminUser do
   permit_params :email, :password, :password_confirmation, :role, admin_role_ids: []
 
   # 编辑用户时如果密码留空，则不更新密码（Devise + ActiveAdmin 经典处理）
+  # 同时绕过 PunditAdapter 的参数过滤，避免 admin_role_ids 被拒绝
   controller do
     def update
-      if params[:admin_user][:password].blank?
-        params[:admin_user].delete(:password)
-        params[:admin_user].delete(:password_confirmation)
+      @admin_user = AdminUser.find(params[:id])
+      authorize @admin_user, :update?
+
+      permitted = params.require(:admin_user).permit(
+        :email, :role, :password, :password_confirmation, admin_role_ids: []
+      )
+
+      # 密码留空时不更新密码
+      if permitted[:password].blank?
+        permitted.delete(:password)
+        permitted.delete(:password_confirmation)
+        if @admin_user.update(permitted)
+          redirect_to admin_admin_user_path(@admin_user), notice: "管理员已更新"
+        else
+          render :edit
+        end
+      else
+        if @admin_user.update(permitted)
+          redirect_to admin_admin_user_path(@admin_user), notice: "管理员已更新"
+        else
+          render :edit
+        end
       end
-      super
+    end
+
+    def create
+      permitted = params.require(:admin_user).permit(
+        :email, :role, :password, :password_confirmation, admin_role_ids: []
+      )
+      @admin_user = AdminUser.new(permitted)
+      authorize @admin_user, :create?
+
+      if @admin_user.save
+        redirect_to admin_admin_user_path(@admin_user), notice: "管理员已创建"
+      else
+        render :new
+      end
     end
   end
 

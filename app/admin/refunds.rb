@@ -65,9 +65,7 @@ ActiveAdmin.register Refund do
       item I18n.t("admin.actions.view"), admin_refund_path(refund)
       if refund.status == "init" && current_admin_user.admin_can?("refund:approve")
         item I18n.t("admin.actions.approve_refund"),
-             approve_admin_refund_path(refund),
-             method: :put,
-             data: { confirm: I18n.t("admin.confirmations.approve_refund") }
+             approve_admin_refund_path(refund)
         item I18n.t("admin.actions.reject_refund"),
              reject_admin_refund_path(refund)
       end
@@ -175,6 +173,9 @@ ActiveAdmin.register Refund do
           column(I18n.t("admin.columns.reject_reason")) do |log|
             log.metadata&.dig("reason").presence || "-"
           end
+          column("操作备注") do |log|
+            log.metadata&.dig("comment").presence || "-"
+          end
           column(I18n.t("admin.columns.ip_address")) { |log| log.ip }
           column(:created_at) { |log| l(log.created_at, format: :long) if log.created_at }
         end
@@ -226,13 +227,71 @@ ActiveAdmin.register Refund do
 
   # === Member Actions ===
 
-  member_action :approve, method: :put do
+  member_action :approve, method: [:get, :put] do
     refund = Refund.find(params[:id])
     authorize! :approve, refund
 
+    unless refund.status == "init"
+      redirect_to admin_refund_path(refund),
+                  alert: I18n.t("admin.alerts.refund_status_not_allow_reject", default: "当前状态不允许审批")
+      return
+    end
+
+    if request.get?
+      render inline: <<~HTML
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>确认审批退款</title>
+          <style>
+            body { font-family: sans-serif; padding: 40px; background: #f5f5f5; }
+            .container { max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
+            h2 { margin-top: 0; color: #333; }
+            .info { background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 12px 16px; margin: 16px 0; border-radius: 4px; }
+            .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 16px 0; border-radius: 4px; font-size: 13px; }
+            label { display: block; margin-bottom: 8px; font-weight: bold; }
+            textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+            .buttons { margin-top: 20px; }
+            button { padding: 10px 20px; font-size: 14px; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+            .submit { background: #22c55e; color: white; border: none; }
+            .submit:hover { background: #16a34a; }
+            .cancel { background: #95a5a6; color: white; border: none; text-decoration: none; padding: 10px 20px; border-radius: 4px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>⚠️ 确认审批通过退款</h2>
+            <div class="info">
+              <p><strong>退款编号：</strong>##{refund.id}</p>
+              <p><strong>关联订单：</strong>#{refund.order&.order_no}</p>
+              <p><strong>退款金额：</strong>¥#{refund.amount}</p>
+              <p><strong>退款原因：</strong>#{refund.reason}</p>
+            </div>
+            <div class="warning">
+              审批通过后，系统将立即向支付渠道发起退款请求，此操作不可撤销。
+            </div>
+            <form method="POST" action="#{approve_admin_refund_path(refund)}">
+              <input type="hidden" name="_method" value="put">
+              <input type="hidden" name="authenticity_token" value="#{form_authenticity_token}">
+              <label for="comment">操作备注 <span style="color:#999;font-weight:normal">(必填)</span></label>
+              <textarea name="comment" id="comment" required placeholder="请填写审批备注，例如：经核实退款理由合理，予以通过"></textarea>
+              <div class="buttons">
+                <button type="submit" class="submit">确认审批通过</button>
+                <a href="#{admin_refund_path(refund)}" class="cancel">取消</a>
+              </div>
+            </form>
+          </div>
+        </body>
+        </html>
+      HTML
+      return
+    end
+
+    # PUT: 执行审批
     service = Refunds::ApproveService.new(
       refund:     refund,
       admin_user: current_admin_user,
+      comment:    params[:comment].presence,
       request:    request
     ).call
 
@@ -313,12 +372,68 @@ ActiveAdmin.register Refund do
   end
 
   # Retry failed refund
-  member_action :retry_refund, method: :put do
+  member_action :retry_refund, method: [:get, :put] do
     refund = Refund.find(params[:id])
 
+    unless refund.status == "failed"
+      redirect_to admin_refund_path(refund), alert: "当前状态不允许重试"
+      return
+    end
+
+    if request.get?
+      render inline: <<~HTML
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>确认重试退款</title>
+          <style>
+            body { font-family: sans-serif; padding: 40px; background: #f5f5f5; }
+            .container { max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.1); }
+            h2 { margin-top: 0; color: #333; }
+            .info { background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px 16px; margin: 16px 0; border-radius: 4px; }
+            .warning { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 16px 0; border-radius: 4px; font-size: 13px; }
+            label { display: block; margin-bottom: 8px; font-weight: bold; }
+            textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; box-sizing: border-box; }
+            .buttons { margin-top: 20px; }
+            button { padding: 10px 20px; font-size: 14px; border-radius: 4px; cursor: pointer; margin-right: 10px; }
+            .submit { background: #f59e0b; color: white; border: none; }
+            .submit:hover { background: #d97706; }
+            .cancel { background: #95a5a6; color: white; border: none; text-decoration: none; padding: 10px 20px; border-radius: 4px; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <h2>⚠️ 确认重试退款</h2>
+            <div class="info">
+              <p><strong>退款编号：</strong>##{refund.id}</p>
+              <p><strong>退款金额：</strong>¥#{refund.amount}</p>
+              <p><strong>失败原因：</strong>#{refund.failure_reason || '未知'}</p>
+            </div>
+            <div class="warning">
+              重试将重新向支付渠道发起退款请求。请确认已排查失败原因后再操作。
+            </div>
+            <form method="POST" action="#{retry_refund_admin_refund_path(refund)}">
+              <input type="hidden" name="_method" value="put">
+              <input type="hidden" name="authenticity_token" value="#{form_authenticity_token}">
+              <label for="comment">操作备注 <span style="color:#999;font-weight:normal">(必填)</span></label>
+              <textarea name="comment" id="comment" required placeholder="请填写重试原因，例如：网络超时已恢复，重新发起退款"></textarea>
+              <div class="buttons">
+                <button type="submit" class="submit">确认重试</button>
+                <a href="#{admin_refund_path(refund)}" class="cancel">取消</a>
+              </div>
+            </form>
+          </div>
+        </body>
+        </html>
+      HTML
+      return
+    end
+
+    # PUT: 执行重试
     service = Refunds::RetryRefundService.new(
       refund:     refund,
       admin_user: current_admin_user,
+      comment:    params[:comment].presence,
       request:    request
     ).call
 
@@ -335,8 +450,6 @@ ActiveAdmin.register Refund do
               if: proc { resource.status == "init" && current_admin_user.admin_can?("refund:approve") } do
     link_to I18n.t("admin.actions.approve_refund"),
             approve_admin_refund_path(resource),
-            method: :put,
-            data: { confirm: I18n.t("admin.confirmations.approve_refund") },
             class: "action-item-button"
   end
 
@@ -349,9 +462,7 @@ ActiveAdmin.register Refund do
 
   action_item :retry_refund, only: :show,
               if: proc { resource.status == "failed" && current_admin_user.admin_can?("refund:approve") } do
-    link_to "重试退款", retry_refund_admin_refund_path(resource),
-            method: :put,
-            data: { confirm: "确定要重试此退款？将重新提交到支付渠道处理。" }
+    link_to "重试退款", retry_refund_admin_refund_path(resource)
   end
 
   action_item :create_ticket_from_refund, only: :show,

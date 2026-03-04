@@ -44,14 +44,14 @@ RSpec.describe SensitiveFieldHelper, type: :helper do
     end
 
     it 'returns true for admin with sensitive:view_plaintext permission' do
-      admin = AdminUser.create!(email: "sens_test_#{SecureRandom.hex(4)}@example.com", password: 'password', password_confirmation: 'password', role: 'operator')
+      admin = AdminUser.create!(email: "sens_test_#{SecureRandom.hex(4)}@example.com", password: 'Str0ng!Pass#12', password_confirmation: 'Str0ng!Pass#12', role: 'operator')
       allow(admin).to receive(:admin_can?).with("sensitive:view_plaintext").and_return(true)
 
       expect(helper.can_view_sensitive?(admin)).to eq(true)
     end
 
     it 'returns false for operator without sensitive permission' do
-      admin = AdminUser.create!(email: "ops_test_#{SecureRandom.hex(4)}@example.com", password: 'password', password_confirmation: 'password', role: 'operator')
+      admin = AdminUser.create!(email: "ops_test_#{SecureRandom.hex(4)}@example.com", password: 'Str0ng!Pass#12', password_confirmation: 'Str0ng!Pass#12', role: 'operator')
       expect(helper.can_view_sensitive?(admin)).to eq(false)
     end
   end

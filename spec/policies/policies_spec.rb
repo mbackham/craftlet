@@ -11,8 +11,8 @@ module PolicySpecHelpers
   def create_super_admin
     admin = AdminUser.create!(
       email: "super_#{SecureRandom.hex(4)}@example.com",
-      password: 'password',
-      password_confirmation: 'password',
+      password: 'Str0ng!Pass#12',
+      password_confirmation: 'Str0ng!Pass#12',
       role: 'admin'  # admin enum = super admin, admin_can? returns true for everything
     )
     admin
@@ -21,8 +21,8 @@ module PolicySpecHelpers
   def create_admin_with_permissions(*permission_codes)
     admin = AdminUser.create!(
       email: "perm_#{SecureRandom.hex(4)}@example.com",
-      password: 'password',
-      password_confirmation: 'password',
+      password: 'Str0ng!Pass#12',
+      password_confirmation: 'Str0ng!Pass#12',
       role: 'operator'
     )
     # Stub admin_can? to check against the given permission codes
@@ -34,8 +34,8 @@ module PolicySpecHelpers
   def create_admin_without_permissions
     admin = AdminUser.create!(
       email: "noperm_#{SecureRandom.hex(4)}@example.com",
-      password: 'password',
-      password_confirmation: 'password',
+      password: 'Str0ng!Pass#12',
+      password_confirmation: 'Str0ng!Pass#12',
       role: 'operator'
     )
     allow(admin).to receive(:admin_can?).and_return(false)

@@ -39,7 +39,7 @@ RSpec.describe Orders::AssignMerchantService do
   let(:merchant_user) { create_merchant_user }
   let(:customer_uuid) { SecureRandom.uuid }
   let(:order)         { create_order(status: "paid", customer_id: customer_uuid) }
-  let(:admin_user)    { AdminUser.first || AdminUser.create!(email: "admin@test.com", password: "password123") }
+  let(:admin_user)    { AdminUser.first || AdminUser.create!(email: "admin@test.com", password: "Str0ng!Pass#12", password_confirmation: "Str0ng!Pass#12") }
 
   def run_service(overrides = {})
     Orders::AssignMerchantService.new(

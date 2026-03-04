@@ -12,9 +12,10 @@ module Refunds
   class RetryRefundService
     attr_reader :error
 
-    def initialize(refund:, admin_user:, request: nil)
+    def initialize(refund:, admin_user:, comment: nil, request: nil)
       @refund     = refund
       @admin_user = admin_user
+      @comment    = comment
       @request    = request
       @error      = nil
     end
@@ -40,7 +41,7 @@ module Refunds
           target:   @refund,
           before:   { status: "failed" },
           after:    { status: "pending" },
-          metadata: { refund_id: @refund.id, order_id: @refund.order_id },
+          metadata: { refund_id: @refund.id, order_id: @refund.order_id, comment: @comment }.compact,
           request:  @request
         )
       end

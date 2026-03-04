@@ -4,9 +4,10 @@ module Refunds
   class ApproveService
     attr_reader :refund, :admin_user, :result
 
-    def initialize(refund:, admin_user:, request: nil)
+    def initialize(refund:, admin_user:, comment: nil, request: nil)
       @refund     = refund
       @admin_user = admin_user
+      @comment    = comment
       @request    = request
       @result     = { success: false, error: nil }
     end
@@ -27,7 +28,7 @@ module Refunds
           target:   refund,
           before:   { status: old_status },
           after:    { status: "pending" },
-          metadata: { action_type: "refund_approval" },
+          metadata: { action_type: "refund_approval", comment: @comment }.compact,
           request:  @request
         )
 

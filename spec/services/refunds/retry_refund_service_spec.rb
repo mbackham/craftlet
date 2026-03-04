@@ -44,7 +44,7 @@ RSpec.describe Refunds::RetryRefundService do
   let(:order)      { create_order }
   let(:payment)    { create_payment(order: order) }
   let(:refund)     { create_refund(order: order, payment: payment) }
-  let(:admin_user) { AdminUser.first || AdminUser.create!(email: "admin@test.com", password: "password123") }
+  let(:admin_user) { AdminUser.first || AdminUser.create!(email: "admin@test.com", password: "Str0ng!Pass#12", password_confirmation: "Str0ng!Pass#12") }
 
   def run_service(overrides = {})
     Refunds::RetryRefundService.new(

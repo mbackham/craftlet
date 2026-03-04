@@ -9,9 +9,12 @@
 #   end
 # Create default admin user in development
 if Rails.env.development?
+  # DEV 账号密码须符合强密码策略（12位+大小写+数字+特殊字符）
+  # 开发用密码: Dev@Pass#2024
   AdminUser.find_or_create_by!(email: 'admin@example.com') do |admin|
-    admin.password = 'password'
-    admin.password_confirmation = 'password'
+    admin.password = 'Dev@Pass#2024'
+    admin.password_confirmation = 'Dev@Pass#2024'
+    admin.role = 'admin'
   end
 end
 
@@ -146,23 +149,23 @@ puts "Risk role seed done."
 
 # === 开发环境测试账号 ===
 if Rails.env.development?
-  # ops 测试账号
+  # ops 测试账号 (密码: Dev@Pass#2024)
   ops_admin = AdminUser.find_or_create_by!(email: 'ops@example.com') do |admin|
-    admin.password = 'password'
-    admin.password_confirmation = 'password'
+    admin.password = 'Dev@Pass#2024'
+    admin.password_confirmation = 'Dev@Pass#2024'
     admin.role = 'operator'
   end
   AdminUserRole.find_or_create_by!(user_id: ops_admin.id, admin_role: ops_role)
 
-  # risk 测试账号
+  # risk 测试账号 (密码: Dev@Pass#2024)
   risk_admin = AdminUser.find_or_create_by!(email: 'risk@example.com') do |admin|
-    admin.password = 'password'
-    admin.password_confirmation = 'password'
+    admin.password = 'Dev@Pass#2024'
+    admin.password_confirmation = 'Dev@Pass#2024'
     admin.role = 'operator'
   end
   AdminUserRole.find_or_create_by!(user_id: risk_admin.id, admin_role: risk_role)
 
-  puts "Dev test accounts seed done (ops@example.com, risk@example.com)."
+  puts "Dev test accounts seed done (ops@example.com / risk@example.com, password: Dev@Pass#2024)."
 end
 
 # === 商家测试数据 (仅开发环境) ===

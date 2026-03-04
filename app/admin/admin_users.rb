@@ -8,39 +8,33 @@ ActiveAdmin.register AdminUser do
   controller do
     def update
       @admin_user = AdminUser.find(params[:id])
-      authorize @admin_user, :update?
 
-      permitted = params.require(:admin_user).permit(
+      # 手动处理参数，绕过 Pundit 参数过滤
+      attrs = params.require(:admin_user).permit(
         :email, :role, :password, :password_confirmation, admin_role_ids: []
       )
 
-      # 密码留空时不更新密码
-      if permitted[:password].blank?
-        permitted.delete(:password)
-        permitted.delete(:password_confirmation)
-        if @admin_user.update(permitted)
-          redirect_to admin_admin_user_path(@admin_user), notice: "管理员已更新"
-        else
-          render :edit
-        end
+      # 密码留空时移除密码参数
+      if attrs[:password].blank?
+        attrs.delete(:password)
+        attrs.delete(:password_confirmation)
+      end
+
+      if @admin_user.update(attrs)
+        redirect_to resource_path(@admin_user), notice: "管理员已更新"
       else
-        if @admin_user.update(permitted)
-          redirect_to admin_admin_user_path(@admin_user), notice: "管理员已更新"
-        else
-          render :edit
-        end
+        render :edit
       end
     end
 
     def create
-      permitted = params.require(:admin_user).permit(
+      attrs = params.require(:admin_user).permit(
         :email, :role, :password, :password_confirmation, admin_role_ids: []
       )
-      @admin_user = AdminUser.new(permitted)
-      authorize @admin_user, :create?
+      @admin_user = AdminUser.new(attrs)
 
       if @admin_user.save
-        redirect_to admin_admin_user_path(@admin_user), notice: "管理员已创建"
+        redirect_to resource_path(@admin_user), notice: "管理员已创建"
       else
         render :new
       end

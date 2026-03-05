@@ -75,16 +75,13 @@ module Payments
     end
 
     def process_callback!(refund)
-      ActiveRecord::Base.transaction do
-        # Idempotency: provider_refund_no unique index + status guard
-        # No pessimistic lock needed — unique index prevents duplicate writes.
-        refund.reload # get latest state inside transaction
-
+      # Idempotency: provider_refund_no unique index + pessimistic locking
+      refund.with_lock do
         # Double-check inside transaction
         if refund.status == "succeeded"
           @success  = true
           @replayed = true
-          next
+          return
         end
 
         old_status = refund.status

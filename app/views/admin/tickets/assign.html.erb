@@ -5,7 +5,8 @@
     <p><strong>主题：</strong><%= @ticket.subject %></p>
 
     <% if @admins.any? %>
-      <%= form_tag assign_admin_ticket_path(@ticket), method: :put do %>
+      <%= form_tag assign_admin_ticket_path(@ticket), method: :put,
+            onsubmit: "this.querySelector('[type=submit]').disabled=true; this.querySelector('[type=submit]').value='处理中...';" do %>
         <fieldset class="inputs">
           <ol>
             <li class="select input">

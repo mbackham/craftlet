@@ -270,7 +270,7 @@ ActiveAdmin.register Refund do
             <div class="warning">
               审批通过后，系统将立即向支付渠道发起退款请求，此操作不可撤销。
             </div>
-            <form method="POST" action="#{approve_admin_refund_path(refund)}">
+            <form method="POST" action="#{approve_admin_refund_path(refund)}" onsubmit="this.querySelector('.submit').disabled=true; this.querySelector('.submit').innerText='处理中...';">
               <input type="hidden" name="_method" value="put">
               <input type="hidden" name="authenticity_token" value="#{form_authenticity_token}">
               <label for="comment">操作备注 <span style="color:#999;font-weight:normal">(必填)</span></label>
@@ -337,7 +337,7 @@ ActiveAdmin.register Refund do
             <h2>#{I18n.t("admin.rejection_form.refund_title")}</h2>
             <p>#{I18n.t("admin.rejection_form.refund_id_label")}: <strong>##{refund.id}</strong></p>
             <p>#{I18n.t("admin.columns.amount")}: <strong>¥#{refund.amount}</strong></p>
-            <form method="POST" action="#{reject_admin_refund_path(refund)}">
+            <form method="POST" action="#{reject_admin_refund_path(refund)}" onsubmit="this.querySelector('.submit').disabled=true; this.querySelector('.submit').innerText='处理中...';">
               <input type="hidden" name="_method" value="put">
               <input type="hidden" name="authenticity_token" value="#{form_authenticity_token}">
               <label for="reason">#{I18n.t("admin.rejection_form.reason_label")}</label>
@@ -412,7 +412,7 @@ ActiveAdmin.register Refund do
             <div class="warning">
               重试将重新向支付渠道发起退款请求。请确认已排查失败原因后再操作。
             </div>
-            <form method="POST" action="#{retry_refund_admin_refund_path(refund)}">
+            <form method="POST" action="#{retry_refund_admin_refund_path(refund)}" onsubmit="this.querySelector('.submit').disabled=true; this.querySelector('.submit').innerText='处理中...';">
               <input type="hidden" name="_method" value="put">
               <input type="hidden" name="authenticity_token" value="#{form_authenticity_token}">
               <label for="comment">操作备注 <span style="color:#999;font-weight:normal">(必填)</span></label>

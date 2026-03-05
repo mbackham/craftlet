@@ -230,23 +230,28 @@ ActiveAdmin.register Ticket do
       @admins = AdminUser.order(:email)
       render "admin/tickets/assign"
     elsif request.put?
-      admin = AdminUser.find(params[:assignee_id])
-      assignee_uuid = AuditService.format_as_uuid(admin.id)
+      assignee_email = nil
 
-      @ticket.assignee_id = assignee_uuid
-      @ticket.assigned_at = Time.current
-      @ticket.assign! if @ticket.may_assign?
-      @ticket.save!
+      @ticket.with_lock do
+        admin = AdminUser.find(params[:assignee_id])
+        assignee_uuid = AuditService.format_as_uuid(admin.id)
+        assignee_email = admin.email
 
-      AuditService.log!(
-        action:  "ticket_assign",
-        actor:   current_admin_user,
-        target:  @ticket,
-        after:   { assignee_id: assignee_uuid, assignee_email: admin.email },
-        request: request
-      )
+        @ticket.assignee_id = assignee_uuid
+        @ticket.assigned_at = Time.current
+        @ticket.assign! if @ticket.may_assign?
+        @ticket.save!
 
-      redirect_to admin_ticket_path(@ticket), notice: "工单已指派给 #{admin.email}"
+        AuditService.log!(
+          action:  "ticket_assign",
+          actor:   current_admin_user,
+          target:  @ticket,
+          after:   { assignee_id: assignee_uuid, assignee_email: admin.email },
+          request: request
+        )
+      end
+
+      redirect_to admin_ticket_path(@ticket), notice: "工单已指派给 #{assignee_email}"
     end
   end
 

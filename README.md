@@ -33,7 +33,7 @@ bundle exec sidekiq
 # API：http://localhost:3000/api/v1/...
 # api文档：http://localhost:3000/api-docs/index.html
 
-第 1 步：检查部署配置（确认服务器连通和目录结构）
+第 1 步：检查部署配置（确认服务器连通和目录结构）cle
 bundle exec cap production deploy:check
 第 2 步：执行部署
 bundle exec cap production deploy

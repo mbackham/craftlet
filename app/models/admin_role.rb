@@ -8,6 +8,10 @@ class AdminRole < ApplicationRecord
   validates :name, presence: true, uniqueness: true
   validates :code, presence: true, uniqueness: true
 
+  def localized_name
+    I18n.t("admin_role_names.#{code}", default: name)
+  end
+
   def self.ransackable_attributes(auth_object = nil)
     %w[name code created_at updated_at]
   end

@@ -103,19 +103,24 @@ ActiveAdmin.register AdminUser do
   end
 
   form do |f|
-    f.inputs "账号信息" do
+    f.inputs I18n.t('admin.forms.admin_user.account_info') do
       f.input :email
       f.input :role, as: :select, collection: AdminUser.roles.keys, include_blank: false,
-              hint: "admin = 超级管理员（拥有全部权限），operator = 普通管理员（权限由下方角色决定）"
-      f.input :password, hint: "至少12位，需包含大写、小写、数字和特殊字符"
-      f.input :password_confirmation
+              hint: I18n.t('admin.forms.admin_user.role_hint')
+      f.input :password,
+              hint: f.object.new_record? \
+                ? I18n.t('admin.forms.admin_user.password_hint_new') \
+                : I18n.t('admin.forms.admin_user.password_hint_edit'),
+              required: f.object.new_record?
+      f.input :password_confirmation,
+              hint: f.object.new_record? ? nil : I18n.t('admin.forms.admin_user.password_confirmation_hint'),
+              required: f.object.new_record?
     end
 
-    f.inputs "管理角色（仅 operator 需要分配）" do
+    f.inputs I18n.t('admin.forms.admin_user.admin_roles_section') do
       f.input :admin_roles,
               as: :check_boxes,
-              collection: AdminRole.all.order(:name),
-              label_method: -> (r) { "#{r.name} (#{r.code})" }
+              collection: AdminRole.all.order(:code).map { |r| [r.localized_name, r.id] }
     end
 
     f.actions

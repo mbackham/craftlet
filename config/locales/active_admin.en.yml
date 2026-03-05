@@ -28,6 +28,9 @@ en:
         id: ID
         email: Email
         role: Role
+        password: Password
+        password_confirmation: Password Confirmation
+        admin_roles: Admin Roles
         current_sign_in_at: Last Login
         sign_in_count: Login Count
         created_at: Created At
@@ -362,6 +365,13 @@ en:
       license_hint: "Business license OSS key"
       idcard_front_hint: "ID card front OSS key"
       idcard_back_hint: "ID card back OSS key"
+      admin_user:
+        account_info: "Account Information"
+        admin_roles_section: "Admin Roles (only needed for operator)"
+        role_hint: "admin = Super Admin (full access), operator = Staff (permissions determined by roles below)"
+        password_hint_new: "Min 12 chars, must include uppercase, lowercase, number and special character"
+        password_hint_edit: "Leave blank to keep current password. To reset, min 12 chars with uppercase, lowercase, number and special character"
+        password_confirmation_hint: "Must match the password above; leave blank to keep unchanged"
     scopes:
       today: Today
       this_week: This Week
@@ -431,3 +441,11 @@ en:
       refund_reject_invalid_status: "Refund status does not allow rejection (current: %{status}, required: init)"
     defaults:
       reject_reason: "Rejected"
+  admin_role_names:
+    super_admin: "Super Admin"
+    ops: "Operations"
+    risk: "Risk Control"
+    content_editor: "Content Editor"
+  admin_user_roles:
+    admin: "Super Admin"
+    operator: "Operator"

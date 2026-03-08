@@ -90,7 +90,7 @@ ActiveAdmin.register AdminUser do
       if permissions.any?
         table_for permissions do
           column(:code) { |p| content_tag(:code, p.code) }
-          column(:name) { |p| p.name }
+          column(:name) { |p| p.localized_name }
         end
       else
         if resource.admin?

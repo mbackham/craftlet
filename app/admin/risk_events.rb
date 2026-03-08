@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register RiskEvent do
-  menu parent: "orders_menu", priority: 7, label: proc { "风控事件" }
+  menu parent: "orders_menu", priority: 7, label: proc { I18n.t('admin.labels.risk_events', default: '风控事件') }
 
   actions :index, :show
 
@@ -58,7 +58,7 @@ ActiveAdmin.register RiskEvent do
   end
 
   # === Show ===
-  show title: proc { |e| "风控事件 ##{e.id}" } do
+  show title: proc { |e| I18n.t('admin.titles.risk_event', id: e.id, default: "风控事件 ##{e.id}") } do
     attributes_table do
       row("规则")     { |e| link_to e.risk_rule.name, admin_risk_rule_path(e.risk_rule) }
       row("严重级")   do |e|

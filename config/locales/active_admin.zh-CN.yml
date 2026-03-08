@@ -673,6 +673,8 @@ zh-CN:
       order: "订单 - %{order_no}"
       payment_record: "支付记录 #%{id}"
       refund_record: "退款记录 #%{id}"
+      risk_rule: "风控规则: %{name}"
+      risk_event: "风控事件 #%{id}"
       reject_merchant: "拒绝商家申请"
     rejection_form:
       title: "拒绝商家申请"

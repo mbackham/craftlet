@@ -239,6 +239,9 @@ en:
       orders: Order List
       payments: Payment Records
       refunds: Refund Records
+      risk_rules: Risk Rules
+      risk_events: Risk Events
+      tickets: Tickets
       users: Users
     columns:
       actions: Actions
@@ -407,6 +410,8 @@ en:
       order: "Order - %{order_no}"
       payment_record: "Payment Record #%{id}"
       refund_record: "Refund Record #%{id}"
+      risk_rule: "Risk Rule: %{name}"
+      risk_event: "Risk Event #%{id}"
       reject_merchant: "Reject Merchant Application"
     rejection_form:
       title: "Reject Merchant Application"

@@ -12,7 +12,7 @@ ActiveAdmin.register AdminPermission do
     column :code do |permission|
       content_tag(:code, permission.code)
     end
-    column :name
+    column(:name) { |permission| permission.localized_name }
     column I18n.t('admin.columns.related_roles') do |permission|
       permission.admin_roles.count
     end
@@ -30,7 +30,7 @@ ActiveAdmin.register AdminPermission do
       row :code do |permission|
         content_tag(:code, permission.code)
       end
-      row :name
+      row(:name) { |permission| permission.localized_name }
       row :created_at
       row :updated_at
     end

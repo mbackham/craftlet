@@ -51,7 +51,7 @@ ActiveAdmin.register AdminRole do
         column :code do |permission|
           link_to permission.code, admin_admin_permission_path(permission)
         end
-        column :name
+        column(:name) { |permission| permission.localized_name }
       end
     end
 
@@ -82,7 +82,7 @@ ActiveAdmin.register AdminRole do
       f.input :admin_permissions,
               as: :check_boxes,
               collection: AdminPermission.all.order(:code),
-              label_method: ->(p) { "#{p.name} (#{p.code})" }
+              label_method: ->(p) { "#{p.localized_name} (#{p.code})" }
     end
 
     f.actions

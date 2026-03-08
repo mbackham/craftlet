@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register Ticket do
-  menu parent: "orders_menu", priority: 5, label: proc { "工单管理" }
+  menu parent: "orders_menu", priority: 5, label: proc { I18n.t('admin.labels.tickets', default: "工单管理") }
 
   permit_params :subject, :description, :category, :priority
 

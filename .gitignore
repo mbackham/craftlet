@@ -41,3 +41,4 @@ vendor/cache
 vendor/bundle
 vendor/cache
 .env.production
+config/credentials.yml.enc

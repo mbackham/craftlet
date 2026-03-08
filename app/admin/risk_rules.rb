@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register RiskRule do
-  menu parent: "orders_menu", priority: 6, label: proc { "风控规则" }
+  menu parent: "orders_menu", priority: 6, label: proc { I18n.t('admin.labels.risk_rules', default: '风控规则') }
 
   permit_params :code, :name, :description, :category, :severity, :enabled
 
@@ -44,7 +44,7 @@ ActiveAdmin.register RiskRule do
   filter :enabled
 
   # === Show ===
-  show title: proc { |r| "风控规则: #{r.name}" } do
+  show title: proc { |r| I18n.t('admin.titles.risk_rule', name: r.name, default: "风控规则: #{r.name}") } do
     attributes_table do
       row("代码")   { |r| r.code }
       row("名称")   { |r| r.name }

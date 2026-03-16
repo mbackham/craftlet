@@ -12,6 +12,9 @@ en:
       order: Order
       payment: Payment
       refund: Refund
+      bank_statement: Bank Statement
+      reconciliation_batch: Reconciliation Batch
+      reconciliation_detail: Reconciliation Detail
     attributes:
       user:
         id: ID
@@ -133,6 +136,39 @@ en:
         succeeded_at: Succeeded At
         created_at: Created At
         updated_at: Updated At
+      bank_statement:
+        id: ID
+        channel: Channel
+        statement_date: Statement Date
+        status: Status
+        file: Statement File
+        created_at: Created At
+        updated_at: Updated At
+      reconciliation_batch:
+        id: ID
+        target_date: Target Date
+        status: Status
+        channel: Channel
+        total_count: Total Count
+        matched_count: Matched Count
+        mismatched_count: Mismatched Count
+        created_at: Created At
+        updated_at: Updated At
+      reconciliation_detail:
+        id: ID
+        reconciliation_batch: Reconciliation Batch
+        transaction_no: Transaction No.
+        order_no: Order No.
+        reconciliation_type: Type
+        system_amount: System Amount
+        statement_amount: Statement Amount
+        match_status: Match Status
+        process_status: Process Status
+        handler_admin: Handler
+        adjustment_reason: Adjustment Reason
+        error_message: Error Message
+        created_at: Created At
+        updated_at: Updated At
 
   # Merchant statuses
   merchant_statuses:
@@ -243,6 +279,9 @@ en:
       risk_events: Risk Events
       tickets: Tickets
       users: Users
+      bank_statements: Bank Statements
+      reconciliation_batches: Reconciliation Batches
+      reconciliation_details: Reconciliation Details
     columns:
       actions: Actions
       permission_count: Permission Count
@@ -312,6 +351,8 @@ en:
       related_refunds: Related Refunds
       refund_rejection_info: Rejection Info
       refund_approval_info: Approval Info
+      reconciliation_overview: Reconciliation Overview
+      batch_discrepancies: Batch Discrepancies
     actions:
       view: View
       approve: Approve
@@ -324,6 +365,12 @@ en:
       unshelf: Unshelf
       approve_refund: Approve Refund
       reject_refund: Reject Refund
+      process_batch: Execute Reconciliation
+      claim: Claim
+      adjust: Adjust
+      ignore: Ignore
+      goto_reconciliation: Go to Reconciliation
+      goto_bank_statements: Go to Bank Statements
     messages:
       no_data: No data
       no_changes: No changes
@@ -341,6 +388,7 @@ en:
       no_refund_records: No refund records
       no_related_refunds: No related refunds
       no_reject_reason: No rejection reason provided
+      no_reconciliation_today: No reconciliation run today
       batch_approved: Batch approved
       batch_rejected: Batch rejected
       batch_shelved: Batch shelved
@@ -446,6 +494,32 @@ en:
       refund_reject_invalid_status: "Refund status does not allow rejection (current: %{status}, required: init)"
     defaults:
       reject_reason: "Rejected"
+    reconciliation:
+      upload_statement: Upload Statement
+      statement_date: Statement Date
+      file: Statement File
+      channel_hint: Alipay and WeChat Pay credentials are pending, not yet available
+      channels:
+        bank: Bank CSV
+        alipay_disabled: Alipay (Not Available)
+        wechat_disabled: WeChat Pay (Not Available)
+    columns:
+      pending_discrepancies: Pending Discrepancies
+      today_batch_status: Today's Reconciliation Status
+      target_date: Target Date
+      total_count: Total Count
+      matched_count: Matched
+      mismatched_count: Mismatched
+    notices:
+      batch_processed: Reconciliation completed successfully
+      claimed: Record claimed successfully
+      adjusted: Record adjusted successfully
+      ignored: Record ignored
+    alerts:
+      batch_failed: "Reconciliation failed: %{error}"
+      empty_reason: Adjustment reason cannot be empty
+    confirmations:
+      process_batch: Are you sure you want to start reconciliation?
   admin_role_names:
     super_admin: "Super Admin"
     ops: "Operations"

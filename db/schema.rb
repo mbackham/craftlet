@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_04_133949) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_16_043131) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -26,6 +26,34 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_04_133949) do
     t.index ["author_type", "author_id"], name: "index_active_admin_comments_on_author"
     t.index ["namespace"], name: "index_active_admin_comments_on_namespace"
     t.index ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource"
+  end
+
+  create_table "active_storage_attachments", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "record_type", null: false
+    t.bigint "record_id", null: false
+    t.bigint "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", force: :cascade do |t|
+    t.string "key", null: false
+    t.string "filename", null: false
+    t.string "content_type"
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.datetime "created_at", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", force: :cascade do |t|
+    t.bigint "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
   create_table "admin_permissions", force: :cascade do |t|
@@ -110,6 +138,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_04_133949) do
     t.index ["created_at"], name: "index_audit_logs_on_created_at"
     t.index ["subject_type", "subject_id"], name: "index_audit_logs_on_subject_type_and_subject_id"
     t.index ["target_type", "target_id"], name: "index_audit_logs_on_target_type_and_target_id"
+  end
+
+  create_table "bank_statements", force: :cascade do |t|
+    t.string "channel"
+    t.date "statement_date"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "bids", force: :cascade do |t|
@@ -326,6 +362,36 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_04_133949) do
     t.index ["status"], name: "index_payments_on_status"
   end
 
+  create_table "reconciliation_batches", force: :cascade do |t|
+    t.date "target_date"
+    t.string "status"
+    t.string "channel"
+    t.integer "total_count", default: 0
+    t.integer "matched_count", default: 0
+    t.integer "mismatched_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "reconciliation_details", force: :cascade do |t|
+    t.bigint "reconciliation_batch_id", null: false
+    t.string "transaction_no"
+    t.string "order_no"
+    t.string "reconciliation_type"
+    t.decimal "system_amount", precision: 10, scale: 2
+    t.decimal "statement_amount", precision: 10, scale: 2
+    t.string "match_status"
+    t.string "process_status"
+    t.integer "handler_admin_id"
+    t.text "adjustment_reason"
+    t.text "error_message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_no"], name: "index_reconciliation_details_on_order_no"
+    t.index ["reconciliation_batch_id"], name: "index_reconciliation_details_on_reconciliation_batch_id"
+    t.index ["transaction_no"], name: "index_reconciliation_details_on_transaction_no"
+  end
+
   create_table "refunds", force: :cascade do |t|
     t.bigint "order_id", null: false
     t.bigint "payment_id", null: false
@@ -487,6 +553,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_04_133949) do
     t.index ["item_type", "item_id"], name: "index_versions_on_item_type_and_item_id"
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "admin_role_permissions", "admin_permissions"
   add_foreign_key "admin_role_permissions", "admin_roles"
   add_foreign_key "admin_user_roles", "admin_roles"
@@ -500,6 +568,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_04_133949) do
   add_foreign_key "order_items", "orders"
   add_foreign_key "payment_callbacks", "payments"
   add_foreign_key "payments", "orders"
+  add_foreign_key "reconciliation_details", "reconciliation_batches"
   add_foreign_key "refunds", "orders"
   add_foreign_key "refunds", "payments"
   add_foreign_key "risk_events", "risk_rules"

@@ -48,6 +48,39 @@ ActiveAdmin.register_page "Dashboard" do
       end
     end
     
+    # 对账概览
+    columns do
+      column do
+        panel I18n.t("admin.panels.reconciliation_overview", default: "对账概览") do
+          today_batch = ReconciliationBatch.where(target_date: Date.today).last
+          pending_count = ReconciliationDetail.where(process_status: 'pending').count
+
+          attributes_table_for "Reconciliation" do
+            row(I18n.t("admin.columns.pending_discrepancies", default: "待处理差异")) { pending_count }
+            row(I18n.t("admin.columns.today_batch_status", default: "今日对账状态")) do
+              if today_batch
+                status_tag today_batch.status
+              else
+                I18n.t("admin.messages.no_reconciliation_today", default: "今日尚未执行对账")
+              end
+            end
+          end
+
+          # 近7日差异走势
+          recent_batches = ReconciliationBatch.where(target_date: 7.days.ago.to_date..Date.today).order(:target_date)
+          if recent_batches.any?
+            table_for recent_batches do
+              column(I18n.t("admin.columns.target_date", default: "对账日期")) { |b| b.target_date }
+              column(I18n.t("admin.columns.total_count", default: "总笔数")) { |b| b.total_count }
+              column(I18n.t("admin.columns.matched_count", default: "平账")) { |b| b.matched_count }
+              column(I18n.t("admin.columns.mismatched_count", default: "异常")) { |b| b.mismatched_count }
+              column(I18n.t("admin.columns.status")) { |b| status_tag b.status }
+            end
+          end
+        end
+      end
+    end
+
     # 底部快捷入口
     columns do
       column do
@@ -55,6 +88,8 @@ ActiveAdmin.register_page "Dashboard" do
           div style: "display: flex; gap: 15px; padding: 10px;" do
             link_to I18n.t("admin.actions.export_orders", default: "前往订单列表 (支持导出)"), admin_orders_path, class: "button"
             link_to I18n.t("admin.actions.export_refunds", default: "前往退款列表 (支持导出)"), admin_refunds_path, class: "button"
+            link_to I18n.t("admin.actions.goto_reconciliation", default: "前往对账差异处理"), admin_reconciliation_details_path, class: "button"
+            link_to I18n.t("admin.actions.goto_bank_statements", default: "前往对账单导入"), admin_bank_statements_path, class: "button"
           end
         end
       end

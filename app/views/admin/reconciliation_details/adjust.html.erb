@@ -1,0 +1,35 @@
+<%= semantic_form_for [:admin, resource], url: do_adjust_admin_reconciliation_detail_path(resource), method: :put, builder: ActiveAdmin::FormBuilder do |f| %>
+  <%= f.inputs "差异明细信息" do %>
+    <li>
+      <label>系统单号:</label>
+      <span><%= resource.transaction_no %></span>
+    </li>
+    <li>
+      <label>商户订单号:</label>
+      <span><%= resource.order_no %></span>
+    </li>
+    <li>
+      <label>系统金额:</label>
+      <span><%= number_to_currency(resource.system_amount) %></span>
+    </li>
+    <li>
+      <label>账单金额:</label>
+      <span><%= number_to_currency(resource.statement_amount) %></span>
+    </li>
+    <li>
+      <label>匹配状态:</label>
+      <span><%= resource.match_status %></span>
+    </li>
+  <% end %>
+
+  <%= f.inputs "财务处理（调账）" do %>
+    <%= f.input :adjustment_reason, as: :text, label: '调账说明',
+                input_html: { name: 'adjustment_reason', value: resource.adjustment_reason, rows: 4 },
+                hint: '请详细填写为何进行平账操作，例如差异来源、补款或更正情况。' %>
+  <% end %>
+
+  <%= f.actions do %>
+    <%= f.action :submit, label: "确认调账平账" %>
+    <li class="cancel"><%= link_to "取消", admin_reconciliation_details_path %></li>
+  <% end %>
+<% end %>

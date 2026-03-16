@@ -175,6 +175,9 @@ zh-CN:
       ticket: 工单
       ticket_message: 工单消息
       ticket_attachment: 工单附件
+      bank_statement: 对账单
+      reconciliation_batch: 对账批次
+      reconciliation_detail: 对账明细
     attributes:
       user:
         id: ID
@@ -352,6 +355,39 @@ zh-CN:
         oss_key: OSS Key
         url: 链接
         created_at: 创建时间
+      bank_statement:
+        id: ID
+        channel: 渠道
+        statement_date: 账单日期
+        status: 状态
+        file: 对账单文件
+        created_at: 创建时间
+        updated_at: 更新时间
+      reconciliation_batch:
+        id: ID
+        target_date: 对账日期
+        status: 状态
+        channel: 渠道
+        total_count: 总笔数
+        matched_count: 平账笔数
+        mismatched_count: 异常笔数
+        created_at: 创建时间
+        updated_at: 更新时间
+      reconciliation_detail:
+        id: ID
+        reconciliation_batch: 对账批次
+        transaction_no: 交易流水号
+        order_no: 商户订单号
+        reconciliation_type: 对账类型
+        system_amount: 系统金额
+        statement_amount: 账单金额
+        match_status: 匹配状态
+        process_status: 处理状态
+        handler_admin: 处理人
+        adjustment_reason: 调账原因
+        error_message: 错误信息
+        created_at: 创建时间
+        updated_at: 更新时间
 
 
   # 商家状态翻译
@@ -506,6 +542,9 @@ zh-CN:
       risk_events: 风控事件
       tickets: 工单管理
       users: 用户
+      bank_statements: 对账单导入
+      reconciliation_batches: 对账批次
+      reconciliation_details: 对账差异处理
     columns:
       actions: 操作
       permission_count: 权限数
@@ -575,6 +614,8 @@ zh-CN:
       related_refunds: 关联退款
       refund_rejection_info: 拒绝信息
       refund_approval_info: 审批通过信息
+      reconciliation_overview: 对账概览
+      batch_discrepancies: 当前批次差异明细
     actions:
       view: 查看
       approve: 通过审核
@@ -587,6 +628,12 @@ zh-CN:
       unshelf: 下架
       approve_refund: 审批通过
       reject_refund: 拒绝退款
+      process_batch: 执行对账
+      claim: 认领
+      adjust: 调账平账
+      ignore: 忽略
+      goto_reconciliation: 前往对账差异处理
+      goto_bank_statements: 前往对账单导入
     messages:
       no_data: 无
       no_changes: 无变更数据
@@ -604,6 +651,7 @@ zh-CN:
       no_refund_records: 暂无退款记录
       no_related_refunds: 暂无关联退款
       no_reject_reason: 未填写拒绝原因
+      no_reconciliation_today: 今日尚未执行对账
       batch_approved: 已批量通过
       batch_rejected: 已批量拒绝
       batch_shelved: 已批量上架
@@ -709,6 +757,32 @@ zh-CN:
       refund_reject_invalid_status: "退款状态不允许拒绝（当前: %{status}，需要: init）"
     defaults:
       reject_reason: "审核拒绝"
+    reconciliation:
+      upload_statement: 上传对账单
+      statement_date: 账单日期
+      file: 对账单文件
+      channel_hint: 支付宝与微信支付目前凭证申请中，暂不可选
+      channels:
+        bank: 银行流水
+        alipay_disabled: 支付宝（未开放）
+        wechat_disabled: 微信支付（未开放）
+    columns:
+      pending_discrepancies: 待处理差异
+      today_batch_status: 今日对账状态
+      target_date: 对账日期
+      total_count: 总笔数
+      matched_count: 平账
+      mismatched_count: 异常
+    notices:
+      batch_processed: 对账执行成功
+      claimed: 已成功认领记录
+      adjusted: 已调账平账
+      ignored: 已忽略该差异记录
+    alerts:
+      batch_failed: "对账执行失败: %{error}"
+      empty_reason: 调账原因不能为空
+    confirmations:
+      process_batch: 确定要开始执行对账吗？
   admin_role_names:
     super_admin: "超级管理员"
     ops: "运营"

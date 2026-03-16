@@ -1,5 +1,5 @@
 ActiveAdmin.register ReconciliationDetail do
-  menu parent: 'finance_menu', label: proc { I18n.t('admin.labels.reconciliation_details', default: '对账差异处理') }, priority: 3
+  menu parent: 'Finance menu', label: proc { I18n.t('admin.labels.reconciliation_details', default: '对账差异处理') }, priority: 3
 
   actions :index, :show
 

@@ -1,5 +1,5 @@
 ActiveAdmin.register ReconciliationBatch do
-  menu parent: 'finance_menu', label: proc { I18n.t('admin.labels.reconciliation_batches', default: '对账批次') }, priority: 2
+  menu parent: 'Finance menu', label: proc { I18n.t('admin.labels.reconciliation_batches', default: '对账批次') }, priority: 2
 
   actions :index, :show
 

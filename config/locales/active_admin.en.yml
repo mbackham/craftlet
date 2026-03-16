@@ -346,6 +346,16 @@ en:
       success_time: Success Time
       business_role: Business Role
       admin_role: Admin Role
+      gmv: Total GMV
+      total_refund: Total Refunds
+      refund_rate: Overall Refund Rate
+      order_count: Order Count
+      pending_discrepancies: Pending Discrepancies
+      today_batch_status: Today's Reconciliation Status
+      target_date: Target Date
+      total_count: Total Count
+      matched_count: Matched
+      mismatched_count: Mismatched
     panels:
       basic_info: Basic Information
       password: Password
@@ -381,6 +391,9 @@ en:
       refund_approval_info: Approval Info
       reconciliation_overview: Reconciliation Overview
       batch_discrepancies: Batch Discrepancies
+      core_metrics: Core Business Metrics (GMV)
+      order_status_distribution: Order Status Distribution
+      quick_links: "Quick Links (click to filter by date and export CSV)"
     actions:
       view: View
       approve: Approve
@@ -399,6 +412,8 @@ en:
       ignore: Ignore
       goto_reconciliation: Go to Reconciliation
       goto_bank_statements: Go to Bank Statements
+      export_orders: Order List (supports export)
+      export_refunds: Refund List (supports export)
     messages:
       no_data: No data
       no_changes: No changes
@@ -417,6 +432,7 @@ en:
       no_related_refunds: No related refunds
       no_reject_reason: No rejection reason provided
       no_reconciliation_today: No reconciliation run today
+      no_orders_yet: No order data yet.
       batch_approved: Batch approved
       batch_rejected: Batch rejected
       batch_shelved: Batch shelved
@@ -531,21 +547,6 @@ en:
         bank: Bank CSV
         alipay_disabled: Alipay (Not Available)
         wechat_disabled: WeChat Pay (Not Available)
-    columns:
-      pending_discrepancies: Pending Discrepancies
-      today_batch_status: Today's Reconciliation Status
-      target_date: Target Date
-      total_count: Total Count
-      matched_count: Matched
-      mismatched_count: Mismatched
-    notices:
-      batch_processed: Reconciliation completed successfully
-      claimed: Record claimed successfully
-      adjusted: Record adjusted successfully
-      ignored: Record ignored
-    alerts:
-      batch_failed: "Reconciliation failed: %{error}"
-      empty_reason: Adjustment reason cannot be empty
     confirmations:
       process_batch: Are you sure you want to start reconciliation?
   admin_role_names:

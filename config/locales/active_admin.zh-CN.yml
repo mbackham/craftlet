@@ -609,6 +609,16 @@ zh-CN:
       success_time: 成功时间
       business_role: 业务角色
       admin_role: 管理角色
+      gmv: 成交总额 (GMV)
+      total_refund: 成功退款总额
+      refund_rate: 整体退款率
+      order_count: 订单数量
+      pending_discrepancies: 待处理差异
+      today_batch_status: 今日对账状态
+      target_date: 对账日期
+      total_count: 总笔数
+      matched_count: 平账
+      mismatched_count: 异常
     panels:
       basic_info: 基本信息
       password: 密码
@@ -644,6 +654,9 @@ zh-CN:
       refund_approval_info: 审批通过信息
       reconciliation_overview: 对账概览
       batch_discrepancies: 当前批次差异明细
+      core_metrics: 运营核心数据 (GMV)
+      order_status_distribution: 订单状态分布
+      quick_links: "对账快捷出口 (点击跳转后可根据时间筛选并导出 CSV)"
     actions:
       view: 查看
       approve: 通过审核
@@ -662,6 +675,8 @@ zh-CN:
       ignore: 忽略
       goto_reconciliation: 前往对账差异处理
       goto_bank_statements: 前往对账单导入
+      export_orders: 前往订单列表 (支持导出)
+      export_refunds: 前往退款列表 (支持导出)
     messages:
       no_data: 无
       no_changes: 无变更数据
@@ -680,6 +695,7 @@ zh-CN:
       no_related_refunds: 暂无关联退款
       no_reject_reason: 未填写拒绝原因
       no_reconciliation_today: 今日尚未执行对账
+      no_orders_yet: 暂无订单数据。
       batch_approved: 已批量通过
       batch_rejected: 已批量拒绝
       batch_shelved: 已批量上架
@@ -794,21 +810,6 @@ zh-CN:
         bank: 银行流水
         alipay_disabled: 支付宝（未开放）
         wechat_disabled: 微信支付（未开放）
-    columns:
-      pending_discrepancies: 待处理差异
-      today_batch_status: 今日对账状态
-      target_date: 对账日期
-      total_count: 总笔数
-      matched_count: 平账
-      mismatched_count: 异常
-    notices:
-      batch_processed: 对账执行成功
-      claimed: 已成功认领记录
-      adjusted: 已调账平账
-      ignored: 已忽略该差异记录
-    alerts:
-      batch_failed: "对账执行失败: %{error}"
-      empty_reason: 调账原因不能为空
     confirmations:
       process_batch: 确定要开始执行对账吗？
   admin_role_names:

@@ -1,13 +1,9 @@
 ActiveAdmin.register BankStatement do
-  menu parent: I18n.t('admin.menu.finance', default: '财务管理'), label: I18n.t('admin.labels.bank_statements', default: '对账单导入'), priority: 1
+  menu parent: I18n.t('admin.menu.finance', default: '财务管理'), label: -> { I18n.t('admin.labels.bank_statements', default: '对账单导入') }, priority: 1
 
   permit_params :channel, :statement_date, :status, :file
 
-  filter :channel, as: :select, collection: -> { [
-    [I18n.t('admin.reconciliation.channels.bank', default: '银行流水'), 'bank'],
-    [I18n.t('admin.reconciliation.channels.alipay_disabled', default: '支付宝'), 'alipay'],
-    [I18n.t('admin.reconciliation.channels.wechat_disabled', default: '微信支付'), 'wechat']
-  ] }
+  filter :channel
   filter :statement_date
   filter :status, as: :select, collection: -> { BankStatement.statuses.keys }
 
@@ -15,12 +11,7 @@ ActiveAdmin.register BankStatement do
     selectable_column
     id_column
     column :channel do |stmt|
-      case stmt.channel
-      when 'bank' then I18n.t('admin.reconciliation.channels.bank', default: '银行流水')
-      when 'alipay' then I18n.t('admin.reconciliation.channels.alipay_disabled', default: '支付宝')
-      when 'wechat' then I18n.t('admin.reconciliation.channels.wechat_disabled', default: '微信支付')
-      else stmt.channel
-      end
+      status_tag stmt.channel
     end
     column :statement_date
     column :status do |stmt|

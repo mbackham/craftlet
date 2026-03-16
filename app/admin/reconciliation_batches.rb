@@ -1,5 +1,5 @@
 ActiveAdmin.register ReconciliationBatch do
-  menu parent: I18n.t('admin.menu.finance', default: '财务管理'), label: I18n.t('admin.labels.reconciliation_batches', default: '对账批次'), priority: 2
+  menu parent: I18n.t('admin.menu.finance', default: '财务管理'), label: -> { I18n.t('admin.labels.reconciliation_batches', default: '对账批次') }, priority: 2
 
   actions :index, :show
 
@@ -10,7 +10,9 @@ ActiveAdmin.register ReconciliationBatch do
   index do
     id_column
     column :target_date
-    column :channel
+    column :channel do |batch|
+      status_tag batch.channel
+    end
     column :total_count
     column :matched_count
     column :mismatched_count

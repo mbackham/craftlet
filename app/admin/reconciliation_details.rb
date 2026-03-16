@@ -1,14 +1,14 @@
 ActiveAdmin.register ReconciliationDetail do
-  menu parent: I18n.t('admin.menu.finance', default: '财务管理'), label: I18n.t('admin.labels.reconciliation_details', default: '对账差异处理'), priority: 3
+  menu parent: -> { I18n.t('admin.menu.finance', default: '财务管理') }, label: -> { I18n.t('admin.labels.reconciliation_details', default: '对账差异处理') }, priority: 3
 
   actions :index, :show
 
   filter :reconciliation_batch
   filter :transaction_no
   filter :order_no
-  filter :reconciliation_type, as: :select, collection: -> { ReconciliationDetail.reconciliation_types.keys }
-  filter :match_status, as: :select, collection: -> { ReconciliationDetail.match_statuses.keys }
-  filter :process_status, as: :select, collection: -> { ReconciliationDetail.process_statuses.keys }
+  filter :reconciliation_type
+  filter :match_status
+  filter :process_status
 
   index do
     selectable_column
@@ -16,7 +16,7 @@ ActiveAdmin.register ReconciliationDetail do
     column :transaction_no
     column :order_no
     column :reconciliation_type do |detail|
-      status_tag detail.reconciliation_type == 'payment' ? I18n.t('admin.reconciliation.type_payment', default: '支付') : I18n.t('admin.reconciliation.type_refund', default: '退款'), class: detail.reconciliation_type == 'payment' ? 'ok' : 'warn'
+      status_tag detail.reconciliation_type, class: detail.reconciliation_type == 'payment' ? 'ok' : 'warn'
     end
     column :statement_amount
     column :system_amount

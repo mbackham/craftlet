@@ -93,10 +93,11 @@ namespace :deploy do
     end
   end
 
-  desc "Upload environment files"
+  desc "Upload environment files and master key"
   task :upload_env do
     on roles(:app) do
       upload! ".env.production", "#{shared_path}/.env"
+      upload! "config/master.key", "#{shared_path}/config/master.key"
     end
   end
 

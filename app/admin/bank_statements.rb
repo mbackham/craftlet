@@ -1,5 +1,5 @@
 ActiveAdmin.register BankStatement do
-  menu parent: I18n.t('admin.menu.finance', default: '财务管理'), label: -> { I18n.t('admin.labels.bank_statements', default: '对账单导入') }, priority: 1
+  menu parent: 'finance_menu', label: proc { I18n.t('admin.labels.bank_statements', default: '对账单导入') }, priority: 1
 
   permit_params :channel, :statement_date, :status, :file
 

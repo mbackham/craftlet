@@ -136,28 +136,6 @@ en:
         succeeded_at: Succeeded At
         created_at: Created At
         updated_at: Updated At
-        channel:
-          bank: Bank Csv
-          alipay: Alipay
-          wechat: WeChat
-        status:
-          pending: Pending
-          processing: Processing
-          processed: Processed
-          failed: Failed
-        reconciliation_type:
-          payment: Payment
-          refund: Refund
-        match_status:
-          matched: Matched
-          amount_mismatch: Amount Mismatch
-          missing_in_system: Missing in System
-          missing_in_statement: Missing in Statement
-        process_status:
-          pending: Pending
-          claimed: Claimed
-          adjusted: Adjusted
-          ignored: Ignored
       bank_statement:
         id: ID
         channel: Channel
@@ -166,15 +144,6 @@ en:
         file: Statement File
         created_at: Created At
         updated_at: Updated At
-        channel:
-          bank: Bank Csv
-          alipay: Alipay
-          wechat: WeChat
-        status:
-          pending: Pending
-          processing: Processing
-          processed: Processed
-          failed: Failed
       reconciliation_batch:
         id: ID
         target_date: Target Date
@@ -185,14 +154,6 @@ en:
         mismatched_count: Mismatched Count
         created_at: Created At
         updated_at: Updated At
-        status:
-          processing: Processing
-          completed: Completed
-          failed: Failed
-        channel:
-          bank: Bank Csv
-          alipay: Alipay
-          wechat: WeChat
       reconciliation_detail:
         id: ID
         reconciliation_batch: Reconciliation Batch
@@ -208,19 +169,6 @@ en:
         error_message: Error Message
         created_at: Created At
         updated_at: Updated At
-        reconciliation_type:
-          payment: Payment
-          refund: Refund
-        match_status:
-          matched: Matched
-          amount_mismatch: Amount Mismatch
-          missing_in_system: Missing in System
-          missing_in_statement: Missing in Statement
-        process_status:
-          pending: Pending
-          claimed: Claimed
-          adjusted: Adjusted
-          ignored: Ignored
 
   # Merchant statuses
   merchant_statuses:

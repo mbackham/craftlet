@@ -11,13 +11,13 @@ ActiveAdmin.register ReconciliationBatch do
     id_column
     column :target_date
     column :channel do |batch|
-      status_tag batch.channel
+      status_tag I18n.t("payment_channels.#{batch.channel == 'bank' ? 'bank_transfer' : batch.channel}", default: batch.channel.to_s.titleize), class: batch.channel
     end
     column :total_count
     column :matched_count
     column :mismatched_count
     column :status do |batch|
-      status_tag batch.status
+      status_tag I18n.t("processing_statuses.#{batch.status}", default: batch.status.to_s.titleize), class: batch.status
     end
     column :created_at
     actions
@@ -27,9 +27,11 @@ ActiveAdmin.register ReconciliationBatch do
     attributes_table do
       row :id
       row :target_date
-      row :channel
+      row :channel do |batch|
+        status_tag I18n.t("payment_channels.#{batch.channel == 'bank' ? 'bank_transfer' : batch.channel}", default: batch.channel.to_s.titleize), class: batch.channel
+      end
       row :status do |batch|
-        status_tag batch.status
+        status_tag I18n.t("processing_statuses.#{batch.status}", default: batch.status.to_s.titleize), class: batch.status
       end
       row :total_count
       row :matched_count
@@ -47,10 +49,10 @@ ActiveAdmin.register ReconciliationBatch do
         column :system_amount
         column :statement_amount
         column :match_status do |detail|
-          status_tag detail.match_status
+          status_tag I18n.t("match_statuses.#{detail.match_status}", default: detail.match_status.to_s.titleize), class: detail.match_status == 'matched' ? 'ok' : 'error'
         end
         column :process_status do |detail|
-          status_tag detail.process_status
+          status_tag I18n.t("process_statuses.#{detail.process_status}", default: detail.process_status.to_s.titleize), class: case detail.process_status when 'pending' then 'error' when 'claimed' then 'warn' else 'ok' end
         end
       end
     end

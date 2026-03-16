@@ -11,11 +11,11 @@ ActiveAdmin.register BankStatement do
     selectable_column
     id_column
     column :channel do |stmt|
-      status_tag stmt.channel
+      status_tag I18n.t("payment_channels.#{stmt.channel == 'bank' ? 'bank_transfer' : stmt.channel}", default: stmt.channel.to_s.titleize), class: stmt.channel
     end
     column :statement_date
     column :status do |stmt|
-      status_tag stmt.status
+      status_tag I18n.t("processing_statuses.#{stmt.status}", default: stmt.status.to_s.titleize), class: stmt.status
     end
     column :file do |stmt|
       if stmt.file.attached?

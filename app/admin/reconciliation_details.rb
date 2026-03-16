@@ -16,15 +16,15 @@ ActiveAdmin.register ReconciliationDetail do
     column :transaction_no
     column :order_no
     column :reconciliation_type do |detail|
-      status_tag detail.reconciliation_type, class: detail.reconciliation_type == 'payment' ? 'ok' : 'warn'
+      status_tag I18n.t("reconciliation_types.#{detail.reconciliation_type}", default: detail.reconciliation_type.to_s.titleize), class: detail.reconciliation_type == 'payment' ? 'ok' : 'warn'
     end
     column :statement_amount
     column :system_amount
     column :match_status do |detail|
-      status_tag detail.match_status, class: detail.match_status == 'matched' ? 'ok' : 'error'
+      status_tag I18n.t("match_statuses.#{detail.match_status}", default: detail.match_status.to_s.titleize), class: detail.match_status == 'matched' ? 'ok' : 'error'
     end
     column :process_status do |detail|
-      status_tag detail.process_status, class: case detail.process_status
+      status_tag I18n.t("process_statuses.#{detail.process_status}", default: detail.process_status.to_s.titleize), class: case detail.process_status
                                                when 'pending' then 'error'
                                                when 'claimed' then 'warn'
                                                when 'adjusted', 'ignored' then 'ok'

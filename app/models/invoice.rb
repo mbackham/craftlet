@@ -13,7 +13,7 @@ class Invoice < ApplicationRecord
   # === Validations ===
   validates :invoice_no, presence: true, uniqueness: true
   validates :invoice_type, presence: true, inclusion: { in: INVOICE_TYPES }
-  validates :amount, numericality: { greater_than: 0 }
+  validates :amount, numericality: { greater_than_or_equal_to: 0.01, less_than_or_equal_to: 9_999_999_999.99 }
 
   # === Callbacks ===
   before_validation :generate_invoice_no, on: :create

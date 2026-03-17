@@ -147,6 +147,38 @@ end
 
 puts "Risk role seed done."
 
+# === 结算管理权限 ===
+settlement_permissions = [
+  { name: "查看结算", code: "settlement:read" },
+  { name: "结算审批", code: "settlement:approve" },
+  { name: "结算打款", code: "settlement:payout" },
+  { name: "结算管理", code: "settlement:manage" }
+]
+
+settlement_permissions.each do |p|
+  AdminPermission.find_or_create_by!(code: p[:code]) { |perm| perm.name = p[:name] }
+end
+
+# 将结算权限添加到超级管理员角色
+AdminPermission.find_each do |perm|
+  AdminRolePermission.find_or_create_by!(admin_role: super_admin_role, admin_permission: perm)
+end
+
+puts "Settlement permissions seed done."
+
+# === 财务角色 (finance) ===
+finance_role = AdminRole.find_or_create_by!(code: "finance") { |r| r.name = "财务" }
+finance_permission_codes = %w[
+  admin.access order:read payment:read merchant:read
+  settlement:read settlement:approve settlement:payout settlement:manage
+]
+finance_permission_codes.each do |code|
+  perm = AdminPermission.find_by(code: code)
+  AdminRolePermission.find_or_create_by!(admin_role: finance_role, admin_permission: perm) if perm
+end
+
+puts "Finance role seed done."
+
 # === 开发环境测试账号 ===
 if Rails.env.development?
   # ops 测试账号 (密码: Dev@Pass#2024)
@@ -165,7 +197,15 @@ if Rails.env.development?
   end
   AdminUserRole.find_or_create_by!(user_id: risk_admin.id, admin_role: risk_role)
 
-  puts "Dev test accounts seed done (ops@example.com / risk@example.com, password: Dev@Pass#2024)."
+  # finance 测试账号 (密码: Dev@Pass#2024)
+  finance_admin = AdminUser.find_or_create_by!(email: 'finance@example.com') do |admin|
+    admin.password = 'Dev@Pass#2024'
+    admin.password_confirmation = 'Dev@Pass#2024'
+    admin.role = 'operator'
+  end
+  AdminUserRole.find_or_create_by!(user_id: finance_admin.id, admin_role: finance_role)
+
+  puts "Dev test accounts seed done (ops / risk / finance @example.com, password: Dev@Pass#2024)."
 end
 
 # === 商家测试数据 (仅开发环境) ===

@@ -555,6 +555,7 @@ zh-CN:
       merchants: 商家管理
       operations: 运营管理
       orders: 订单管理
+      settlement: 结算管理
       finance: 财务管理
     labels:
       admin_users: 管理员账号
@@ -573,6 +574,9 @@ zh-CN:
       bank_statements: 对账单导入
       reconciliation_batches: 对账批次
       reconciliation_details: 对账差异处理
+      settlement_rules: 结算规则
+      settlements: 结算单
+      invoices: 发票管理
     columns:
       actions: 操作
       permission_count: 权限数
@@ -619,6 +623,42 @@ zh-CN:
       total_count: 总笔数
       matched_count: 平账
       mismatched_count: 异常
+      settlement_no: 结算单号
+      period: 结算周期
+      total_order_amount: 订单总额
+      total_refund_amount: 退款总额
+      deposit_deduction: 保证金扣除
+      penalty_amount: 违约金
+      net_amount: 结算金额
+      cycle_type: 结算周期类型
+      cycle_days: T+N天数
+      deposit_deduction_rate: 保证金扣除比例
+      penalty_rate: 违约金比例
+      min_settlement_amount: 最低结算金额
+      approved_by: 审批人
+      paid_out_by: 出纳
+      paid_out_at: 打款时间
+      payout_reference: 打款凭证号
+      confirmed_at: 到账确认时间
+      frozen_reason: 冻结原因
+      failure_reason: 失败原因
+      invoice_no: 发票编号
+      invoice_type: 发票类型
+      title: 发票抬头
+      tax_no: 纳税人识别号
+      tracking_no: 快递单号
+      shipped_at: 寄送时间
+      received_at: 签收时间
+      rejected_reason: 驳回原因
+      issued_by: 开票人
+      issued_at: 开票时间
+      exception_type: 异常类型
+      description: 描述
+      resolved_by: 处理人
+      comment: 备注
+      action: 操作
+      order_amount: 订单金额
+      refund_amount: 退款金额
     panels:
       basic_info: 基本信息
       password: 密码
@@ -657,6 +697,14 @@ zh-CN:
       core_metrics: 运营核心数据 (GMV)
       order_status_distribution: 订单状态分布
       quick_links: "对账快捷出口 (点击跳转后可根据时间筛选并导出 CSV)"
+      settlement_rule_config: 结算规则配置
+      settlement_info: 结算单信息
+      settlement_amounts: 金额明细
+      settlement_items: 结算明细
+      settlement_exceptions: 异常记录
+      settlement_overview: 结算概览
+      related_invoices: 关联发票
+      invoice_request: 发票申请
     actions:
       view: 查看
       approve: 通过审核
@@ -696,6 +744,8 @@ zh-CN:
       no_reject_reason: 未填写拒绝原因
       no_reconciliation_today: 今日尚未执行对账
       no_orders_yet: 暂无订单数据。
+      no_settlement_items: 暂无结算明细
+      no_settlement_exceptions: 暂无异常记录
       batch_approved: 已批量通过
       batch_rejected: 已批量拒绝
       batch_shelved: 已批量上架
@@ -710,6 +760,7 @@ zh-CN:
       shelf_element: "确认上架该元素？"
       unshelf_element: "确认下架该元素？"
       approve_refund: "确认通过该退款申请？审批后将异步提交给支付渠道处理。"
+      process_batch: 确定要开始执行对账吗？
     forms:
       select_user: "请选择用户"
       only_users_without_merchant: "只显示尚未创建商家资料的用户"
@@ -759,6 +810,15 @@ zh-CN:
       feedback_pending: 待处理
       feedback_reviewing: 处理中
       feedback_resolved: 已解决
+      active_rules: 活跃规则
+      global_default: 全局默认
+      paid_out: 已打款
+      confirmed: 已完结
+      frozen_scope: 已冻结
+      pending_issue: 待开具
+      issued: 已开具
+      shipped: 已寄送
+      received: 已签收
     titles:
       merchant_profile: "商家资料 - %{name}"
       element: "元素 - %{name}"
@@ -810,13 +870,63 @@ zh-CN:
         bank: 银行流水
         alipay_disabled: 支付宝（未开放）
         wechat_disabled: 微信支付（未开放）
-    confirmations:
-      process_batch: 确定要开始执行对账吗？
   admin_role_names:
     super_admin: "超级管理员"
     ops: "运营"
     risk: "风控"
     content_editor: "内容编辑"
+    finance: "财务"
   admin_user_roles:
     admin: "超级管理员"
     operator: "普通管理员"
+
+  # 结算单状态
+  settlement_statuses:
+    pending_review: 待审核
+    approved: 已审批
+    rejected: 已拒绝
+    paid_out: 已打款
+    confirmed: 已到账
+    funds_frozen: 已冻结
+    failed: 失败
+
+  # 发票状态
+  invoice_statuses:
+    requested: 已申请
+    issued: 已开具
+    shipped: 已寄送
+    received: 已签收
+    rejected: 已驳回
+
+  # 发票类型
+  invoice_types:
+    normal: 普通发票
+    special: 专用发票
+
+  # 结算异常类型
+  settlement_exception_types:
+    payout_failed: 打款失败
+    amount_mismatch: 金额不符
+    merchant_frozen: 商家冻结
+
+  # 结算异常状态
+  settlement_exception_statuses:
+    pending: 待处理
+    processing: 处理中
+    resolved: 已解决
+    ignored: 已忽略
+
+  # 结算审计操作扩展
+  settlement_audit_actions:
+    generate_settlement: 生成结算单
+    approve_settlement: 审批通过
+    reject_settlement: 审批拒绝
+    payout_settlement: 确认打款
+    confirm_arrival_settlement: 确认到账
+    freeze_settlement: 冻结资金
+    retry_settlement: 重试结算
+    issue_invoice: 开具发票
+    ship_invoice: 寄送发票
+    receive_invoice: 确认签收
+    reject_invoice: 驳回发票
+

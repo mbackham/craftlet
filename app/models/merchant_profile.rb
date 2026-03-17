@@ -7,6 +7,9 @@ class MerchantProfile < ApplicationRecord
   # === Associations ===
   belongs_to :user
   has_many :review_logs, class_name: 'MerchantReviewLog', dependent: :destroy
+  has_many :settlement_rules, dependent: :destroy
+  has_many :settlements, dependent: :destroy
+  has_many :invoices, dependent: :destroy
   # Note: approved_by_admin_id and rejected_by_admin_id are UUID fields
   # AdminUser uses bigint IDs, so we can't use belongs_to directly
   # Use custom methods approved_by_admin and rejected_by_admin instead

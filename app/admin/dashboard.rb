@@ -48,6 +48,31 @@ ActiveAdmin.register_page "Dashboard" do
       end
     end
     
+    # 结算概览
+    columns do
+      column do
+        panel I18n.t("admin.panels.settlement_overview", default: "结算概览") do
+          pending_settlements = Settlement.where(status: "pending_review").count
+          monthly_settled = Settlement.where(status: "confirmed")
+                                      .where("confirmed_at >= ?", Time.current.beginning_of_month)
+                                      .sum(:net_amount)
+          pending_exceptions = SettlementException.where(status: %w[pending processing]).count
+
+          attributes_table_for "Settlement" do
+            row(I18n.t("admin.columns.pending_review_count", default: "待审批结算单")) { pending_settlements }
+            row(I18n.t("admin.columns.monthly_settled", default: "本月已结算总额")) { number_to_currency(monthly_settled, unit: "¥") }
+            row(I18n.t("admin.columns.pending_exceptions", default: "待处理异常")) { pending_exceptions }
+          end
+
+          div style: "display: flex; gap: 10px; margin-top: 10px;" do
+            link_to "结算单列表", admin_settlements_path, class: "button"
+            link_to "结算规则", admin_settlement_rules_path, class: "button"
+            link_to "发票管理", admin_invoices_path, class: "button"
+          end
+        end
+      end
+    end
+
     # 对账概览
     columns do
       column do

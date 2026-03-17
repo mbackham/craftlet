@@ -293,6 +293,7 @@ en:
       operations: Operations
       orders: Orders
       finance: Finance
+      settlement: Settlement Management
     labels:
       admin_users: Admin Users
       admin_roles: Admin Roles
@@ -310,6 +311,9 @@ en:
       bank_statements: Bank Statements
       reconciliation_batches: Reconciliation Batches
       reconciliation_details: Reconciliation Details
+      settlement_rules: Settlement Rules
+      settlements: Settlements
+      invoices: Invoice Management
     columns:
       actions: Actions
       permission_count: Permission Count
@@ -356,6 +360,42 @@ en:
       total_count: Total Count
       matched_count: Matched
       mismatched_count: Mismatched
+      settlement_no: Settlement No.
+      period: Settlement Period
+      total_order_amount: Total Order Amount
+      total_refund_amount: Total Refund Amount
+      deposit_deduction: Deposit Deduction
+      penalty_amount: Penalty Amount
+      net_amount: Net Amount
+      cycle_type: Cycle Type
+      cycle_days: "T+N Days"
+      deposit_deduction_rate: Deposit Deduction Rate
+      penalty_rate: Penalty Rate
+      min_settlement_amount: Minimum Settlement Amount
+      approved_by: Approved By
+      paid_out_by: Cashier
+      paid_out_at: Payout Time
+      payout_reference: Payout Reference No.
+      confirmed_at: Arrival Confirmed At
+      frozen_reason: Freeze Reason
+      failure_reason: Failure Reason
+      invoice_no: Invoice No.
+      invoice_type: Invoice Type
+      title: Invoice Title
+      tax_no: Tax ID
+      tracking_no: Tracking No.
+      shipped_at: Shipped At
+      received_at: Received At
+      rejected_reason: Rejection Reason
+      issued_by: Issued By
+      issued_at: Issued At
+      exception_type: Exception Type
+      description: Description
+      resolved_by: Resolved By
+      comment: Comment
+      action: Action
+      order_amount: Order Amount
+      refund_amount: Refund Amount
     panels:
       basic_info: Basic Information
       password: Password
@@ -394,6 +434,14 @@ en:
       core_metrics: Core Business Metrics (GMV)
       order_status_distribution: Order Status Distribution
       quick_links: "Quick Links (click to filter by date and export CSV)"
+      settlement_rule_config: Settlement Rule Configuration
+      settlement_info: Settlement Information
+      settlement_amounts: Amount Details
+      settlement_items: Settlement Items
+      settlement_exceptions: Exception Records
+      settlement_overview: Settlement Overview
+      related_invoices: Related Invoices
+      invoice_request: Invoice Request
     actions:
       view: View
       approve: Approve
@@ -437,6 +485,8 @@ en:
       batch_rejected: Batch rejected
       batch_shelved: Batch shelved
       batch_unshelved: Batch unshelved
+      no_settlement_items: No settlement items
+      no_settlement_exceptions: No exception records
     confirmations:
       approve_merchant: "Confirm approval of this merchant application?"
       reject_merchant: "Confirm rejection of this merchant application?"
@@ -447,6 +497,7 @@ en:
       shelf_element: "Confirm shelving this element?"
       unshelf_element: "Confirm unshelving this element?"
       approve_refund: "Confirm approval of this refund? It will be submitted to the payment provider for processing."
+      process_batch: Are you sure you want to start reconciliation?
     forms:
       select_user: "Select User"
       only_users_without_merchant: "Only shows users without merchant profile"
@@ -496,6 +547,14 @@ en:
       feedback_pending: Pending
       feedback_reviewing: Reviewing
       feedback_resolved: Resolved
+      active_rules: Active Rules
+      global_default: Global Default
+      paid_out: Paid Out
+      frozen_scope: Frozen
+      pending_issue: Pending Issue
+      issued: Issued
+      shipped: Shipped
+      received: Received
     titles:
       merchant_profile: "Merchant Profile - %{name}"
       element: "Element - %{name}"
@@ -547,13 +606,62 @@ en:
         bank: Bank CSV
         alipay_disabled: Alipay (Not Available)
         wechat_disabled: WeChat Pay (Not Available)
-    confirmations:
-      process_batch: Are you sure you want to start reconciliation?
   admin_role_names:
     super_admin: "Super Admin"
     ops: "Operations"
     risk: "Risk Control"
     content_editor: "Content Editor"
+    finance: "Finance"
   admin_user_roles:
     admin: "Super Admin"
     operator: "Operator"
+
+  # Settlement statuses
+  settlement_statuses:
+    pending_review: Pending Review
+    approved: Approved
+    rejected: Rejected
+    paid_out: Paid Out
+    confirmed: Confirmed
+    funds_frozen: Frozen
+    failed: Failed
+
+  # Invoice statuses
+  invoice_statuses:
+    requested: Requested
+    issued: Issued
+    shipped: Shipped
+    received: Received
+    rejected: Rejected
+
+  # Invoice types
+  invoice_types:
+    normal: Standard Invoice
+    special: VAT Special Invoice
+
+  # Settlement exception types
+  settlement_exception_types:
+    payout_failed: Payout Failed
+    amount_mismatch: Amount Mismatch
+    merchant_frozen: Merchant Frozen
+
+  # Settlement exception statuses
+  settlement_exception_statuses:
+    pending: Pending
+    processing: Processing
+    resolved: Resolved
+    ignored: Ignored
+
+  # Settlement audit actions
+  settlement_audit_actions:
+    generate_settlement: Generate Settlement
+    approve_settlement: Approve Settlement
+    reject_settlement: Reject Settlement
+    payout_settlement: Confirm Payout
+    confirm_arrival_settlement: Confirm Arrival
+    freeze_settlement: Freeze Funds
+    retry_settlement: Retry Settlement
+    issue_invoice: Issue Invoice
+    ship_invoice: Ship Invoice
+    receive_invoice: Confirm Receipt
+    reject_invoice: Reject Invoice

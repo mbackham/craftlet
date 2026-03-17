@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_16_043131) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_17_083959) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -226,6 +226,30 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_16_043131) do
     t.index ["submitter_email"], name: "index_feedbacks_on_submitter_email"
     t.index ["tracking_number"], name: "index_feedbacks_on_tracking_number", unique: true
     t.index ["user_id"], name: "index_feedbacks_on_user_id"
+  end
+
+  create_table "invoices", force: :cascade do |t|
+    t.string "invoice_no", null: false, comment: "发票编号"
+    t.bigint "settlement_id", null: false
+    t.bigint "merchant_profile_id", null: false
+    t.string "invoice_type", default: "normal", null: false, comment: "normal / special"
+    t.decimal "amount", precision: 12, scale: 2, null: false
+    t.string "status", default: "requested", null: false, comment: "发票状态"
+    t.string "title", comment: "发票抬头"
+    t.string "tax_no", comment: "纳税人识别号"
+    t.string "tracking_no", comment: "快递单号"
+    t.datetime "shipped_at"
+    t.datetime "received_at"
+    t.string "rejected_reason", limit: 500
+    t.datetime "requested_at"
+    t.datetime "issued_at"
+    t.bigint "issued_by", comment: "开票人 admin_user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invoice_no"], name: "index_invoices_on_invoice_no", unique: true
+    t.index ["merchant_profile_id"], name: "index_invoices_on_merchant_profile_id"
+    t.index ["settlement_id"], name: "index_invoices_on_settlement_id"
+    t.index ["status"], name: "index_invoices_on_status"
   end
 
   create_table "merchant_profiles", force: :cascade do |t|
@@ -462,6 +486,76 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_16_043131) do
     t.index ["user_id"], name: "index_roles_on_user_id"
   end
 
+  create_table "settlement_exceptions", force: :cascade do |t|
+    t.bigint "settlement_id", null: false
+    t.string "exception_type", null: false, comment: "payout_failed / amount_mismatch / merchant_frozen"
+    t.text "description"
+    t.string "status", default: "pending", null: false, comment: "pending / processing / resolved / ignored"
+    t.bigint "resolved_by", comment: "处理人 admin_user_id"
+    t.datetime "resolved_at"
+    t.text "resolution_note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["exception_type"], name: "index_settlement_exceptions_on_exception_type"
+    t.index ["settlement_id"], name: "index_settlement_exceptions_on_settlement_id"
+    t.index ["status"], name: "index_settlement_exceptions_on_status"
+  end
+
+  create_table "settlement_items", force: :cascade do |t|
+    t.bigint "settlement_id", null: false
+    t.bigint "order_id", null: false
+    t.decimal "order_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "refund_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "net_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_settlement_items_on_order_id"
+    t.index ["settlement_id", "order_id"], name: "idx_settlement_items_settlement_order", unique: true
+    t.index ["settlement_id"], name: "index_settlement_items_on_settlement_id"
+  end
+
+  create_table "settlement_rules", force: :cascade do |t|
+    t.bigint "merchant_profile_id", comment: "关联商家（null=全局默认）"
+    t.string "cycle_type", default: "T+7", null: false, comment: "结算周期类型"
+    t.integer "cycle_days", default: 7, null: false, comment: "T+N 天数"
+    t.decimal "deposit_deduction_rate", precision: 5, scale: 4, default: "0.0", null: false, comment: "保证金扣除比例"
+    t.decimal "penalty_rate", precision: 5, scale: 4, default: "0.0", null: false, comment: "违约金比例"
+    t.decimal "min_settlement_amount", precision: 12, scale: 2, default: "0.0", null: false, comment: "最低结算金额"
+    t.boolean "is_active", default: true, null: false, comment: "是否启用"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["is_active"], name: "index_settlement_rules_on_is_active"
+    t.index ["merchant_profile_id", "is_active"], name: "idx_settlement_rules_merchant_active"
+    t.index ["merchant_profile_id"], name: "index_settlement_rules_on_merchant_profile_id"
+  end
+
+  create_table "settlements", force: :cascade do |t|
+    t.string "settlement_no", null: false, comment: "结算单号"
+    t.bigint "merchant_profile_id", null: false, comment: "关联商家"
+    t.date "period_start", null: false, comment: "结算周期起始"
+    t.date "period_end", null: false, comment: "结算周期结束"
+    t.decimal "total_order_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "total_refund_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "deposit_deduction", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "penalty_amount", precision: 12, scale: 2, default: "0.0", null: false
+    t.decimal "net_amount", precision: 12, scale: 2, default: "0.0", null: false, comment: "实际结算金额"
+    t.string "status", default: "pending_review", null: false, comment: "状态"
+    t.bigint "approved_by", comment: "审批人 admin_user_id"
+    t.datetime "approved_at"
+    t.bigint "paid_out_by", comment: "出纳 admin_user_id"
+    t.datetime "paid_out_at"
+    t.datetime "confirmed_at", comment: "到账确认时间"
+    t.string "payout_reference", comment: "打款凭证号"
+    t.string "failure_reason", limit: 500
+    t.string "frozen_reason", limit: 500
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["merchant_profile_id", "period_start", "period_end"], name: "idx_settlements_merchant_period", unique: true
+    t.index ["merchant_profile_id"], name: "index_settlements_on_merchant_profile_id"
+    t.index ["settlement_no"], name: "index_settlements_on_settlement_no", unique: true
+    t.index ["status"], name: "index_settlements_on_status"
+  end
+
   create_table "ticket_attachments", force: :cascade do |t|
     t.bigint "ticket_message_id", null: false
     t.string "file_name", null: false
@@ -563,6 +657,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_16_043131) do
   add_foreign_key "faqs", "faq_categories"
   add_foreign_key "feedbacks", "admin_users", on_delete: :nullify
   add_foreign_key "feedbacks", "users", on_delete: :nullify
+  add_foreign_key "invoices", "merchant_profiles"
+  add_foreign_key "invoices", "settlements"
   add_foreign_key "merchant_profiles", "users"
   add_foreign_key "merchant_review_logs", "merchant_profiles"
   add_foreign_key "order_items", "orders"
@@ -573,6 +669,11 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_16_043131) do
   add_foreign_key "refunds", "payments"
   add_foreign_key "risk_events", "risk_rules"
   add_foreign_key "roles", "users"
+  add_foreign_key "settlement_exceptions", "settlements"
+  add_foreign_key "settlement_items", "orders"
+  add_foreign_key "settlement_items", "settlements"
+  add_foreign_key "settlement_rules", "merchant_profiles"
+  add_foreign_key "settlements", "merchant_profiles"
   add_foreign_key "ticket_attachments", "ticket_messages"
   add_foreign_key "ticket_messages", "tickets"
 end

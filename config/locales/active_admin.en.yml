@@ -294,6 +294,7 @@ en:
       orders: Orders
       finance: Finance
       settlement: Settlement Management
+      data_center: Data Center
     labels:
       admin_users: Admin Users
       admin_roles: Admin Roles

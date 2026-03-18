@@ -294,6 +294,9 @@ ActiveAdmin.setup do |config|
       menu.add id: 'Finance menu',
                label: proc { I18n.t('admin.menu.finance') },
                priority: 50
+      menu.add id: 'data_center_menu',
+               label: proc { I18n.t('admin.menu.data_center') },
+               priority: 55
     end
   end
 

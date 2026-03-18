@@ -99,6 +99,8 @@ group :development, :test do
   # === Testing & API Docs ===
   gem "rspec-rails"
   gem "rswag-specs"
+  gem "factory_bot_rails"
+  gem "shoulda-matchers"
 end
 
 group :development do

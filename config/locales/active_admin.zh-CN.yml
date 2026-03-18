@@ -557,6 +557,7 @@ zh-CN:
       orders: 订单管理
       settlement: 结算管理
       finance: 财务管理
+      data_center: 数据中心
     labels:
       admin_users: 管理员账号
       admin_roles: 管理角色

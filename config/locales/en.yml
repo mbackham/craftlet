@@ -29,3 +29,54 @@
 
 en:
   hello: "Hello world"
+
+  # ── Fund Monitoring ───────────────────────────────────────
+  admin:
+    labels:
+      fund_alerts: "Large-Amount Alerts"
+      fund_daily_report: "Daily Fund Report"
+
+    panels:
+      fund_monitoring: "Fund Monitoring"
+
+    columns:
+      today_income: "Today's Income"
+      today_refund: "Today's Refunds"
+      today_net: "Today's Net Inflow"
+      today_alerts: "Today's Large-Amount Alerts"
+      pending_fund_alerts: "Pending Alerts"
+
+    fund_daily_report:
+      select_date: "Select Date"
+      date_label: "Date:"
+      query: "Query"
+      summary_title: "%{date} Fund Summary"
+      date: "Date"
+      income: "Total Income"
+      income_count: "Income Transactions"
+      refund: "Total Refunds"
+      refund_count: "Refund Transactions"
+      txn_count: "%{count} txn(s)"
+      net: "Net Inflow"
+      settled: "Confirmed Settlement"
+      alert_count: "Large-Amount Alerts"
+      today_alerts_title: "Today's Large-Amount Alerts (%{count})"
+      today_alerts_title_empty: "Today's Large-Amount Alerts"
+      no_alerts: "No large-amount alerts for this day."
+      col_type: "Type"
+      col_subject: "Subject"
+      col_amount: "Amount"
+      col_threshold: "Threshold"
+      col_status: "Status"
+      col_time: "Time"
+
+  fund_alert_statuses:
+    pending: "Pending"
+    acknowledged: "Acknowledged"
+    ignored: "Ignored"
+
+  fund_alert_types:
+    payment: "Payment"
+    refund: "Refund"
+    settlement: "Settlement"
+

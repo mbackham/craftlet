@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_17_083959) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_18_104700) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -226,6 +226,24 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_17_083959) do
     t.index ["submitter_email"], name: "index_feedbacks_on_submitter_email"
     t.index ["tracking_number"], name: "index_feedbacks_on_tracking_number", unique: true
     t.index ["user_id"], name: "index_feedbacks_on_user_id"
+  end
+
+  create_table "fund_alerts", force: :cascade do |t|
+    t.string "alert_type", null: false
+    t.string "subject_type", null: false
+    t.bigint "subject_id", null: false
+    t.decimal "amount", precision: 12, scale: 2, null: false
+    t.decimal "threshold", precision: 12, scale: 2, null: false
+    t.string "status", default: "pending", null: false
+    t.bigint "handler_admin_id"
+    t.text "note"
+    t.datetime "acknowledged_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["alert_type"], name: "index_fund_alerts_on_alert_type"
+    t.index ["created_at"], name: "index_fund_alerts_on_created_at"
+    t.index ["status"], name: "index_fund_alerts_on_status"
+    t.index ["subject_type", "subject_id"], name: "index_fund_alerts_on_subject_type_and_subject_id"
   end
 
   create_table "invoices", force: :cascade do |t|

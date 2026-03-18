@@ -124,6 +124,19 @@ module Refunds
         )
       end
 
+      # === 资金监控：事务提交后执行，不影响退款主流程 ===
+      begin
+        FundMonitoring::LargeAmountDetector.call(refund)
+      rescue => e
+        Rails.logger.warn("[FundMonitoring] LargeAmountDetector error for Refund##{refund.id}: #{e.message}")
+      end
+
+      begin
+        FundMonitoring::FrequentRefundDetector.call(refund)
+      rescue => e
+        Rails.logger.warn("[FundMonitoring] FrequentRefundDetector error for Refund##{refund.id}: #{e.message}")
+      end
+
       Rails.logger.info(
         "[Refunds::ProcessRefundJob] Refund ##{refund.id} succeeded — provider_refund_no: #{refund.provider_refund_no}"
       )

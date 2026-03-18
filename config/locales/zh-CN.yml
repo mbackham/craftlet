@@ -9,3 +9,53 @@ zh-CN:
       default: "%Y-%m-%d %H:%M:%S"
       long: "%Y年%m月%d日 %H:%M"
       short: "%m月%d日 %H:%M"
+
+  # ── 资金监控 ──────────────────────────────────────────────
+  admin:
+    labels:
+      fund_alerts: "大额预警"
+      fund_daily_report: "资金日报"
+
+    panels:
+      fund_monitoring: "资金监控"
+
+    columns:
+      today_income: "今日收入"
+      today_refund: "今日退款"
+      today_net: "今日净流入"
+      today_alerts: "今日大额预警"
+      pending_fund_alerts: "待处理大额预警"
+
+    fund_daily_report:
+      select_date: "选择日期"
+      date_label: "日期："
+      query: "查询"
+      summary_title: "%{date} 资金汇总"
+      date: "日期"
+      income: "收入总额"
+      income_count: "收入笔数"
+      refund: "退款总额"
+      refund_count: "退款笔数"
+      txn_count: "%{count} 笔"
+      net: "净流入"
+      settled: "已结算净额"
+      alert_count: "大额预警数"
+      today_alerts_title: "当日大额预警 (%{count} 条)"
+      today_alerts_title_empty: "当日大额预警"
+      no_alerts: "当日无大额预警记录。"
+      col_type: "类型"
+      col_subject: "关联"
+      col_amount: "金额"
+      col_threshold: "阈值"
+      col_status: "状态"
+      col_time: "时间"
+
+  fund_alert_statuses:
+    pending: "待处理"
+    acknowledged: "已知晓"
+    ignored: "已忽略"
+
+  fund_alert_types:
+    payment: "收款"
+    refund: "退款"
+    settlement: "结算"

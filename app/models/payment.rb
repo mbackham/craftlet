@@ -7,6 +7,10 @@ class Payment < ApplicationRecord
   belongs_to :order
   has_many :refunds, dependent: :destroy
 
+  # === Callbacks ===
+  # 支付状态变为 paid 后检测大额预警（after_update_commit = 事务提交后，不阻断主流程）
+  after_update_commit :detect_large_amount, if: :just_paid?
+
   # === Display Helpers ===
   def status_label
     I18n.t("payment_statuses.#{status}", default: status.to_s.humanize)
@@ -25,4 +29,17 @@ class Payment < ApplicationRecord
   def self.ransackable_associations(auth_object = nil)
     %w[order refunds]
   end
+
+  private
+
+  def just_paid?
+    saved_change_to_status? && status == "paid"
+  end
+
+  def detect_large_amount
+    FundMonitoring::LargeAmountDetector.call(self)
+  rescue => e
+    Rails.logger.warn("[FundMonitoring] LargeAmountDetector error for Payment##{id}: #{e.message}")
+  end
 end
+

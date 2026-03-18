@@ -106,6 +106,39 @@ ActiveAdmin.register_page "Dashboard" do
       end
     end
 
+    # 资金监控概览
+    columns do
+      column do
+        panel I18n.t("admin.panels.fund_monitoring", default: "资金监控") do
+          # 今日资金日报
+          today_report = FundMonitoring::DailyReportService.call(date: Date.today)
+          pending_alerts = FundAlert.pending.count
+          today_alerts   = FundAlert.today.count
+
+          attributes_table_for "FundMonitoring" do
+            row(I18n.t("admin.columns.today_income",        default: "今日收入")) { number_to_currency(today_report.income,       unit: "¥") }
+            row(I18n.t("admin.columns.today_refund",        default: "今日退款")) { number_to_currency(today_report.refund_total, unit: "¥") }
+            row(I18n.t("admin.columns.today_net",           default: "今日净流入")) do
+              color = today_report.net >= 0 ? "color:green;" : "color:red;"
+              content_tag(:span, number_to_currency(today_report.net, unit: "¥"), style: color)
+            end
+            row(I18n.t("admin.columns.today_alerts",        default: "今日大额预警")) do
+              today_alerts > 0 ? status_tag("#{today_alerts} 条", class: "warning") : "0 条"
+            end
+            row(I18n.t("admin.columns.pending_fund_alerts", default: "待处理大额预警")) do
+              pending_alerts > 0 ? status_tag("#{pending_alerts} 条", class: "error") : "0 条"
+            end
+          end
+
+          div style: "display: flex; gap: 10px; margin-top: 10px;" do
+            link_to "大额预警列表",  admin_fund_alerts_path,        class: "button"
+            link_to "资金日报",      admin_funddailyreport_path,    class: "button"
+            link_to "风控事件",      admin_risk_events_path,        class: "button"
+          end
+        end
+      end
+    end
+
     # 底部快捷入口
     columns do
       column do

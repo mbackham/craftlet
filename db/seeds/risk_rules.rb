@@ -30,6 +30,15 @@ rules = [
     severity:    "high",
     params:      { window_minutes: 30, threshold: 10 },
     enabled:     true
+  },
+  {
+    code:        "frequent_refund",
+    name:        "同卡/同支付频繁退款",
+    description: "同一笔支付在短时间内多次发起退款，可能存在欺诈或异常退款行为",
+    category:    "refund",
+    severity:    "high",
+    params:      { max_count: 3, window_days: 7 },
+    enabled:     true
   }
 ]
 

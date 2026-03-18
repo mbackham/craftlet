@@ -126,3 +126,23 @@ table.index_table td.col-actions a {
 .refund-approval-panel th {
   color: #27ae60;
 }
+
+// Language switcher dropdown in utility nav
+#utility_nav li#language_switcher {
+  > a {
+    padding: 0 12px;
+  }
+
+  ul {
+    min-width: 0 !important;
+    width: auto !important;
+
+    li {
+      a {
+        text-align: center;
+        padding: 8px 20px;
+        white-space: nowrap;
+      }
+    }
+  }
+}

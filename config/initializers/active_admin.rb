@@ -264,12 +264,20 @@ ActiveAdmin.setup do |config|
 
   config.namespace :admin do |admin|
     admin.build_menu :utility_navigation do |menu|
+      menu.add id: 'language_switcher',
+               label: proc { "🌐 #{I18n.locale.to_s.start_with?('zh') ? '中文' : 'English'}" },
+               url: '#',
+               priority: 1
       menu.add id: 'language_zh',
-               label: proc { I18n.t("active_admin.language.zh") },
-               url: proc { url_for(params.permit!.to_h.merge(locale: "zh-CN")) }
+               parent: 'language_switcher',
+               label: '中文',
+               url: proc { url_for(params.permit!.to_h.merge(locale: "zh-CN")) },
+               priority: 1
       menu.add id: 'language_en',
-               label: proc { I18n.t("active_admin.language.en") },
-               url: proc { url_for(params.permit!.to_h.merge(locale: "en")) }
+               parent: 'language_switcher',
+               label: 'English',
+               url: proc { url_for(params.permit!.to_h.merge(locale: "en")) },
+               priority: 2
       admin.add_current_user_to_menu menu
       admin.add_logout_button_to_menu menu
     end

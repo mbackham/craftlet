@@ -1,0 +1,200 @@
+zh-CN:
+  # Banner 状态
+  banner_statuses:
+    draft: 草稿
+    active: 已上线
+    inactive: 已下线
+
+  # Banner 展示位置
+  banner_placements:
+    home: 首页
+    category: 分类页
+    detail: 详情页
+
+  # 公告状态
+  announcement_statuses:
+    draft: 草稿
+    published: 已发布
+    archived: 已归档
+
+  # 公告类型
+  announcement_types:
+    info: 通知
+    warning: 警告
+    maintenance: 维护
+
+  # A/B 测试状态
+  ab_test_statuses:
+    draft: 草稿
+    running: 运行中
+    paused: 已暂停
+    completed: 已结束
+
+  admin:
+    menu:
+      content: 内容管理
+    labels:
+      banners: Banner 管理
+      announcements: 公告管理
+      faq_categories: FAQ 分类
+      faqs: FAQ 管理
+      ab_tests: A/B 测试
+    columns:
+      title: 标题
+      title_zh: 标题 (中文)
+      title_en: 标题 (English)
+      content_zh: 内容 (中文)
+      content_en: 内容 (English)
+      link_url: 跳转链接
+      image_key: 图片 Key
+      placement: 展示位置
+      position: 排序
+      start_at: 上线时间
+      end_at: 下线时间
+      publish_at: 发布时间
+      expire_at: 过期时间
+      is_pinned: 是否置顶
+      type: 类型
+      name_zh: 名称 (中文)
+      name_en: 名称 (English)
+      slug: Slug
+      sort: 排序
+      is_active: 是否启用
+      faq_count: FAQ 数量
+      question: 问题
+      question_zh: 问题 (中文)
+      question_en: 问题 (English)
+      answer_zh: 回答 (中文)
+      answer_en: 回答 (English)
+      test_key: 测试 Key
+      variants: 变体配置
+      traffic_percentage: 流量比例
+      variant_name: 变体名称
+      variant_weight: 权重
+      variant_config: 配置
+      variants_json: 变体 JSON 配置
+    panels:
+      multilingual_title: 多语言标题
+      multilingual_content: 多语言内容
+      multilingual_name: 多语言名称
+      multilingual_question: 多语言问题
+      multilingual_answer: 多语言回答
+      schedule: 定时设置
+      variants_config: 变体配置
+      faqs_in_category: 分类下的 FAQ
+    actions:
+      activate_banner: 上线
+      deactivate_banner: 下线
+      publish: 发布
+      archive: 归档
+      start_test: 启动测试
+      pause_test: 暂停测试
+      complete_test: 结束测试
+    notices:
+      banner_activated: Banner 已上线
+      banner_deactivated: Banner 已下线
+      announcement_published: 公告已发布
+      announcement_archived: 公告已归档
+      ab_test_started: A/B 测试已启动
+      ab_test_paused: A/B 测试已暂停
+      ab_test_completed: A/B 测试已结束
+      ab_test_created: A/B 测试已创建
+      ab_test_updated: A/B 测试已更新
+    alerts:
+      cannot_activate: 当前状态不允许上线
+      cannot_deactivate: 当前状态不允许下线
+      cannot_publish: 当前状态不允许发布
+      cannot_archive: 当前状态不允许归档
+      cannot_start_test: 当前状态不允许启动
+      cannot_pause_test: 当前状态不允许暂停
+      cannot_complete_test: 当前状态不允许结束
+    confirmations:
+      activate_banner: 确认上线该 Banner？
+      deactivate_banner: 确认下线该 Banner？
+      publish_announcement: 确认发布该公告？
+      archive_announcement: 确认归档该公告？
+      start_test: 确认启动该 A/B 测试？
+      pause_test: 确认暂停该 A/B 测试？
+      complete_test: 确认结束该 A/B 测试？
+    forms:
+      link_url_hint: 点击 Banner 跳转的目标链接
+      schedule_start_hint: 留空则手动上线
+      schedule_end_hint: 留空则不自动下线
+      publish_at_hint: 留空则手动发布
+      expire_at_hint: 留空则不自动过期
+      slug_hint: URL 友好标识，全局唯一
+      test_key_hint: 唯一标识 key，小写字母+数字+下划线
+      traffic_hint: 参与测试的流量百分比 (0-100)
+      variants_hint: "JSON 数组格式，每个变体包含 name, weight, config 字段"
+    scopes:
+      pinned: 已置顶
+      active_items: 已启用
+    messages:
+      no_faqs: 暂无 FAQ
+      no_variants: 暂无变体配置
+      batch_activated: 已批量上线
+      batch_deactivated: 已批量下线
+    errors:
+      invalid_json: JSON 格式无效
+
+  activerecord:
+    models:
+      banner: Banner
+      announcement: 公告
+      faq_category: FAQ 分类
+      faq: FAQ
+      ab_test: A/B 测试
+    attributes:
+      banner:
+        id: ID
+        title: 标题
+        link_url: 跳转链接
+        image_key: 图片 Key
+        position: 排序
+        placement: 展示位置
+        status: 状态
+        start_at: 上线时间
+        end_at: 下线时间
+        created_at: 创建时间
+        updated_at: 更新时间
+      announcement:
+        id: ID
+        title: 标题
+        content: 内容
+        announcement_type: 公告类型
+        status: 状态
+        is_pinned: 是否置顶
+        publish_at: 发布时间
+        expire_at: 过期时间
+        created_at: 创建时间
+        updated_at: 更新时间
+      faq_category:
+        id: ID
+        name: 名称
+        slug: Slug
+        sort: 排序
+        is_active: 是否启用
+        created_at: 创建时间
+        updated_at: 更新时间
+      faq:
+        id: ID
+        question: 问题
+        answer: 回答
+        faq_category_id: 所属分类
+        faq_category: 所属分类
+        sort: 排序
+        is_active: 是否启用
+        created_at: 创建时间
+        updated_at: 更新时间
+      ab_test:
+        id: ID
+        name: 名称
+        test_key: 测试 Key
+        description: 描述
+        status: 状态
+        variants: 变体配置
+        traffic_percentage: 流量比例
+        start_at: 开始时间
+        end_at: 结束时间
+        created_at: 创建时间
+        updated_at: 更新时间

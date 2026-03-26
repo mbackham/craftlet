@@ -10,9 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_18_104700) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_25_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "ab_tests", force: :cascade do |t|
+    t.string "name", null: false, comment: "实验名称"
+    t.string "test_key", null: false, comment: "唯一标识 key"
+    t.text "description", comment: "实验描述"
+    t.string "status", default: "draft", null: false, comment: "draft / running / paused / completed"
+    t.jsonb "variants", default: [], null: false, comment: "变体配置 [{ \"name\": \"A\", \"weight\": 50, \"config\": {} }]"
+    t.integer "traffic_percentage", default: 100, comment: "总流量百分比"
+    t.datetime "start_at", comment: "开始时间"
+    t.datetime "end_at", comment: "结束时间"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["status"], name: "index_ab_tests_on_status"
+    t.index ["test_key"], name: "index_ab_tests_on_test_key", unique: true
+  end
 
   create_table "active_admin_comments", force: :cascade do |t|
     t.string "namespace"
@@ -117,6 +132,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_18_104700) do
     t.index ["unlock_token"], name: "index_admin_users_on_unlock_token", unique: true
   end
 
+  create_table "announcements", force: :cascade do |t|
+    t.jsonb "title", default: {}, null: false, comment: "多语言标题"
+    t.jsonb "content", default: {}, null: false, comment: "多语言内容"
+    t.string "announcement_type", default: "info", null: false, comment: "info / warning / maintenance"
+    t.string "status", default: "draft", null: false, comment: "draft / published / archived"
+    t.boolean "is_pinned", default: false, comment: "是否置顶"
+    t.datetime "publish_at", comment: "定时发布时间"
+    t.datetime "expire_at", comment: "过期时间"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["announcement_type"], name: "index_announcements_on_announcement_type"
+    t.index ["is_pinned"], name: "index_announcements_on_is_pinned"
+    t.index ["publish_at"], name: "index_announcements_on_publish_at"
+    t.index ["status"], name: "index_announcements_on_status"
+  end
+
   create_table "audit_logs", force: :cascade do |t|
     t.string "actor_type", null: false
     t.uuid "actor_id", null: false
@@ -146,6 +177,22 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_18_104700) do
     t.string "status"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "banners", force: :cascade do |t|
+    t.jsonb "title", default: {}, null: false, comment: "多语言标题 { zh-CN: ..., en: ... }"
+    t.string "link_url", comment: "点击跳转链接"
+    t.string "image_key", comment: "OSS 图片 Key"
+    t.integer "position", default: 0, comment: "排序位置"
+    t.string "placement", default: "home", null: false, comment: "展示位置: home / category / detail"
+    t.string "status", default: "draft", null: false, comment: "draft / active / inactive"
+    t.datetime "start_at", comment: "定时上线"
+    t.datetime "end_at", comment: "定时下线"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["placement"], name: "index_banners_on_placement"
+    t.index ["position"], name: "index_banners_on_position"
+    t.index ["status"], name: "index_banners_on_status"
   end
 
   create_table "bids", force: :cascade do |t|

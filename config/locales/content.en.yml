@@ -1,0 +1,200 @@
+en:
+  # Banner statuses
+  banner_statuses:
+    draft: Draft
+    active: Active
+    inactive: Inactive
+
+  # Banner placements
+  banner_placements:
+    home: Home
+    category: Category
+    detail: Detail
+
+  # Announcement statuses
+  announcement_statuses:
+    draft: Draft
+    published: Published
+    archived: Archived
+
+  # Announcement types
+  announcement_types:
+    info: Info
+    warning: Warning
+    maintenance: Maintenance
+
+  # A/B test statuses
+  ab_test_statuses:
+    draft: Draft
+    running: Running
+    paused: Paused
+    completed: Completed
+
+  admin:
+    menu:
+      content: Content
+    labels:
+      banners: Banners
+      announcements: Announcements
+      faq_categories: FAQ Categories
+      faqs: FAQs
+      ab_tests: A/B Tests
+    columns:
+      title: Title
+      title_zh: "Title (中文)"
+      title_en: "Title (English)"
+      content_zh: "Content (中文)"
+      content_en: "Content (English)"
+      link_url: Link URL
+      image_key: Image Key
+      placement: Placement
+      position: Position
+      start_at: Start At
+      end_at: End At
+      publish_at: Publish At
+      expire_at: Expire At
+      is_pinned: Pinned
+      type: Type
+      name_zh: "Name (中文)"
+      name_en: "Name (English)"
+      slug: Slug
+      sort: Sort
+      is_active: Active
+      faq_count: FAQ Count
+      question: Question
+      question_zh: "Question (中文)"
+      question_en: "Question (English)"
+      answer_zh: "Answer (中文)"
+      answer_en: "Answer (English)"
+      test_key: Test Key
+      variants: Variants
+      traffic_percentage: Traffic %
+      variant_name: Variant Name
+      variant_weight: Weight
+      variant_config: Config
+      variants_json: Variants JSON
+    panels:
+      multilingual_title: Multilingual Title
+      multilingual_content: Multilingual Content
+      multilingual_name: Multilingual Name
+      multilingual_question: Multilingual Question
+      multilingual_answer: Multilingual Answer
+      schedule: Schedule
+      variants_config: Variants Configuration
+      faqs_in_category: FAQs in Category
+    actions:
+      activate_banner: Activate
+      deactivate_banner: Deactivate
+      publish: Publish
+      archive: Archive
+      start_test: Start Test
+      pause_test: Pause Test
+      complete_test: Complete Test
+    notices:
+      banner_activated: Banner activated
+      banner_deactivated: Banner deactivated
+      announcement_published: Announcement published
+      announcement_archived: Announcement archived
+      ab_test_started: A/B test started
+      ab_test_paused: A/B test paused
+      ab_test_completed: A/B test completed
+      ab_test_created: A/B test created
+      ab_test_updated: A/B test updated
+    alerts:
+      cannot_activate: Current status does not allow activation
+      cannot_deactivate: Current status does not allow deactivation
+      cannot_publish: Current status does not allow publishing
+      cannot_archive: Current status does not allow archiving
+      cannot_start_test: Current status does not allow starting
+      cannot_pause_test: Current status does not allow pausing
+      cannot_complete_test: Current status does not allow completing
+    confirmations:
+      activate_banner: "Are you sure you want to activate this banner?"
+      deactivate_banner: "Are you sure you want to deactivate this banner?"
+      publish_announcement: "Are you sure you want to publish this announcement?"
+      archive_announcement: "Are you sure you want to archive this announcement?"
+      start_test: "Are you sure you want to start this A/B test?"
+      pause_test: "Are you sure you want to pause this A/B test?"
+      complete_test: "Are you sure you want to complete this A/B test?"
+    forms:
+      link_url_hint: Target URL when banner is clicked
+      schedule_start_hint: Leave blank to activate manually
+      schedule_end_hint: Leave blank for no auto-deactivation
+      publish_at_hint: Leave blank to publish manually
+      expire_at_hint: Leave blank for no auto-expiry
+      slug_hint: URL-friendly identifier, globally unique
+      test_key_hint: "Unique key, lowercase letters + digits + underscores"
+      traffic_hint: "Percentage of traffic for this test (0-100)"
+      variants_hint: "JSON array format, each variant must have name, weight, config fields"
+    scopes:
+      pinned: Pinned
+      active_items: Active
+    messages:
+      no_faqs: No FAQs yet
+      no_variants: No variants configured
+      batch_activated: Batch activated
+      batch_deactivated: Batch deactivated
+    errors:
+      invalid_json: Invalid JSON format
+
+  activerecord:
+    models:
+      banner: Banner
+      announcement: Announcement
+      faq_category: FAQ Category
+      faq: FAQ
+      ab_test: A/B Test
+    attributes:
+      banner:
+        id: ID
+        title: Title
+        link_url: Link URL
+        image_key: Image Key
+        position: Position
+        placement: Placement
+        status: Status
+        start_at: Start At
+        end_at: End At
+        created_at: Created At
+        updated_at: Updated At
+      announcement:
+        id: ID
+        title: Title
+        content: Content
+        announcement_type: Type
+        status: Status
+        is_pinned: Pinned
+        publish_at: Publish At
+        expire_at: Expire At
+        created_at: Created At
+        updated_at: Updated At
+      faq_category:
+        id: ID
+        name: Name
+        slug: Slug
+        sort: Sort
+        is_active: Active
+        created_at: Created At
+        updated_at: Updated At
+      faq:
+        id: ID
+        question: Question
+        answer: Answer
+        faq_category_id: Category
+        faq_category: Category
+        sort: Sort
+        is_active: Active
+        created_at: Created At
+        updated_at: Updated At
+      ab_test:
+        id: ID
+        name: Name
+        test_key: Test Key
+        description: Description
+        status: Status
+        variants: Variants
+        traffic_percentage: Traffic %
+        start_at: Start At
+        end_at: End At
+        created_at: Created At
+        updated_at: Updated At

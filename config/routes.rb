@@ -25,6 +25,11 @@ Rails.application.routes.draw do
           get :captcha
         end
       end
+
+      # 内容运营 API (公开只读)
+      resources :banners, only: [:index]
+      resources :announcements, only: [:index]
+      resources :faqs, only: [:index]
     end
 
     # 支付回调 (Payment Provider Callbacks)

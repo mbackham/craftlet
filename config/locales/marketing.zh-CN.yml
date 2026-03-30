@@ -1,0 +1,99 @@
+zh-CN:
+  # ── 营销工具 Admin 翻译 ──────────────────────────────────
+  admin:
+    labels:
+      coupon_templates: "优惠券模板"
+      coupons: "优惠券"
+      coupon_budget_alerts: "预算告警"
+      coupon_analytics: "活动效果分析"
+      no_limit: "不限"
+      for_new_user: "新用户专享"
+      for_birthday: "生日礼券"
+      min_level: "最低等级"
+      manual_only: "仅手动发放"
+      marketing_menu: "营销工具"
+
+    panels:
+      budget_control: "预算控制"
+      recent_coupons: "最近发放记录"
+      overall_stats: "整体统计"
+      template_breakdown: "模板明细"
+      recent_trend: "近7日趋势"
+      pending_budget_alerts: "待处理预算告警"
+      grant_rules: "发放规则"
+      validity: "有效期设置"
+
+    columns:
+      coupon_type: "类型"
+      face_value: "面值"
+      min_order_amount: "最低消费"
+      quota: "配额（已发/总量）"
+      budget: "预算（已用/总额）"
+      valid_from: "有效期开始"
+      valid_until: "有效期结束"
+      valid_days: "领取后有效天数"
+      per_user_limit: "每人限领"
+      category_restrictions: "限制品类"
+      merchant_restrictions: "限制商家"
+      grant_rules: "发放规则"
+      total_quota: "总配额"
+      issued_count: "已发放"
+      quota_used_ratio: "配额使用率"
+      budget_amount: "预算总额"
+      used_amount: "已使用金额"
+      budget_used_ratio: "预算使用率"
+      budget_alert_threshold: "告警阈值"
+      template: "优惠券模板"
+      code: "券码"
+      grant_type: "发放来源"
+      expires_at: "过期时间"
+      granted_at: "发放时间"
+      used_at: "使用时间"
+      order_id: "关联订单"
+      discount_amount: "抵扣金额"
+      alert_type: "告警类型"
+      current_ratio: "当前比例"
+      acknowledged_by: "处理人"
+      acknowledged_at: "处理时间"
+      total_issued: "总发放量"
+      total_used: "已使用"
+      total_unused: "未使用"
+      total_expired: "已过期"
+      use_rate: "使用率"
+      total_discount: "总抵扣金额"
+      used_count: "使用数"
+      quota_progress: "配额进度"
+      budget_progress: "预算进度"
+      date: "日期"
+      user_id: "用户 ID"
+
+    forms:
+      face_value_hint: "满减券填写减免金额；折扣券填写折扣率（如 0.8 = 8折）；兑换码填写商品价值"
+      min_order_hint: "最低消费金额，0 表示无门槛"
+      per_user_limit_hint: "每位用户最多领取张数，0 表示不限"
+      valid_days_hint: "用户领取后 N 天内有效，与有效期时间二选一"
+      total_quota_hint: "最多发放张数，留空表示不限"
+      budget_amount_hint: "预算总额（元），留空表示不限"
+      budget_alert_hint: "使用比例超过此阈值时触发告警，如 0.8 = 80%"
+
+    actions:
+      activate_coupon_template: "启用模板"
+      deactivate_coupon_template: "停用模板"
+      acknowledge_alert: "标记处理"
+
+    confirmations:
+      activate_coupon_template: "确认启用此优惠券模板？"
+      deactivate_coupon_template: "确认停用此优惠券模板？"
+      acknowledge_alert: "确认标记此告警为已处理？"
+
+    notices:
+      coupon_template_activated: "优惠券模板已启用"
+      coupon_template_deactivated: "优惠券模板已停用"
+      coupon_alert_acknowledged: "告警已标记为处理"
+      coupon_issued: "优惠券已发放，券码：%{code}"
+
+    alerts:
+      user_not_found: "用户不存在"
+
+    messages:
+      batch_acknowledged: "已批量处理 %{count} 条告警"

@@ -207,3 +207,43 @@ zh-CN:
         no_reasons: "暂无退款原因数据。"
         merchant_refund_count: "退款笔数"
         merchant_refund_amount: "退款金额"
+
+
+  # ── 营销工具（优惠券）────────────────────────────────────
+  coupon_types:
+    fixed_amount: "满减券"
+    discount: "折扣券"
+    redeem_code: "兑换码"
+
+  coupon_statuses:
+    draft: "草稿"
+    active: "启用"
+    inactive: "停用"
+
+  coupon_item_statuses:
+    unused: "未使用"
+    used: "已使用"
+    expired: "已过期"
+    locked: "锁定中"
+
+  coupon_grant_types:
+    manual: "手动发放"
+    new_user: "新用户"
+    birthday: "生日礼券"
+    level_up: "等级升级"
+    redeem: "兑换码"
+
+  coupon_alert_types:
+    quota_threshold: "配额预警"
+    budget_threshold: "预算预警"
+    quota_exhausted: "配额耗尽"
+    budget_exhausted: "预算耗尽"
+
+  coupon_alert_statuses:
+    pending: "待处理"
+    acknowledged: "已处理"
+
+  api:
+    coupons:
+      code_required: "请输入兑换码"
+      invalid_code: "无效的兑换码"

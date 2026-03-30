@@ -30,6 +30,15 @@ Rails.application.routes.draw do
       resources :banners, only: [:index]
       resources :announcements, only: [:index]
       resources :faqs, only: [:index]
+
+      # 营销工具 API (需登录)
+      resources :coupons, only: [:index] do
+        collection do
+          get  :available
+          post :redeem
+          post :grant_new_user
+        end
+      end
     end
 
     # 支付回调 (Payment Provider Callbacks)

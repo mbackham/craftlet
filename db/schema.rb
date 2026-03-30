@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_25_100002) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_30_100003) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -205,6 +205,66 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_25_100002) do
     t.index ["bidder_id"], name: "index_bids_on_bidder_id"
     t.index ["order_id"], name: "index_bids_on_order_id"
     t.index ["status"], name: "index_bids_on_status"
+  end
+
+  create_table "coupon_budget_alerts", force: :cascade do |t|
+    t.bigint "coupon_template_id", null: false, comment: "关联模板"
+    t.string "alert_type", null: false, comment: "quota_threshold / budget_threshold / quota_exhausted / budget_exhausted"
+    t.decimal "current_ratio", precision: 5, scale: 4, comment: "触发时的使用比例"
+    t.string "status", default: "pending", null: false, comment: "pending / acknowledged"
+    t.bigint "acknowledged_by_id", comment: "处理人 AdminUser ID"
+    t.datetime "acknowledged_at", comment: "处理时间"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["alert_type"], name: "index_coupon_budget_alerts_on_alert_type"
+    t.index ["coupon_template_id"], name: "index_coupon_budget_alerts_on_coupon_template_id"
+    t.index ["status"], name: "index_coupon_budget_alerts_on_status"
+  end
+
+  create_table "coupon_templates", force: :cascade do |t|
+    t.string "name", null: false, comment: "模板名称"
+    t.string "coupon_type", null: false, comment: "类型: fixed_amount / discount / redeem_code"
+    t.decimal "face_value", precision: 12, scale: 2, comment: "面值（满减：减少金额；折扣：折扣率 0-1；兑换码：商品价值）"
+    t.decimal "min_order_amount", precision: 12, scale: 2, default: "0.0", comment: "最低使用金额，0 表示无限制"
+    t.string "status", default: "draft", null: false, comment: "draft / active / inactive"
+    t.jsonb "category_ids", default: [], null: false, comment: "限制品类 ID 列表，空表示不限"
+    t.jsonb "merchant_ids", default: [], null: false, comment: "限制商家 ID 列表，空表示不限"
+    t.datetime "valid_from", comment: "优惠券有效期开始时间"
+    t.datetime "valid_until", comment: "优惠券有效期结束时间"
+    t.integer "valid_days", comment: "领取后 N 天内有效，与 valid_from/until 二选一"
+    t.integer "per_user_limit", default: 1, comment: "每人最多领取张数，0 表示不限"
+    t.jsonb "grant_rules", default: {}, null: false, comment: "发放规则: { new_user: true, birthday: true, min_level: 2 }"
+    t.integer "total_quota", comment: "总发放量，nil 表示不限"
+    t.integer "issued_count", default: 0, null: false, comment: "已发放数量"
+    t.decimal "budget_amount", precision: 14, scale: 2, comment: "预算总额，nil 表示不限"
+    t.decimal "used_amount", precision: 14, scale: 2, default: "0.0", null: false, comment: "已使用金额"
+    t.decimal "budget_alert_threshold", precision: 5, scale: 2, default: "0.8", comment: "预算告警阈值（比例），0.8 = 80%"
+    t.text "description", comment: "备注说明"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["coupon_type"], name: "index_coupon_templates_on_coupon_type"
+    t.index ["status"], name: "index_coupon_templates_on_status"
+  end
+
+  create_table "coupons", force: :cascade do |t|
+    t.bigint "coupon_template_id", null: false, comment: "关联的优惠券模板"
+    t.bigint "user_id", null: false, comment: "持有用户 ID"
+    t.string "code", null: false, comment: "优惠券码（兑换码类型用随机字符串）"
+    t.string "status", default: "unused", null: false, comment: "unused / used / expired / locked"
+    t.string "grant_type", default: "manual", null: false, comment: "发放来源: manual / new_user / birthday / level_up / redeem"
+    t.datetime "granted_at", null: false, comment: "发放时间"
+    t.datetime "expires_at", comment: "过期时间（由模板计算得出）"
+    t.datetime "used_at", comment: "使用时间"
+    t.bigint "order_id", comment: "使用时关联的订单 ID"
+    t.decimal "discount_amount", precision: 12, scale: 2, comment: "实际抵扣金额"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "index_coupons_on_code", unique: true
+    t.index ["coupon_template_id"], name: "index_coupons_on_coupon_template_id"
+    t.index ["order_id"], name: "index_coupons_on_order_id"
+    t.index ["status"], name: "index_coupons_on_status"
+    t.index ["user_id", "coupon_template_id"], name: "index_coupons_on_user_and_template"
+    t.index ["user_id"], name: "index_coupons_on_user_id"
   end
 
   create_table "elements", force: :cascade do |t|
@@ -719,6 +779,8 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_25_100002) do
   add_foreign_key "admin_user_roles", "admin_roles"
   add_foreign_key "admin_user_roles", "admin_users", column: "user_id"
   add_foreign_key "bids", "orders"
+  add_foreign_key "coupon_budget_alerts", "coupon_templates"
+  add_foreign_key "coupons", "coupon_templates"
   add_foreign_key "faqs", "faq_categories"
   add_foreign_key "feedbacks", "admin_users", on_delete: :nullify
   add_foreign_key "feedbacks", "users", on_delete: :nullify

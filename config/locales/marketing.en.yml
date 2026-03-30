@@ -1,0 +1,137 @@
+en:
+  # ── Marketing Tools (Coupons) ─────────────────────────────
+  coupon_types:
+    fixed_amount: "Fixed Discount"
+    discount: "Percentage Discount"
+    redeem_code: "Redeem Code"
+
+  coupon_statuses:
+    draft: "Draft"
+    active: "Active"
+    inactive: "Inactive"
+
+  coupon_item_statuses:
+    unused: "Unused"
+    used: "Used"
+    expired: "Expired"
+    locked: "Locked"
+
+  coupon_grant_types:
+    manual: "Manual"
+    new_user: "New User"
+    birthday: "Birthday"
+    level_up: "Level Up"
+    redeem: "Redeem Code"
+
+  coupon_alert_types:
+    quota_threshold: "Quota Alert"
+    budget_threshold: "Budget Alert"
+    quota_exhausted: "Quota Exhausted"
+    budget_exhausted: "Budget Exhausted"
+
+  coupon_alert_statuses:
+    pending: "Pending"
+    acknowledged: "Acknowledged"
+
+  admin:
+    labels:
+      coupon_templates: "Coupon Templates"
+      coupons: "Coupons"
+      coupon_budget_alerts: "Budget Alerts"
+      coupon_analytics: "Campaign Analytics"
+      no_limit: "No Limit"
+      for_new_user: "New Users"
+      for_birthday: "Birthday"
+      min_level: "Min Level"
+      manual_only: "Manual Only"
+      marketing_menu: "Marketing"
+
+    panels:
+      budget_control: "Budget Control"
+      recent_coupons: "Recent Issued Coupons"
+      overall_stats: "Overall Statistics"
+      template_breakdown: "Template Breakdown"
+      recent_trend: "Last 7 Days Trend"
+      pending_budget_alerts: "Pending Budget Alerts"
+      grant_rules: "Grant Rules"
+      validity: "Validity Settings"
+
+    columns:
+      coupon_type: "Type"
+      face_value: "Face Value"
+      min_order_amount: "Min Order"
+      quota: "Quota (Used/Total)"
+      budget: "Budget (Used/Total)"
+      valid_from: "Valid From"
+      valid_until: "Valid Until"
+      valid_days: "Valid Days After Grant"
+      per_user_limit: "Per User Limit"
+      category_restrictions: "Category Restrictions"
+      merchant_restrictions: "Merchant Restrictions"
+      grant_rules: "Grant Rules"
+      total_quota: "Total Quota"
+      issued_count: "Issued"
+      quota_used_ratio: "Quota Usage"
+      budget_amount: "Budget"
+      used_amount: "Used Amount"
+      budget_used_ratio: "Budget Usage"
+      budget_alert_threshold: "Alert Threshold"
+      template: "Template"
+      code: "Code"
+      grant_type: "Grant Type"
+      expires_at: "Expires At"
+      granted_at: "Granted At"
+      used_at: "Used At"
+      order_id: "Order ID"
+      discount_amount: "Discount"
+      alert_type: "Alert Type"
+      current_ratio: "Current Ratio"
+      acknowledged_by: "Acknowledged By"
+      acknowledged_at: "Acknowledged At"
+      total_issued: "Total Issued"
+      total_used: "Total Used"
+      total_unused: "Unused"
+      total_expired: "Expired"
+      use_rate: "Use Rate"
+      total_discount: "Total Discount"
+      used_count: "Used Count"
+      quota_progress: "Quota Progress"
+      budget_progress: "Budget Progress"
+      date: "Date"
+      user_id: "User ID"
+
+    forms:
+      face_value_hint: "Fixed: discount amount; Discount: rate (e.g. 0.8 = 20% off); Redeem: product value"
+      min_order_hint: "Minimum order amount to use this coupon, 0 means no limit"
+      per_user_limit_hint: "Max coupons per user, 0 means unlimited"
+      valid_days_hint: "Days after grant until expiry; use this OR valid_from/until"
+      total_quota_hint: "Max coupons to issue, leave blank for unlimited"
+      budget_amount_hint: "Total budget cap in CNY, leave blank for unlimited"
+      budget_alert_hint: "Alert when usage ratio exceeds this, e.g. 0.8 = 80%"
+
+    actions:
+      activate_coupon_template: "Activate Template"
+      deactivate_coupon_template: "Deactivate Template"
+      acknowledge_alert: "Acknowledge"
+
+    confirmations:
+      activate_coupon_template: "Activate this coupon template?"
+      deactivate_coupon_template: "Deactivate this coupon template?"
+      acknowledge_alert: "Mark this alert as acknowledged?"
+
+    notices:
+      coupon_template_activated: "Coupon template activated."
+      coupon_template_deactivated: "Coupon template deactivated."
+      coupon_alert_acknowledged: "Alert acknowledged."
+      coupon_issued: "Coupon issued. Code: %{code}"
+
+    alerts:
+      user_not_found: "User not found"
+
+    messages:
+      batch_acknowledged: "Acknowledged %{count} alert(s)"
+
+  api:
+    coupons:
+      code_required: "Coupon code is required"
+      invalid_code: "Invalid coupon code"

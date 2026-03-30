@@ -295,6 +295,7 @@ en:
       finance: Finance
       settlement: Settlement Management
       data_center: Data Center
+      marketing: Marketing
     labels:
       admin_users: Admin Users
       admin_roles: Admin Roles

@@ -1,0 +1,115 @@
+zh-CN:
+  admin:
+    etl:
+      menu:
+        dashboard: "ETL 总览"
+        sync_logs: "同步任务"
+        clean_rules: "清洗规则"
+        clean_logs: "清洗日志"
+        dim_users: "用户画像"
+        dim_merchants: "商家画像"
+        lineage: "血缘关系图"
+
+      dashboard:
+        title: "ETL 数据仓库总览"
+        sync_stats: "同步状态"
+        dw_stats: "数仓数据量"
+        recent_syncs: "最近同步记录"
+        rfm_distribution: "用户RFM分层"
+        merchant_tier: "商家层级分布"
+        quick_actions: "快速操作"
+        total_syncs: "同步总次数"
+        completed: "成功"
+        failed: "失败"
+        running: "运行中"
+        clean_rules: "活跃清洗规则"
+        lineage_nodes: "血缘节点"
+
+      sync_log:
+        batch_id: "批次ID"
+        source_table: "源表"
+        target_table: "目标表"
+        sync_type: "类型"
+        status: "状态"
+        extracted: "抽取数"
+        loaded: "加载数"
+        cleaned: "清洗数"
+        duration: "耗时(秒)"
+        recent_logs: "最近清洗日志"
+
+      clean_rule:
+        basic_info: "基本信息"
+        source_table: "源表"
+        target_field: "目标字段"
+        rule_type: "规则类型"
+        action: "动作"
+        priority: "优先级"
+        is_active: "启用"
+        params: "规则参数"
+        params_config: "规则参数(JSON)"
+        recent_logs: "最近清洗日志 (最新50条)"
+
+      clean_log:
+        batch_id: "批次"
+        rule: "触发规则"
+        action: "处理动作"
+        stats: "清洗统计"
+
+      dim_user:
+        basic_info: "基本信息"
+        order_stats: "消费统计"
+        rfm: "RFM分层"
+        rfm_profile: "RFM 画像"
+        rfm_stats: "RFM 分层分布"
+        total_amount: "总消费"
+        refund_rate: "退款率"
+
+      dim_merchant:
+        basic_info: "基本信息"
+        performance: "经营指标"
+        tier: "层级"
+        score: "评分"
+        gmv: "GMV"
+        refund_rate: "退款率"
+        rating: "评分与分层"
+        tier_stats: "商家层级分布"
+
+      lineage:
+        title: "数据血缘关系图"
+        graph: "血缘图 (Mermaid)"
+        source: "血缘图源码"
+        nodes: "数据节点"
+        edges: "数据流向"
+        node_type: "类型"
+        node_name: "名称"
+        downstream_count: "下游节点数"
+        upstream: "上游"
+        downstream: "下游"
+        management: "血缘图管理"
+
+      sources:
+        orders: "订单"
+        payments: "支付"
+        refunds: "退款"
+        users: "用户"
+        merchant_profiles: "商家"
+        settlements: "结算"
+        coupons: "优惠券"
+
+      actions:
+        trigger_full_sync: "触发全量同步"
+        sync_source: "同步 %{source}"
+        rebuild_profile: "重建画像"
+        rebuild_all_profiles: "全量重建画像"
+        rebuild_lineage: "重新构建血缘图"
+
+      confirm:
+        full_sync: "确认触发全量同步？这将重新同步所有数据源。"
+        rebuild_all: "确认全量重建所有画像？"
+        rebuild_lineage: "将重新生成所有血缘节点和边，确认？"
+
+      notices:
+        full_sync_enqueued: "全量同步任务已加入队列"
+        profile_rebuilt: "画像已重建"
+        rebuild_enqueued: "画像重建任务已加入队列"
+        lineage_rebuilt: "血缘图已重建"

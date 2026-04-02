@@ -119,6 +119,23 @@ end
 
 puts "All permissions seed done."
 
+# === ETL管理权限 ===
+etl_permissions = [
+  { name: "查看ETL", code: "etl:read" },
+  { name: "管理ETL", code: "etl:manage" }
+]
+
+etl_permissions.each do |p|
+  AdminPermission.find_or_create_by!(code: p[:code]) { |perm| perm.name = p[:name] }
+end
+
+# 将ETL权限添加到超级管理员角色
+AdminPermission.find_each do |perm|
+  AdminRolePermission.find_or_create_by!(admin_role: super_admin_role, admin_permission: perm)
+end
+
+puts "ETL permissions seed done."
+
 # === 运营角色 (ops) ===
 ops_role = AdminRole.find_or_create_by!(code: "ops") { |r| r.name = "运营" }
 ops_permission_codes = %w[

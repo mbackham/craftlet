@@ -295,6 +295,7 @@ en:
       finance: Finance
       settlement: Settlement Management
       data_center: Data Center
+      etl: ETL Warehouse
       marketing: Marketing
     labels:
       admin_users: Admin Users

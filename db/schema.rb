@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_30_100003) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_02_100007) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -267,6 +267,160 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_30_100003) do
     t.index ["user_id"], name: "index_coupons_on_user_id"
   end
 
+  create_table "dw_dim_merchants", force: :cascade do |t|
+    t.bigint "source_merchant_id", null: false
+    t.bigint "source_user_id"
+    t.string "shop_name"
+    t.string "status"
+    t.string "province"
+    t.string "city"
+    t.integer "total_order_count", default: 0
+    t.decimal "total_gmv", precision: 14, scale: 2, default: "0.0"
+    t.decimal "avg_order_amount", precision: 12, scale: 2, default: "0.0"
+    t.integer "refund_count", default: 0
+    t.decimal "refund_rate", precision: 5, scale: 2, default: "0.0"
+    t.integer "settlement_count", default: 0
+    t.decimal "total_settled_amount", precision: 14, scale: 2, default: "0.0"
+    t.integer "risk_event_count", default: 0
+    t.string "merchant_tier", default: "standard"
+    t.decimal "merchant_score", precision: 5, scale: 2, default: "0.0"
+    t.jsonb "tags", default: []
+    t.jsonb "extra", default: {}
+    t.datetime "profile_updated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["merchant_score"], name: "index_dw_dim_merchants_on_merchant_score"
+    t.index ["merchant_tier"], name: "index_dw_dim_merchants_on_merchant_tier"
+    t.index ["source_merchant_id"], name: "index_dw_dim_merchants_on_source_merchant_id", unique: true
+  end
+
+  create_table "dw_dim_time", force: :cascade do |t|
+    t.date "date_value", null: false
+    t.integer "year"
+    t.integer "quarter"
+    t.integer "month"
+    t.integer "week_of_year"
+    t.integer "day_of_week"
+    t.boolean "is_weekend"
+    t.boolean "is_holiday", default: false
+    t.string "holiday_name"
+    t.index ["date_value"], name: "index_dw_dim_time_on_date_value", unique: true
+  end
+
+  create_table "dw_dim_users", force: :cascade do |t|
+    t.bigint "source_user_id", null: false
+    t.string "email"
+    t.string "phone"
+    t.string "nickname"
+    t.string "status"
+    t.string "user_level", default: "normal"
+    t.string "registration_channel"
+    t.integer "total_order_count", default: 0
+    t.decimal "total_order_amount", precision: 14, scale: 2, default: "0.0"
+    t.decimal "avg_order_amount", precision: 12, scale: 2, default: "0.0"
+    t.integer "refund_count", default: 0
+    t.decimal "refund_rate", precision: 5, scale: 2, default: "0.0"
+    t.integer "coupon_used_count", default: 0
+    t.decimal "coupon_total_discount", precision: 12, scale: 2, default: "0.0"
+    t.datetime "first_order_at"
+    t.datetime "last_order_at"
+    t.integer "days_since_last_order"
+    t.string "rfm_segment"
+    t.jsonb "tags", default: []
+    t.jsonb "extra", default: {}
+    t.datetime "profile_updated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["rfm_segment"], name: "index_dw_dim_users_on_rfm_segment"
+    t.index ["source_user_id"], name: "index_dw_dim_users_on_source_user_id", unique: true
+    t.index ["user_level"], name: "index_dw_dim_users_on_user_level"
+  end
+
+  create_table "dw_fact_coupons", force: :cascade do |t|
+    t.bigint "source_id", null: false
+    t.bigint "user_id"
+    t.bigint "template_id"
+    t.decimal "discount_amount", precision: 12, scale: 2
+    t.datetime "used_at"
+    t.datetime "synced_at"
+    t.string "etl_batch_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["etl_batch_id"], name: "index_dw_fact_coupons_on_etl_batch_id"
+    t.index ["source_id"], name: "index_dw_fact_coupons_on_source_id", unique: true
+    t.index ["user_id"], name: "index_dw_fact_coupons_on_user_id"
+  end
+
+  create_table "dw_fact_orders", force: :cascade do |t|
+    t.bigint "source_id", null: false
+    t.string "order_no"
+    t.string "customer_id"
+    t.string "merchant_id"
+    t.string "status"
+    t.decimal "total_amount", precision: 12, scale: 2
+    t.string "currency"
+    t.datetime "paid_at"
+    t.datetime "completed_at"
+    t.datetime "canceled_at"
+    t.bigint "dim_time_id"
+    t.datetime "synced_at"
+    t.string "etl_batch_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["etl_batch_id"], name: "index_dw_fact_orders_on_etl_batch_id"
+    t.index ["paid_at"], name: "index_dw_fact_orders_on_paid_at"
+    t.index ["source_id"], name: "index_dw_fact_orders_on_source_id", unique: true
+    t.index ["status"], name: "index_dw_fact_orders_on_status"
+  end
+
+  create_table "dw_fact_payments", force: :cascade do |t|
+    t.bigint "source_id", null: false
+    t.bigint "order_source_id"
+    t.string "channel"
+    t.decimal "amount", precision: 12, scale: 2
+    t.string "status"
+    t.datetime "paid_at"
+    t.datetime "synced_at"
+    t.string "etl_batch_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["etl_batch_id"], name: "index_dw_fact_payments_on_etl_batch_id"
+    t.index ["order_source_id"], name: "index_dw_fact_payments_on_order_source_id"
+    t.index ["source_id"], name: "index_dw_fact_payments_on_source_id", unique: true
+  end
+
+  create_table "dw_fact_refunds", force: :cascade do |t|
+    t.bigint "source_id", null: false
+    t.bigint "order_source_id"
+    t.decimal "amount", precision: 12, scale: 2
+    t.string "reason"
+    t.string "status"
+    t.datetime "succeeded_at"
+    t.datetime "synced_at"
+    t.string "etl_batch_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["etl_batch_id"], name: "index_dw_fact_refunds_on_etl_batch_id"
+    t.index ["order_source_id"], name: "index_dw_fact_refunds_on_order_source_id"
+    t.index ["source_id"], name: "index_dw_fact_refunds_on_source_id", unique: true
+  end
+
+  create_table "dw_fact_settlements", force: :cascade do |t|
+    t.bigint "source_id", null: false
+    t.bigint "merchant_source_id"
+    t.decimal "net_amount", precision: 12, scale: 2
+    t.string "status"
+    t.date "period_start"
+    t.date "period_end"
+    t.datetime "synced_at"
+    t.string "etl_batch_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["etl_batch_id"], name: "index_dw_fact_settlements_on_etl_batch_id"
+    t.index ["merchant_source_id"], name: "index_dw_fact_settlements_on_merchant_source_id"
+    t.index ["source_id"], name: "index_dw_fact_settlements_on_source_id", unique: true
+  end
+
   create_table "elements", force: :cascade do |t|
     t.string "name", null: false
     t.string "category"
@@ -282,6 +436,87 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_30_100003) do
     t.index ["category"], name: "index_elements_on_category"
     t.index ["created_at"], name: "index_elements_on_created_at"
     t.index ["status"], name: "index_elements_on_status"
+  end
+
+  create_table "etl_clean_logs", force: :cascade do |t|
+    t.bigint "etl_clean_rule_id", null: false
+    t.string "batch_id", null: false
+    t.string "source_table", null: false
+    t.bigint "source_record_id", null: false
+    t.string "field_name", null: false
+    t.text "original_value"
+    t.text "cleaned_value"
+    t.string "action_taken"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["batch_id"], name: "index_etl_clean_logs_on_batch_id"
+    t.index ["etl_clean_rule_id"], name: "index_etl_clean_logs_on_etl_clean_rule_id"
+    t.index ["source_record_id"], name: "index_etl_clean_logs_on_source_record_id"
+    t.index ["source_table"], name: "index_etl_clean_logs_on_source_table"
+  end
+
+  create_table "etl_clean_rules", force: :cascade do |t|
+    t.string "name", null: false
+    t.string "source_table", null: false
+    t.string "target_field", null: false
+    t.string "rule_type", null: false
+    t.string "action", default: "skip"
+    t.jsonb "params", default: {}, null: false
+    t.integer "priority", default: 0
+    t.boolean "is_active", default: true
+    t.text "description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["is_active"], name: "index_etl_clean_rules_on_is_active"
+    t.index ["rule_type"], name: "index_etl_clean_rules_on_rule_type"
+    t.index ["source_table"], name: "index_etl_clean_rules_on_source_table"
+  end
+
+  create_table "etl_lineage_edges", force: :cascade do |t|
+    t.bigint "upstream_id", null: false
+    t.bigint "downstream_id", null: false
+    t.string "edge_type", default: "etl"
+    t.string "transform_logic"
+    t.jsonb "field_mapping", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["downstream_id"], name: "index_etl_lineage_edges_on_downstream_id"
+    t.index ["upstream_id", "downstream_id"], name: "index_etl_lineage_edges_on_upstream_id_and_downstream_id", unique: true
+    t.index ["upstream_id"], name: "index_etl_lineage_edges_on_upstream_id"
+  end
+
+  create_table "etl_lineage_nodes", force: :cascade do |t|
+    t.string "node_type", null: false
+    t.string "name", null: false
+    t.string "schema_name"
+    t.text "description"
+    t.jsonb "metadata", default: {}
+    t.boolean "is_active", default: true
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["node_type", "name"], name: "index_etl_lineage_nodes_on_node_type_and_name", unique: true
+  end
+
+  create_table "etl_sync_logs", force: :cascade do |t|
+    t.string "source_table", null: false
+    t.string "target_table", null: false
+    t.string "sync_type", default: "incremental"
+    t.string "status", default: "running"
+    t.integer "extracted_count", default: 0
+    t.integer "loaded_count", default: 0
+    t.integer "cleaned_count", default: 0
+    t.integer "error_count", default: 0
+    t.datetime "started_at"
+    t.datetime "completed_at"
+    t.text "error_message"
+    t.string "batch_id", null: false
+    t.jsonb "metadata", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["batch_id"], name: "index_etl_sync_logs_on_batch_id"
+    t.index ["source_table"], name: "index_etl_sync_logs_on_source_table"
+    t.index ["started_at"], name: "index_etl_sync_logs_on_started_at"
+    t.index ["status"], name: "index_etl_sync_logs_on_status"
   end
 
   create_table "faq_categories", force: :cascade do |t|
@@ -781,6 +1016,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_30_100003) do
   add_foreign_key "bids", "orders"
   add_foreign_key "coupon_budget_alerts", "coupon_templates"
   add_foreign_key "coupons", "coupon_templates"
+  add_foreign_key "etl_clean_logs", "etl_clean_rules"
+  add_foreign_key "etl_lineage_edges", "etl_lineage_nodes", column: "downstream_id"
+  add_foreign_key "etl_lineage_edges", "etl_lineage_nodes", column: "upstream_id"
   add_foreign_key "faqs", "faq_categories"
   add_foreign_key "feedbacks", "admin_users", on_delete: :nullify
   add_foreign_key "feedbacks", "users", on_delete: :nullify

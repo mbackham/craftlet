@@ -308,6 +308,9 @@ ActiveAdmin.setup do |config|
       menu.add id: 'data_center_menu',
                label: proc { I18n.t('admin.menu.data_center') },
                priority: 55
+      menu.add id: 'etl_menu',
+               label: proc { I18n.t('admin.menu.etl') },
+               priority: 57
       menu.add id: 'marketing_menu',
                label: proc { I18n.t('admin.menu.marketing') },
                priority: 60

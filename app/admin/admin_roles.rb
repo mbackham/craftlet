@@ -59,13 +59,10 @@ ActiveAdmin.register AdminRole do
       table_for admin_role.users.order(:email) do
         column :id
         column :email do |user|
-          link_to user.email, admin_user_path(user)
+          link_to user.email, admin_admin_user_path(user)
         end
-        column :phone do |user|
-          sensitive_field(user.phone, mask_method: :mask_phone, admin_user: current_admin_user)
-        end
-        column :status do |u|
-          I18n.t("user_statuses.#{u.status}", default: u.status)
+        column I18n.t('admin.columns.role') do |user|
+          status_tag user.role, class: user.admin? ? 'yes' : nil
         end
         column :created_at
       end
@@ -81,8 +78,7 @@ ActiveAdmin.register AdminRole do
     f.inputs I18n.t('admin.panels.permission_assignment') do
       f.input :admin_permissions,
               as: :check_boxes,
-              collection: AdminPermission.all.order(:code),
-              label_method: ->(p) { "#{p.localized_name} (#{p.code})" }
+              collection: AdminPermission.all.order(:code).map { |p| ["#{p.localized_name} (#{p.code})", p.id] }
     end
 
     f.actions

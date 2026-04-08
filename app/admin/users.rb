@@ -139,8 +139,7 @@ ActiveAdmin.register User do
     f.inputs I18n.t('admin.panels.admin_role_assignment') do
       f.input :admin_roles,
               as: :check_boxes,
-              collection: AdminRole.all.order(:code),
-              label_method: ->(r) { "#{r.name} (#{r.code})" },
+              collection: AdminRole.all.order(:code).map { |r| ["#{r.localized_name} (#{r.code})", r.id] },
               hint: I18n.t('admin.forms.role_assignment_hint')
     end
 

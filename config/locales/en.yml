@@ -98,6 +98,21 @@ en:
       today_net: "Today's Net Inflow"
       today_alerts: "Today's Large-Amount Alerts"
       pending_fund_alerts: "Pending Alerts"
+      pending_review_count: "Pending Approval Settlements"
+      monthly_settled: "Total Settled This Month"
+      pending_exceptions: "Pending Exceptions"
+
+    actions:
+      settlement_list: "Settlement List"
+      settlement_rules: "Settlement Rules"
+      invoice_management: "Invoice Management"
+      export_orders: "Go to Orders List (Exportable)"
+      export_refunds: "Go to Refunds List (Exportable)"
+      goto_reconciliation: "Go to Reconciliation Discrepancies"
+      goto_bank_statements: "Go to Bank Statement Import"
+      fund_alerts_list: "Large-Amount Alerts List"
+      fund_daily_report_list: "Fund Daily Report"
+      risk_events: "Risk Events"
 
     fund_daily_report:
       select_date: "Select Date"

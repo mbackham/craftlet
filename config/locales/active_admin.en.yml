@@ -321,6 +321,7 @@ en:
       actions: Actions
       permission_count: Permission Count
       user_count: User Count
+      role: Role
       related_roles: Related Roles
       status: Status
       operator: Operator

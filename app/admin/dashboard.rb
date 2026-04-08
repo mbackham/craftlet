@@ -65,9 +65,9 @@ ActiveAdmin.register_page "Dashboard" do
           end
 
           div style: "display: flex; gap: 10px; margin-top: 10px;" do
-            link_to "结算单列表", admin_settlements_path, class: "button"
-            link_to "结算规则", admin_settlement_rules_path, class: "button"
-            link_to "发票管理", admin_invoices_path, class: "button"
+            link_to I18n.t("admin.actions.settlement_list", default: "结算单列表"), admin_settlements_path, class: "button"
+            link_to I18n.t("admin.actions.settlement_rules", default: "结算规则"), admin_settlement_rules_path, class: "button"
+            link_to I18n.t("admin.actions.invoice_management", default: "发票管理"), admin_invoices_path, class: "button"
           end
         end
       end
@@ -131,9 +131,9 @@ ActiveAdmin.register_page "Dashboard" do
           end
 
           div style: "display: flex; gap: 10px; margin-top: 10px;" do
-            link_to "大额预警列表",  admin_fund_alerts_path,        class: "button"
-            link_to "资金日报",      admin_funddailyreport_path,    class: "button"
-            link_to "风控事件",      admin_risk_events_path,        class: "button"
+            link_to I18n.t("admin.actions.fund_alerts_list", default: "大额预警列表"),  admin_fund_alerts_path,        class: "button"
+            link_to I18n.t("admin.actions.fund_daily_report_list", default: "资金日报"),      admin_funddailyreport_path,    class: "button"
+            link_to I18n.t("admin.actions.risk_events", default: "风控事件"),      admin_risk_events_path,        class: "button"
           end
         end
       end

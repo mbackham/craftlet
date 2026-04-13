@@ -1,0 +1,528 @@
+# Craftlet App 架构分析：RN(Expo) + Rails 后端兼容性评估
+
+## 一、后端现状全景
+
+### 1.1 技术栈概览
+
+| 层面 | 技术 | 状态 |
+|------|------|------|
+| 框架 | Rails 7.1 + Ruby 3.2 | ✅ 稳定 |
+| 数据库 | PostgreSQL | ✅ 稳定 |
+| 认证 | Devise + devise-jwt (JTIMatcher) | ⚠️ 需改造 |
+| 授权 | Pundit | ✅ 可复用 |
+| 后台管理 | ActiveAdmin | ✅ 独立体系(AdminUser) |
+| 后台任务 | Sidekiq + Redis | ✅ 可复用 |
+| 支付 | 微信/支付宝回调 (Stub) | ⚠️ 需扩展 |
+| 文件存储 | ActiveStorage + AWS S3 | ✅ 可复用 |
+| 实时通信 | ActionCable (基础骨架) | ⚠️ 需开发 |
+| API文档 | Rswag (Swagger) | ✅ 可复用 |
+| 错误追踪 | Sentry | ✅ 可复用 |
+| CORS | rack-cors | ✅ 已配置 |
+
+### 1.2 当前 API 结构
+
+```
+/api/v1/
+├── users/sign_in          (POST)   # JWT 登录
+├── users/sign_out         (DELETE) # JWT 登出
+├── merchant/status        (GET)    # 商家审核状态
+├── feedbacks              (POST/GET) # 反馈
+├── banners                (GET)    # Banner列表
+├── announcements          (GET)    # 公告列表
+├── faqs                   (GET)    # FAQ列表
+├── coupons                (GET)    # 优惠券
+│   ├── available          (GET)    # 可用优惠券
+│   ├── redeem             (POST)   # 兑换码
+│   └── grant_new_user     (POST)   # 新用户发券
+/api/payments/callbacks/
+├── wechat                 (POST)   # 微信回调
+└── alipay                 (POST)   # 支付宝回调
+```
+
+### 1.3 核心数据模型
+
+```mermaid
+erDiagram
+    User ||--o| MerchantProfile : "has_one"
+    User ||--o{ Role : "has_many"
+    User ||--o{ Order : "customer_orders"
+    User ||--o{ Order : "merchant_orders"
+    User ||--o{ Coupon : "has_many"
+    Order ||--o{ Payment : "has_many"
+    Order ||--o{ Refund : "has_many"
+    Order ||--o{ OrderItem : "has_many"
+    Order ||--o{ Bid : "has_many"
+    MerchantProfile ||--o{ SettlementRule : "has_many"
+    MerchantProfile ||--o{ Settlement : "has_many"
+    CouponTemplate ||--o{ Coupon : "has_many"
+```
+
+### 1.4 用户角色设计
+
+后端已有 **双角色模型**：
+- `User` 模型通过 `Role` 表支持 `customer` / `merchant` 角色
+- `User#customer?` / `User#merchant?` 方法已就绪
+- `MerchantProfile` 一对一关联 User，支持审核流程 (pending → submitted → approved/rejected)
+
+> [!TIP]
+> 后端已原生支持"一个用户同时是消费者和商家"的模式，与你"商家端+用户端集成到 App"的计划完全契合。
+
+---
+
+## 二、逐项技术栈评估
+
+### 2.1 🔐 身份认证：Clerk / LogTo
+
+#### 当前状态
+- 后端使用 **Devise + devise-jwt**，JWT 由 Rails 自签发
+- Session 控制器 `Api::V1::Users::SessionsController` 返回 `{ user, token }`
+- JWT 密钥通过 `DEVISE_JWT_SECRET_KEY` 环境变量管理
+- 过期时间 1 天
+
+#### 兼容性分析
+
+| 维度 | Clerk | LogTo | 备注 |
+|------|:-----:|:-----:|------|
+| Expo SDK | ✅ `@clerk/clerk-expo` | ⚠️ 需自行集成 OIDC | Clerk 有官方 Expo SDK |
+| 社交登录 (微信/Apple) | ✅ 原生支持 | ✅ 支持 | 中国区需微信登录 |
+| JWT 验证 | ✅ JWKS endpoint | ✅ JWKS endpoint | 后端只需验证 token |
+| 中国区合规 | ⚠️ 服务器在境外 | ✅ 可自部署 | LogTo 可私有化部署 |
+| 用户管理后台 | ✅ Dashboard | ✅ Admin Console | 都有 |
+| 价格 | $25/月起（MAU） | 开源免费 / Cloud 付费 | |
+
+#### 后端需要改造的点
+
+> [!IMPORTANT]
+> 切换到 Clerk/LogTo 后，**后端不再签发 JWT**，只需验证来自 IdP 的 token。
+
+```ruby
+# 当前：Devise 签发 JWT ❌ 将被替代
+devise :jwt_authenticatable, jwt_revocation_strategy: self
+
+# 改造后：后端变成 JWT Consumer
+# 1. 移除 devise-jwt，保留 devise 做 AdminUser 的 session 认证
+# 2. 新增 middleware / concern 验证外部 IdP 的 JWT
+# 3. 通过 JWKS 公钥验证签名
+```
+
+**需要新增的后端组件：**
+
+```
+app/controllers/concerns/
+└── external_jwt_authenticatable.rb   # JWT 验证 concern
+
+config/initializers/
+└── jwt_auth.rb                       # JWKS 缓存 & 配置
+
+app/services/auth/
+├── jwt_verifier.rb                   # Token 签名验证
+├── user_sync_service.rb              # IdP 用户 → 本地 User 同步
+└── webhook_handler.rb                # IdP Webhook 处理
+```
+
+**关键改造逻辑：**
+
+```ruby
+# external_jwt_authenticatable.rb (概念)
+module ExternalJwtAuthenticatable
+  extend ActiveSupport::Concern
+
+  included do
+    before_action :authenticate_from_external_jwt!
+  end
+
+  def authenticate_from_external_jwt!
+    token = request.headers["Authorization"]&.split(" ")&.last
+    payload = Auth::JwtVerifier.verify!(token) # 用 JWKS 验证
+    
+    # 根据 IdP 的 sub claim 查找/创建本地用户
+    @current_user = User.find_or_create_by!(external_id: payload["sub"]) do |u|
+      u.email = payload["email"]
+      # ... sync other fields
+    end
+  end
+end
+```
+
+> [!WARNING]
+> **User 模型需要新增 `external_id` 字段**（存储 Clerk/LogTo 的 userId），并建立唯一索引。现有 `email` 字段作为辅助匹配。
+
+#### 推荐方案
+
+| 场景 | 推荐 |
+|------|------|
+| 面向中国市场、需要微信登录 | **LogTo (自部署)** — 数据在国内，合规性好 |
+| 快速上线、开发效率优先 | **Clerk** — Expo SDK 完善，开箱即用 |
+| 成本敏感 | **LogTo (开源自部署)** — 免费 |
+
+---
+
+### 2.2 📱 RN 框架：Expo
+
+#### 与后端的交互方式
+
+```mermaid
+graph LR
+    A[Expo App] -->|REST API / JWT| B[Rails API /api/v1/*]
+    A -->|WebSocket| C[ActionCable]
+    A -->|Push Notification| D[Expo Push / APNs / FCM]
+    B -->|Callback| E[Sidekiq Workers]
+```
+
+#### 后端兼容性：✅ 完全兼容
+
+Expo App 作为纯客户端，与后端的交互完全通过 HTTP REST API + WebSocket，后端已具备：
+
+- ✅ `ActionController::API` 基类（无 session/CSRF 干扰）
+- ✅ rack-cors 已配置 CORS
+- ✅ JSON 格式 API 响应
+- ✅ Swagger 文档可自动生成 API 客户端
+
+#### 需要补充的 API 能力
+
+后端当前 API **覆盖面不足**，需要大量扩展：
+
+```
+需新增的 API group：
+├── /api/v1/users/
+│   ├── profile (GET/PATCH)       # 用户个人资料
+│   ├── register (POST)           # 注册（或由 IdP 处理）
+│   └── device_tokens (POST)      # 推送 token 注册
+│
+├── /api/v1/merchants/
+│   ├── register (POST)           # 商家入驻申请
+│   ├── profile (GET/PATCH)       # 商家资料管理
+│   ├── orders (GET)              # 商家订单列表
+│   ├── orders/:id/accept (POST)  # 接单
+│   ├── orders/:id/reject (POST)  # 拒单
+│   ├── settlements (GET)         # 结算记录
+│   └── dashboard (GET)           # 商家看板数据
+│
+├── /api/v1/orders/
+│   ├── create (POST)             # 下单
+│   ├── index (GET)               # 订单列表
+│   ├── show (GET)                # 订单详情
+│   ├── cancel (POST)             # 取消订单
+│   └── :id/bids (GET/POST)       # 竞价
+│
+├── /api/v1/payments/
+│   ├── create (POST)             # 创建支付（获取支付参数）
+│   └── status (GET)              # 查询支付状态
+│
+├── /api/v1/tickets/
+│   ├── index/create/show (CRUD)  # 工单
+│   └── :id/messages (GET/POST)   # 工单消息
+│
+└── /api/v1/notifications/
+    └── index (GET)               # 通知列表
+```
+
+---
+
+### 2.3 💳 支付托管：RevenueCat
+
+#### 定位理解
+
+> [!NOTE]
+> RevenueCat 专注于 **应用内购 (IAP)** 和 **订阅管理**，对接 Apple App Store / Google Play 的支付系统。
+> 它 **不适用于** C2B 的商品交易支付（如消费者给商家付款）。
+
+#### 你的支付场景分析
+
+| 支付场景 | 适用方案 | 备注 |
+|----------|----------|------|
+| 用户购买会员/订阅 | ✅ **RevenueCat** | IAP/订阅的标准方案 |
+| 用户购买数字商品 | ✅ **RevenueCat** | Apple 要求走 IAP |
+| 用户给商家支付（实物/服务） | ❌ **不用 RevenueCat** | 走微信/支付宝 |
+| 平台抽佣结算 | ❌ **不用 RevenueCat** | 后端已有结算系统 |
+
+#### 后端改造
+
+**场景 A：订阅/会员（RevenueCat）**
+
+```ruby
+# 需要新增
+app/services/subscriptions/
+├── revenue_cat_webhook_handler.rb  # 处理 RC Webhook
+└── subscription_sync_service.rb    # 同步订阅状态到本地
+
+app/models/
+└── subscription.rb                 # 订阅记录表
+
+# routes.rb
+namespace :api do
+  namespace :v1 do
+    resource :subscription, only: [:show]  # 查询当前订阅状态
+  end
+  # RevenueCat Webhook
+  post '/webhooks/revenuecat', to: 'webhooks/revenuecat#create'
+end
+```
+
+**场景 B：商品交易支付（保持微信/支付宝）**
+
+后端已有 `Payment` 模型 + `Api::Payments::CallbacksController`，但还需要：
+
+```ruby
+# 需要新增：创建支付单的 API（给 App 返回支付参数）
+app/controllers/api/v1/payments_controller.rb
+# POST /api/v1/payments
+# → 调用微信/支付宝SDK生成预付单
+# → 返回 App 端调起支付所需的参数
+```
+
+> [!IMPORTANT]
+> **RevenueCat 和 微信/支付宝 可以并存**。RevenueCat 管订阅，微信/支付宝管交易。后端需要同时支持两种支付 Webhook。
+
+---
+
+### 2.4 📊 统计分析：Mixpanel
+
+#### 兼容性：✅ 完全兼容，且后端几乎不需要改动
+
+Mixpanel 主要是 **客户端 SDK** 埋点（Expo 端），后端只在需要服务端事件追踪时才需要集成。
+
+```
+Expo App 端：
+├── mixpanel-react-native SDK
+├── 页面浏览、按钮点击、转化漏斗 → 直接上报 Mixpanel
+│
+Rails 后端（可选）：
+├── 关键业务事件服务端上报（防篡改）
+│   ├── 订单支付成功
+│   ├── 商家入驻审核通过
+│   └── 退款完成
+└── 通过 Mixpanel HTTP API 上报
+```
+
+**后端可选集成：**
+
+```ruby
+# Gemfile
+gem 'mixpanel-ruby'  # 可选
+
+# app/services/analytics/
+└── mixpanel_tracker.rb
+
+# 使用示例（在 Service 中）
+class Payments::HandleCallbackService
+  def call
+    # ... 支付处理逻辑 ...
+    Analytics::MixpanelTracker.track(user_id, 'Payment Completed', { amount: amount })
+  end
+end
+```
+
+---
+
+## 三、整体架构图
+
+```mermaid
+graph TB
+    subgraph "Mobile App (Expo/RN)"
+        UA[用户端 UI]
+        MA[商家端 UI]
+        SDK1[Clerk/LogTo SDK]
+        SDK2[RevenueCat SDK]
+        SDK3[Mixpanel SDK]
+        SDK4[Expo Push]
+    end
+
+    subgraph "Auth Provider"
+        IdP[Clerk / LogTo]
+    end
+
+    subgraph "Rails Backend"
+        API["/api/v1/* Controllers"]
+        AUTH[JWT Verification Middleware]
+        SVC["Service Layer (Orders/Payments/...)"]
+        JOBS[Sidekiq Workers]
+        WS[ActionCable WebSocket]
+        ADMIN[ActiveAdmin 管理后台]
+    end
+
+    subgraph "External Services"
+        WX[微信支付]
+        ALI[支付宝]
+        RC[RevenueCat]
+        MP[Mixpanel]
+        S3[AWS S3]
+        SENTRY[Sentry]
+    end
+
+    subgraph "Data"
+        PG[(PostgreSQL)]
+        REDIS[(Redis)]
+    end
+
+    UA --> SDK1
+    MA --> SDK1
+    SDK1 --> IdP
+    IdP -->|JWKS| AUTH
+    UA --> API
+    MA --> API
+    API --> AUTH
+    AUTH --> SVC
+    SVC --> PG
+    SVC --> JOBS
+    JOBS --> REDIS
+    SVC --> WX
+    SVC --> ALI
+    UA --> SDK2
+    SDK2 --> RC
+    RC -->|Webhook| API
+    UA --> SDK3
+    MA --> SDK3
+    SDK3 --> MP
+    SVC -.->|Server Events| MP
+    API --> WS
+    WS --> REDIS
+    SVC --> S3
+    API --> SENTRY
+    ADMIN --> PG
+```
+
+---
+
+## 四、GAP 分析总结
+
+### ✅ 已具备（无需改动）
+
+| 能力 | 现状 |
+|------|------|
+| RESTful API 架构 | `ActionController::API` 基类 |
+| CORS 配置 | rack-cors 已就绪 |
+| 双角色模型 | User → customer/merchant |
+| 订单状态机 | AASM 完整状态流转 |
+| 结算体系 | Settlement + SettlementRule |
+| 微信/支付宝回调 | CallbacksController (Stub) |
+| 后台管理 | ActiveAdmin + RBAC |
+| 后台任务 | Sidekiq |
+| API 文档 | Rswag/Swagger |
+| 敏感数据加密 | Lockbox + BlindIndex |
+
+### ⚠️ 需要改造
+
+| 改造项 | 优先级 | 工作量 | 说明 |
+|--------|--------|--------|------|
+| 拆分认证层 (Devise-JWT → 外部 IdP) | 🔴 P0 | 3-5 天 | 核心前置依赖 |
+| User 模型增加 `external_id` | 🔴 P0 | 0.5 天 | 配合认证改造 |
+| API 序列化层 (Serializer) | 🟡 P1 | 2-3 天 | 统一响应格式 |
+| CORS 扩展 (支持 RN) | 🟢 P2 | 0.5 天 | 添加 App 域名 |
+
+### ❌ 需要新建
+
+| 新建项 | 优先级 | 工作量 | 说明 |
+|--------|--------|--------|------|
+| 订单 CRUD API | 🔴 P0 | 3-5 天 | App 核心功能 |
+| 支付创建 API（预付单） | 🔴 P0 | 2-3 天 | App 端调起支付 |
+| 商家端 API (入驻/订单管理) | 🔴 P0 | 3-5 天 | 商家端核心 |
+| 用户资料 API | 🟡 P1 | 1-2 天 | |
+| 推送通知集成 | 🟡 P1 | 2-3 天 | Expo Push + 后端通知 Job |
+| 订阅/会员系统 (RevenueCat) | 🟡 P1 | 2-3 天 | Webhook + 模型 |
+| 工单 API | 🟡 P1 | 1-2 天 | |
+| ActionCable 实时推送 | 🟢 P2 | 2-3 天 | 订单状态实时更新 |
+| GraphQL API (可选) | 🟢 P3 | 5-7 天 | RN 复杂查询优化 |
+
+---
+
+## 五、推荐技术决策
+
+### 5.1 认证方案推荐
+
+**如果你的主要市场是中国大陆，且需要微信登录 → 选 LogTo 自部署**
+
+理由：
+1. 数据存储在国内服务器，合规
+2. 微信开放平台的 OAuth 需要从国内域名发起
+3. 开源免费，全部可控
+4. 支持 OIDC 标准协议，RN 端用 `expo-auth-session` 即可
+
+**如果国际化或快速验证 MVP → 选 Clerk**
+
+理由：
+1. `@clerk/clerk-expo` 开箱即用，10 行代码搞定
+2. 内置 Apple/Google/Email 登录
+3. 无需运维 IdP 服务
+
+### 5.2 支付架构推荐
+
+```
+                        ┌─────────────────┐
+                        │   Expo App      │
+                        └────────┬────────┘
+                                 │
+                   ┌─────────────┼─────────────┐
+                   ▼             ▼             ▼
+             ┌──────────┐ ┌──────────┐  ┌───────────┐
+             │ 会员订阅  │ │ 商品交易  │  │ 打赏/虚拟 │
+             │ RevenueCat│ │ 微信/支付宝│  │ IAP      │
+             └────┬─────┘ └────┬─────┘  └─────┬─────┘
+                  │            │              │
+                  ▼            ▼              ▼
+             ┌──────────────────────────────────────┐
+             │         Rails Backend                │
+             │  Webhook Handler + 统一支付状态管理    │
+             └──────────────────────────────────────┘
+```
+
+### 5.3 App 端架构推荐
+
+```
+expo-app/
+├── app/                          # Expo Router (file-based routing)
+│   ├── (auth)/                   # 未登录页面组
+│   │   ├── login.tsx
+│   │   └── register.tsx
+│   ├── (customer)/               # 用户端 tab
+│   │   ├── _layout.tsx           # Bottom Tab Navigator
+│   │   ├── home.tsx
+│   │   ├── orders/
+│   │   ├── messages/
+│   │   └── profile/
+│   ├── (merchant)/               # 商家端 tab
+│   │   ├── _layout.tsx           # Bottom Tab Navigator
+│   │   ├── dashboard.tsx
+│   │   ├── orders/
+│   │   ├── products/
+│   │   └── settlements/
+│   └── _layout.tsx               # Root Layout (Auth gate)
+├── src/
+│   ├── api/                      # API 客户端 (可从 Swagger 自动生成)
+│   ├── hooks/                    # Custom hooks
+│   ├── stores/                   # Zustand 状态管理
+│   ├── components/               # 共享组件
+│   └── utils/
+└── eas.json                      # EAS Build 配置
+```
+
+---
+
+## 六、结论
+
+> [!IMPORTANT]
+> **后端架构整体可以支持 RN App**，但存在大量 API 缺口需要填补。核心改造集中在认证层，其余主要是新增 API 接口。
+
+**核心结论：**
+
+| 问题 | 答案 |
+|------|------|
+| 后端支持 RN App 吗？ | ✅ 架构上完全支持，API 层需大量扩展 |
+| 双端(用户+商家)集成可行吗？ | ✅ 数据模型已天然支持 |
+| Clerk/LogTo 可以接入吗？ | ✅ 需替换 devise-jwt，改造认证中间件 |
+| RevenueCat 可以用吗？ | ⚠️ 仅适用于 IAP/订阅，交易支付仍需微信/支付宝 |
+| Mixpanel 可以用吗？ | ✅ 主要前端集成，后端几乎零改动 |
+| 预计改造工期 | 认证改造(1周) + 核心API开发(2-3周) + 联调(1周) ≈ **4-5周** |
+
+---
+
+## 开放问题
+
+> [!IMPORTANT]
+> 请确认以下问题，以便进一步细化方案：
+
+1. **主要目标市场？** 中国大陆 vs 国际化 → 直接影响 Clerk vs LogTo 的选择
+2. **是否需要微信登录？** → 影响 IdP 选择和合规方案
+3. **是否有订阅/会员制需求？** → 决定 RevenueCat 的接入范围
+4. **订单中的商品是实物还是虚拟商品？** → Apple 对虚拟商品强制 IAP，影响支付架构
+5. **是否先做 MVP（单端）再扩展双端？** → 影响开发排期

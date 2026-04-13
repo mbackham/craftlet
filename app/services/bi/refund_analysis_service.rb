@@ -78,7 +78,7 @@ module Bi
         merchant_uuid = mr.merchant_id
         next unless merchant_uuid
 
-        user_id = merchant_uuid.to_s.split("-").last.to_i
+        user_id = Order.uuid_to_id(merchant_uuid)
         user = User.find_by(id: user_id)
         profile = user&.merchant_profile
         next unless profile

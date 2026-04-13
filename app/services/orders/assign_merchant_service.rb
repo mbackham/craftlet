@@ -127,7 +127,9 @@ module Orders
     end
 
     def format_user_id_as_uuid(id)
-      sprintf('00000000-0000-0000-0000-%012d', id.to_i)
+      # 委托给 UuidIdentity（统一转换逻辑，消除重复实现）
+      # Delegates to UuidIdentity (single source of truth for UUID encoding)
+      Order.id_to_uuid(id)
     end
   end
 end

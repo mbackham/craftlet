@@ -56,7 +56,7 @@ module FundMonitoring
     private
 
     def user_id_for(refund)
-      refund.order&.customer_id.to_s.split("-").last.to_i
+      Order.uuid_to_id(refund.order&.customer_id).to_i
     rescue StandardError
       0
     end

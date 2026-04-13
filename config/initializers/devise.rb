@@ -268,16 +268,19 @@ Devise.setup do |config|
   # The default HTTP method used to sign out a resource. Default is :delete.
   config.sign_out_via = :delete
 
-  config.jwt do |jwt|
-    jwt.secret = ENV["DEVISE_JWT_SECRET_KEY"]
-    jwt.dispatch_requests = [
-      ["POST", %r{^/api/v1/users/sign_in$}]
-    ]
-    jwt.revocation_requests = [
-      ["DELETE", %r{^/api/v1/users/sign_out$}]
-    ]
-    jwt.expiration_time = 1.day.to_i
-  end
+  # ⚠️  devise-jwt 配置已移除（Week 0 改造，2026-04-13）
+  # ⚠️  devise-jwt configuration removed (Week 0 refactor, 2026-04-13)
+  #
+  # 原配置：
+  # config.jwt do |jwt|
+  #   jwt.secret = ENV["DEVISE_JWT_SECRET_KEY"]
+  #   jwt.dispatch_requests = [["POST", %r{^/api/v1/users/sign_in$}]]
+  #   jwt.revocation_requests = [["DELETE", %r{^/api/v1/users/sign_out$}]]
+  #   jwt.expiration_time = 1.day.to_i
+  # end
+  #
+  # JWT 认证现由 Logto 处理（见 app/services/auth/jwt_verifier.rb，Week 1 实现）
+  # JWT authentication is now handled by Logto (see app/services/auth/jwt_verifier.rb, Week 1)
 
   # ==> OmniAuth
   # Add a new OmniAuth provider. Check the wiki for more information on setting

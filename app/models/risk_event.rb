@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class RiskEvent < ApplicationRecord
+  include UuidIdentity
+
   # === Constants ===
   STATUSES = %w[pending ignored processed].freeze
 
@@ -22,18 +24,16 @@ class RiskEvent < ApplicationRecord
     I18n.t("risk_event_statuses.#{status}", default: status.humanize)
   end
 
-  # Subject lookup (UUID to User)
+  # === Subject / Resolver Lookup (via UuidIdentity) ===
+  # subject_id / resolved_by_id 存储格式：00000000-0000-0000-0000-{12 位 bigint ID}
+  # Stored as: 00000000-0000-0000-0000-{12-digit bigint ID}
+
   def subject
-    return nil if subject_id.blank?
-    id_num = subject_id.to_s.split('-').last.to_i
-    User.find_by(id: id_num)
+    @subject ||= self.class.find_user_by_uuid(subject_id)
   end
 
-  # Resolver lookup
   def resolved_by
-    return nil if resolved_by_id.blank?
-    id_num = resolved_by_id.to_s.split('-').last.to_i
-    AdminUser.find_by(id: id_num)
+    @resolved_by ||= self.class.find_admin_by_uuid(resolved_by_id)
   end
 
   # === Ransack ===

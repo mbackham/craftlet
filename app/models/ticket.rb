@@ -2,6 +2,7 @@
 
 class Ticket < ApplicationRecord
   include AASM
+  include UuidIdentity
 
   # === Constants ===
   CATEGORIES = %w[general payment order merchant other].freeze
@@ -68,23 +69,25 @@ class Ticket < ApplicationRecord
     I18n.t("ticket_categories.#{category}", default: category.to_s.humanize)
   end
 
-  # Creator lookup (UUID to User/AdminUser)
+  # === Creator / Assignee Lookup (via UuidIdentity) ===
+  # creator_id / assignee_id 存储格式：00000000-0000-0000-0000-{12 位 bigint ID}
+  # creator_id / assignee_id are stored as: 00000000-0000-0000-0000-{12-digit bigint ID}
+
+  # 多态 creator：User 或 AdminUser
+  # Polymorphic creator: User or AdminUser
   def creator
     return nil if creator_id.blank?
+
     if creator_type == "AdminUser"
-      id_num = creator_id.to_s.split('-').last.to_i
-      AdminUser.find_by(id: id_num)
+      self.class.find_admin_by_uuid(creator_id)
     else
-      id_num = creator_id.to_s.split('-').last.to_i
-      User.find_by(id: id_num)
+      self.class.find_user_by_uuid(creator_id)
     end
   end
 
   # Assignee lookup (UUID to AdminUser)
   def assignee
-    return nil if assignee_id.blank?
-    id_num = assignee_id.to_s.split('-').last.to_i
-    AdminUser.find_by(id: id_num)
+    @assignee ||= self.class.find_admin_by_uuid(assignee_id)
   end
 
   # Related order lookup

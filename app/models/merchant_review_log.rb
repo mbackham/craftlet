@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 class MerchantReviewLog < ApplicationRecord
+  include UuidIdentity
+
   # === Constants ===
   ACTIONS = %w[submit approve reject suspend unsuspend update].freeze
 
   # === Associations ===
   belongs_to :merchant_profile
-  # Note: operator_admin_id is UUID, AdminUser uses bigint
-  # Use custom operator method instead of belongs_to
+  # Note: operator_admin_id is a UUID-encoded bigint ID (see UuidIdentity concern)
 
   # === Validations ===
   validates :action, presence: true, inclusion: { in: ACTIONS }
@@ -36,17 +37,17 @@ class MerchantReviewLog < ApplicationRecord
     operator&.email || '系统'
   end
 
-  # Custom operator lookup (UUID to bigint conversion)
+  # === Operator Lookup (via UuidIdentity) ===
+  # operator_admin_id 存储格式：00000000-0000-0000-0000-{12 位 bigint ID}
+  # Stored as: 00000000-0000-0000-0000-{12-digit bigint ID}
   def operator
-    return nil if operator_admin_id.blank?
-    
-    numeric_id = operator_admin_id.to_s.split('-').last.to_i
-    AdminUser.find_by(id: numeric_id)
+    @operator ||= self.class.find_admin_by_uuid(operator_admin_id)
   end
 
-  # Helper to format admin user ID as UUID for storage
+  # 向下兼容：format_admin_id_as_uuid 委托给 UuidIdentity#id_to_uuid
+  # Backward-compatible class method; delegates to UuidIdentity#id_to_uuid
   def self.format_admin_id_as_uuid(admin_user_id)
-    sprintf('00000000-0000-0000-0000-%012d', admin_user_id.to_i)
+    id_to_uuid(admin_user_id)
   end
 
   # === Ransack Configuration ===

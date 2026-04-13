@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Bid < ApplicationRecord
+  include UuidIdentity
+
   # === Constants ===
   STATUSES = %w[pending accepted rejected].freeze
 
@@ -35,10 +37,16 @@ class Bid < ApplicationRecord
     I18n.t("bid_statuses.#{status}", default: status.humanize)
   end
 
-  # Bidder lookup (UUID to User)
+  # === Bidder Lookup (via UuidIdentity) ===
+  # bidder_id 存储格式：00000000-0000-0000-0000-{12 位 bigint ID}
+  # bidder_id is stored as: 00000000-0000-0000-0000-{12-digit bigint ID}
   def bidder
-    return nil if bidder_id.blank?
-    User.find_by(id: bidder_id.to_s.split('-').last.to_i)
+    @bidder ||= self.class.find_user_by_uuid(bidder_id)
+  end
+
+  def bidder=(user)
+    self.bidder_id = self.class.id_to_uuid(user&.id)
+    @bidder = user
   end
 
   # === Ransack Configuration ===

@@ -5,14 +5,24 @@ Rails.application.routes.draw do
     controllers: { sessions: "admin_users/sessions" }
   )
   ActiveAdmin.routes(self)
-  devise_for :users
+  # devise_for :users — Week 0 改造：移除 :registerable 路由，仅保留密码重置功能
+  # App 端用户通过 Logto 注册和登录，不再使用 Devise session 路由。
+  # Week 0 refactor: removed :registerable routes; only password reset is kept.
+  # App users register and sign in via Logto; Devise session routes are no longer used.
+  devise_for :users, only: [:passwords]
+
   namespace :api do
     namespace :v1 do
       get "/", to: "root#index"
-      devise_scope :user do
-        post "users/sign_in", to: "users/sessions#create", defaults: { format: :json }
-        delete "users/sign_out", to: "users/sessions#destroy", defaults: { format: :json }
-      end
+
+      # ⚠️  Week 0 改造：以下 devise_scope 路由（sign_in / sign_out）已废弃。
+      # App 端认证改由 Logto JWT 中间件处理（Week 1 实现）。
+      # ⚠️  Week 0 refactor: the devise_scope sign_in/sign_out routes below are deprecated.
+      # App authentication is now handled by the Logto JWT middleware (implemented in Week 1).
+      # devise_scope :user do
+      #   post "users/sign_in",  to: "users/sessions#create",  defaults: { format: :json }
+      #   delete "users/sign_out", to: "users/sessions#destroy", defaults: { format: :json }
+      # end
 
       # 商家相关 API
       resource :merchant, only: [], controller: 'merchants' do

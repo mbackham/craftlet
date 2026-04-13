@@ -1,4 +1,6 @@
 class Refund < ApplicationRecord
+  include UuidIdentity
+
   # === Constants ===
   STATUSES = %w[init pending succeeded failed].freeze
 
@@ -11,10 +13,11 @@ class Refund < ApplicationRecord
     I18n.t("refund_statuses.#{status}", default: status.to_s.humanize)
   end
 
-  # Requester lookup (UUID to User)
+  # === Requester Lookup (via UuidIdentity) ===
+  # requested_by_id 存储格式：00000000-0000-0000-0000-{12 位 bigint ID}
+  # Stored as: 00000000-0000-0000-0000-{12-digit bigint ID}
   def requester
-    return nil if requested_by_id.blank?
-    User.find_by(id: requested_by_id.to_s.split('-').last.to_i)
+    @requester ||= self.class.find_user_by_uuid(requested_by_id)
   end
 
   # === Ransack Configuration ===

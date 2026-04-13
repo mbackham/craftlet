@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_02_100007) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_13_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -967,7 +967,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_02_100007) do
 
   create_table "users", force: :cascade do |t|
     t.string "email", default: "", null: false
-    t.string "encrypted_password", default: "", null: false
+    t.string "encrypted_password"
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
@@ -979,7 +979,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_02_100007) do
     t.string "status", default: "active", null: false
     t.datetime "disabled_at"
     t.string "disabled_reason"
-    t.string "jti", null: false
+    t.string "jti"
     t.integer "failed_attempts", default: 0, null: false
     t.string "unlock_token"
     t.datetime "locked_at"
@@ -988,8 +988,13 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_02_100007) do
     t.datetime "last_sign_in_at"
     t.string "current_sign_in_ip"
     t.string "last_sign_in_ip"
+    t.string "external_id", comment: "Logto sub claim — 唯一标识 Logto 用户 / Uniquely identifies the Logto user"
+    t.string "auth_provider", default: "logto", comment: "认证来源 / Auth source: logto | devise(legacy)"
+    t.string "locale", default: "zh-CN", comment: "用户界面语言 / UI locale, e.g. zh-CN, en"
+    t.string "country_code", comment: "用户所在国家 / User country: CN | INTL"
     t.index ["disabled_at"], name: "index_users_on_disabled_at"
     t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["external_id"], name: "index_users_on_external_id", unique: true
     t.index ["jti"], name: "index_users_on_jti", unique: true
     t.index ["phone"], name: "index_users_on_phone", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true

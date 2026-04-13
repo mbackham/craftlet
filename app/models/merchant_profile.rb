@@ -1,18 +1,18 @@
 # frozen_string_literal: true
 
 class MerchantProfile < ApplicationRecord
+  include UuidIdentity
+
   # === Constants ===
   STATUSES = %w[pending submitted approved rejected suspended].freeze
-  
+
   # === Associations ===
   belongs_to :user
   has_many :review_logs, class_name: 'MerchantReviewLog', dependent: :destroy
   has_many :settlement_rules, dependent: :destroy
   has_many :settlements, dependent: :destroy
   has_many :invoices, dependent: :destroy
-  # Note: approved_by_admin_id and rejected_by_admin_id are UUID fields
-  # AdminUser uses bigint IDs, so we can't use belongs_to directly
-  # Use custom methods approved_by_admin and rejected_by_admin instead
+  # Note: approved_by_admin_id and rejected_by_admin_id are UUID-encoded bigint IDs (see UuidIdentity)
 
   # === Validations ===
   validates :shop_name, presence: true
@@ -86,25 +86,22 @@ class MerchantProfile < ApplicationRecord
     [address_province, address_city, address_district, address_detail].compact.join(' ')
   end
 
-  # Custom admin lookup methods (UUID to bigint conversion)
-  # Format: 00000000-0000-0000-0000-{12 digit ID}
+  # === Admin Lookup (via UuidIdentity) ===
+  # approved_by_admin_id / rejected_by_admin_id 存储格式：00000000-0000-0000-0000-{12 位 bigint ID}
+  # Stored as: 00000000-0000-0000-0000-{12-digit bigint ID}
+
   def approved_by_admin
-    return nil if approved_by_admin_id.blank?
-    
-    numeric_id = approved_by_admin_id.to_s.split('-').last.to_i
-    AdminUser.find_by(id: numeric_id)
+    @approved_by_admin ||= self.class.find_admin_by_uuid(approved_by_admin_id)
   end
 
   def rejected_by_admin
-    return nil if rejected_by_admin_id.blank?
-    
-    numeric_id = rejected_by_admin_id.to_s.split('-').last.to_i
-    AdminUser.find_by(id: numeric_id)
+    @rejected_by_admin ||= self.class.find_admin_by_uuid(rejected_by_admin_id)
   end
 
-  # Helper to format admin user ID as UUID for storage
+  # 向下兼容：format_admin_id_as_uuid 委托给 UuidIdentity#id_to_uuid
+  # Backward-compatible class method; delegates to UuidIdentity#id_to_uuid
   def self.format_admin_id_as_uuid(admin_user_id)
-    sprintf('00000000-0000-0000-0000-%012d', admin_user_id.to_i)
+    id_to_uuid(admin_user_id)
   end
 
   # === Ransack Configuration ===

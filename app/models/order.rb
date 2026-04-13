@@ -1,9 +1,10 @@
 class Order < ApplicationRecord
   include AASM
+  include UuidIdentity
 
   # === Associations ===
-  # Note: customer_id and merchant_id are UUIDs, but User uses bigint IDs
-  # So we use custom lookup methods instead of belongs_to
+  # Note: customer_id and merchant_id are UUID-encoded bigint IDs (see UuidIdentity concern).
+  # Direct belongs_to is not used; use #customer / #merchant instance methods instead.
   has_many :payments, dependent: :destroy
   has_many :refunds, dependent: :destroy
   has_many :order_items, dependent: :destroy
@@ -48,21 +49,37 @@ class Order < ApplicationRecord
     I18n.t("order_statuses.#{status}", default: status.to_s.humanize)
   end
 
-  # Customer/Merchant lookup (UUID to User)
-  def customer_user
-    return nil if customer_id.blank?
-    User.find_by(id: customer_id.to_s.split('-').last.to_i)
+  # === Customer / Merchant Lookup (via UuidIdentity) ===
+  # customer_id / merchant_id 存储格式：00000000-0000-0000-0000-{12 位 bigint ID}
+  # customer_id / merchant_id are stored as: 00000000-0000-0000-0000-{12-digit bigint ID}
+
+  def customer
+    @customer ||= self.class.find_user_by_uuid(customer_id)
   end
 
-  def merchant_user
-    return nil if merchant_id.blank?
-    User.find_by(id: merchant_id.to_s.split('-').last.to_i)
+  def merchant
+    @merchant ||= self.class.find_user_by_uuid(merchant_id)
+  end
+
+  # 向下兼容别名（ActiveAdmin 视图中引用了 customer_user / merchant_user）
+  # Backward-compatible aliases (ActiveAdmin views reference customer_user / merchant_user)
+  alias_method :customer_user, :customer
+  alias_method :merchant_user, :merchant
+
+  def customer=(user)
+    self.customer_id = self.class.id_to_uuid(user&.id)
+    @customer = user
+  end
+
+  def merchant=(user)
+    self.merchant_id = self.class.id_to_uuid(user&.id)
+    @merchant = user
   end
 
   # === Frozen Participant Guards ===
   # Used by AASM accept guard and AssignMerchantService
   def merchant_active?
-    user = merchant_user
+    user = merchant
     return false unless user
     return false unless user.status == "active"
 
@@ -73,7 +90,7 @@ class Order < ApplicationRecord
   end
 
   def customer_active?
-    user = customer_user
+    user = customer
     return false unless user
     user.status == "active"
   end

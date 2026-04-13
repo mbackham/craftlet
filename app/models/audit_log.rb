@@ -1,21 +1,30 @@
 class AuditLog < ApplicationRecord
+  include UuidIdentity
+
   # Don't use polymorphic association directly due to UUID/bigint mismatch
   # belongs_to :actor, polymorphic: true, optional: true
-  
+
   validates :action, presence: true
 
-  # Custom actor method to handle UUID to bigint conversion
+  # === Actor Lookup (via UuidIdentity) ===
+  # actor_id 存储格式：00000000-0000-0000-0000-{12 位 bigint ID}，actor_type 为 'User' 或 'AdminUser'
+  # actor_id is stored as: 00000000-0000-0000-0000-{12-digit bigint ID}; actor_type is 'User' or 'AdminUser'
   def actor
     return nil if actor_type.blank? || actor_id.blank?
     return nil if actor_type == 'System'
-    
-    begin
-      klass = actor_type.constantize
-      # Extract the numeric ID from UUID format (last 12 digits)
-      numeric_id = actor_id.to_s.split('-').last.to_i
-      klass.find_by(id: numeric_id)
-    rescue NameError, ActiveRecord::RecordNotFound
-      nil
+
+    case actor_type
+    when 'User'
+      self.class.find_user_by_uuid(actor_id)
+    when 'AdminUser'
+      self.class.find_admin_by_uuid(actor_id)
+    else
+      begin
+        klass = actor_type.constantize
+        klass.find_by(id: self.class.uuid_to_id(actor_id))
+      rescue NameError
+        nil
+      end
     end
   end
 

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class TicketMessage < ApplicationRecord
+  include UuidIdentity
+
   # === Associations ===
   belongs_to :ticket
   has_many :attachments, class_name: "TicketAttachment", dependent: :destroy
@@ -13,15 +15,19 @@ class TicketMessage < ApplicationRecord
   scope :public_messages,  -> { where(internal: false) }
   scope :internal_notes,   -> { where(internal: true) }
 
-  # Sender lookup (UUID to User/AdminUser)
+  # === Sender Lookup (via UuidIdentity) ===
+  # sender_id 存储格式：00000000-0000-0000-0000-{12 位 bigint ID}
+  # sender_id is stored as: 00000000-0000-0000-0000-{12-digit bigint ID}
+
+  # 多态 sender：User 或 AdminUser
+  # Polymorphic sender: User or AdminUser
   def sender
     return nil if sender_id.blank?
+
     if sender_type == "AdminUser"
-      id_num = sender_id.to_s.split('-').last.to_i
-      AdminUser.find_by(id: id_num)
+      self.class.find_admin_by_uuid(sender_id)
     else
-      id_num = sender_id.to_s.split('-').last.to_i
-      User.find_by(id: id_num)
+      self.class.find_user_by_uuid(sender_id)
     end
   end
 

@@ -3,7 +3,8 @@
 module Api
   module V1
     class FaqsController < BaseController
-      skip_before_action :authenticate_user!, only: [:index], raise: false
+      # 公开端点 — 跳过 JWT 认证 / Public endpoint — skip JWT auth
+      skip_before_action :authenticate_from_logto!
 
       def index
         locale = params[:locale] || I18n.locale.to_s

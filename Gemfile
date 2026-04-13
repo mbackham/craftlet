@@ -16,7 +16,15 @@ gem "puma", ">= 5.0"
 
 # === Authentication ===
 gem "devise"
-gem "devise-jwt"
+# ⚠️  devise-jwt 已移除（Week 1 改造，2026-04-13）
+# 认证改由 Logto JWT 中间件处理，见 app/services/auth/jwt_verifier.rb
+# ⚠️  devise-jwt removed (Week 1 refactor, 2026-04-13)
+# Authentication is now handled by the Logto JWT middleware (app/services/auth/jwt_verifier.rb)
+# gem "devise-jwt"
+#
+# jwt gem（原为 devise-jwt 的传递依赖，现直接依赖）
+# jwt gem (previously a transitive dep of devise-jwt, now a direct dependency)
+gem "jwt", "~> 3.1"
 
 # === Admin ===
 gem "activeadmin"
@@ -40,6 +48,11 @@ gem "paper_trail"
 
 # === API ===
 gem "rack-cors"
+
+# === API Serializers ===
+# Blueprinter — 轻量级、声明式 JSON 序列化
+# Blueprinter — lightweight, declarative JSON serialization
+gem "blueprinter"
 
 # === API Documentation ===
 gem "rswag-api"

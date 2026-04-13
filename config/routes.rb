@@ -61,6 +61,12 @@ Rails.application.routes.draw do
         post :alipay, to: "callbacks#alipay"
       end
     end
+
+    # Logto Webhook (HMAC-SHA256 verified, no JWT auth)
+    # POST /api/webhooks/logto
+    namespace :webhooks do
+      post :logto, to: "logto#receive"
+    end
   end
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

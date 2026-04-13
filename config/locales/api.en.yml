@@ -1,0 +1,37 @@
+en:
+  api:
+    errors:
+      unauthorized: "Please sign in to continue"
+      missing_token: "Authentication token is missing. Please include Authorization: Bearer <token> in your request header"
+      invalid_token: "Invalid or expired token. Please obtain a new one"
+      user_sync_failed: "User sync failed. Please try again later"
+      forbidden: "You do not have permission to access this resource"
+      not_found: "The requested resource was not found"
+      server_error: "An internal server error occurred. Please try again later"
+      parameter_missing: "A required parameter is missing"
+      rate_limited: "Too many requests. Please try again later"
+
+    merchants:
+      status:
+        not_applied: "You have not applied for merchant onboarding yet"
+        pending: "Your application materials have not been submitted for review"
+        submitted: "Your application is under review. Please wait patiently"
+        approved: "Congratulations! Your merchant application has been approved"
+        rejected: "We're sorry, your application was not approved"
+        suspended: "Your merchant account has been suspended"
+
+    feedbacks:
+      invalid_captcha: "Incorrect captcha. Please try again"
+      submitted: "Thank you for your feedback! We will process it and reply to you via email as soon as possible."
+      estimated_response_time: "Within 48 hours"
+      submit_failed: "Submission failed"
+      status:
+        pending: "We have received your feedback and it is queued for processing..."
+        reviewing: "A support agent is processing your feedback..."
+        resolved: "Your feedback has been resolved."
+        closed: "This feedback has been closed."
+
+    coupons:
+      code_required: "Please enter a redemption code"
+      invalid_code: "Invalid or expired redemption code"
+      already_redeemed: "This redemption code has already been used"

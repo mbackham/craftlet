@@ -1,0 +1,37 @@
+zh-CN:
+  api:
+    errors:
+      unauthorized: "请先登录"
+      missing_token: "缺少认证 Token，请在请求头中携带 Authorization: Bearer <token>"
+      invalid_token: "Token 无效或已过期，请重新获取"
+      user_sync_failed: "用户信息同步失败，请稍后重试"
+      forbidden: "无权限访问该资源"
+      not_found: "请求的资源不存在"
+      server_error: "服务器内部错误，请稍后重试"
+      parameter_missing: "缺少必要参数"
+      rate_limited: "请求过于频繁，请稍后再试"
+
+    merchants:
+      status:
+        not_applied: "您尚未申请入驻"
+        pending: "您的资料尚未提交审核"
+        submitted: "您的资料正在审核中，请耐心等待"
+        approved: "恭喜！您的商家入驻申请已通过"
+        rejected: "很抱歉，您的申请未通过审核"
+        suspended: "您的商家账户已被停用"
+
+    feedbacks:
+      invalid_captcha: "验证码错误，请重新输入"
+      submitted: "感谢您的反馈！我们会尽快处理并通过邮件回复您。"
+      estimated_response_time: "48小时内"
+      submit_failed: "提交失败"
+      status:
+        pending: "我们已收到您的反馈，正在排队处理中..."
+        reviewing: "客服正在处理您的反馈..."
+        resolved: "您的反馈已处理完成。"
+        closed: "该反馈已关闭。"
+
+    coupons:
+      code_required: "请输入兑换码"
+      invalid_code: "兑换码无效或已过期"
+      already_redeemed: "该兑换码已被使用"

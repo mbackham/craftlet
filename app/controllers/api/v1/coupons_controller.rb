@@ -3,7 +3,10 @@
 module Api
   module V1
     class CouponsController < BaseController
-      before_action :authenticate_user!
+      # ⚠️  Week 1: 移除 before_action :authenticate_user!
+      # 由 BaseController 的 before_action :authenticate_from_logto! 统一处理
+      # Week 1: removed before_action :authenticate_user!
+      # Now handled by BaseController's before_action :authenticate_from_logto!
 
       # GET /api/v1/coupons
       # Returns the current user's coupons

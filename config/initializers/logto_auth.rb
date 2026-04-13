@@ -35,8 +35,14 @@ Rails.application.config.after_initialize do
     message = "[logto_auth] Missing required environment variables: #{missing.join(', ')}. " \
               "Logto JWT authentication will not function correctly."
     Rails.logger.warn(message)
-    # 在开发环境仅警告，生产环境抛出启动错误
-    # Warn in development, raise at boot in production
-    raise ArgumentError, message if Rails.env.production?
+
+    # ⚠️  不阻塞启动 — Logto 服务可能尚未部署。
+    # JWT 认证中间件在运行时检查此标志，对请求返回 503。
+    #
+    # ⚠️  Do NOT block boot — Logto may not be deployed yet.
+    # The JWT auth middleware checks this flag at runtime and returns 503.
+    Rails.application.config.logto_configured = false
+  else
+    Rails.application.config.logto_configured = true
   end
 end

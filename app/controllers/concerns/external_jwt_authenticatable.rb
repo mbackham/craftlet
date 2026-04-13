@@ -36,6 +36,16 @@ module ExternalJwtAuthenticatable
   # before_action: verify JWT and inject current_user
   # -----------------------------------------------------------------------
   def authenticate_from_logto!
+    # 如果 Logto 环境变量未配置，返回 503（服务尚不可用）
+    # If Logto env vars are not configured, return 503 (service not yet available)
+    unless Rails.application.config.try(:logto_configured)
+      return render_error(
+        message: 'Authentication service is not yet configured',
+        code:    'auth_not_configured',
+        status:  :service_unavailable
+      )
+    end
+
     token = extract_bearer_token
     unless token
       return render_unauthorized(

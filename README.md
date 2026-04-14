@@ -34,10 +34,15 @@ bundle exec sidekiq
 # api文档：http://localhost:3000/api-docs/index.html
 
 第 1 步：检查部署配置（确认服务器连通和目录结构）cle
-bundle exec cap production deploy:check
+RAILS_ENV=production bin/rails runner 'puts :boot_ok'
+
 第 2 步：执行部署
-bundle exec cap production deploy
+
+bundle exec cap production deploy:check
+
 第 3 步：执行部署
+
+bundle exec cap production deploy
 
 什么时候才需要执行 bundle exec cap production rails:seed？ 只有当你（或者我）修改了 
 db/seeds.rb

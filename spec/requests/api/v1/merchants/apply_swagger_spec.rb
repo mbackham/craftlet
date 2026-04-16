@@ -17,6 +17,74 @@ RSpec.describe 'Merchant Apply & Status API', type: :request do
   # 现有 GET /api/v1/merchant/status 已在 merchants_spec.rb 中有 swagger 文档
   # 此文件补充 POST /api/v1/merchant/apply
 
+  path '/api/v1/merchant/status' do
+    get '查询商家入驻审核状态' do
+      tags '商家'
+      description <<~DESC
+        查询当前登录用户的商家入驻申请状态。
+        - 需要 Logto JWT 认证
+        - 若从未申请过，返回 `{ status: "not_applied" }`
+        - 若已申请，返回 MerchantProfile 详情，含当前审核状态
+      DESC
+      security [Bearer: []]
+      produces 'application/json'
+
+      parameter name: :Authorization,
+                in: :header,
+                type: :string,
+                required: true,
+                description: 'Bearer <Logto JWT>'
+
+      response '200', '查询成功（包含未申请和已申请两种情况）' do
+        schema type: :object,
+               properties: {
+                 success: { type: :boolean, example: true },
+                 data: {
+                   type: :object,
+                   oneOf: [
+                     {
+                       title: '未申请',
+                       properties: {
+                         status: { type: :string, enum: ['not_applied'], example: 'not_applied' }
+                       },
+                       required: ['status']
+                     },
+                     {
+                       title: '已申请（含审核状态）',
+                       properties: {
+                         id:         { type: :integer, example: 1 },
+                         status:     { type: :string, enum: %w[submitted approved rejected suspended], example: 'submitted' },
+                         shop_name:  { type: :string, example: '张三手工坊' },
+                         created_at: { type: :string, format: 'date-time' }
+                       },
+                       required: %w[id status shop_name]
+                     }
+                   ]
+                 }
+               }
+
+        let(:Authorization) { 'Bearer valid.logto.token' }
+        before { allow(Auth::JwtVerifier).to receive(:call).and_return(valid_claims) }
+        run_test!
+      end
+
+      response '401', '未登录或 Token 无效' do
+        schema type: :object,
+               properties: {
+                 success: { type: :boolean, example: false },
+                 error:   { type: :object, properties: { message: { type: :string } } }
+               }
+
+        let(:Authorization) { 'Bearer invalid' }
+        before do
+          allow(Auth::JwtVerifier).to receive(:call)
+            .and_raise(Auth::JwtVerifier::VerificationError, 'invalid')
+        end
+        run_test!
+      end
+    end
+  end
+
   path '/api/v1/merchant/apply' do
     post '提交商家入驻申请' do
       tags '商家'

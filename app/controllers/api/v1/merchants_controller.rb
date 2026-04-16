@@ -2,21 +2,12 @@
 
 module Api
   module V1
-    # MerchantsController — 商家状态 API
-    # MerchantsController — Merchant status API
+    # MerchantsController — 商家状态 + 入驻申请 API
     #
-    # Week 1 改造 / Week 1 refactor:
-    #   - 改为继承 BaseController（接入 Logto JWT 认证）
-    #   - 移除 before_action :authenticate_user!（由 BaseController 统一处理）
-    #   - status_message 改用 I18n 翻译
-    #
-    #   - Now inherits BaseController (Logto JWT auth)
-    #   - Removed before_action :authenticate_user! (handled by BaseController)
-    #   - status_message now uses I18n translations
+    # GET  /api/v1/merchant/status → 查询入驻审核状态
+    # POST /api/v1/merchant/apply  → 提交入驻申请（pending → submitted）
     class MerchantsController < BaseController
       # GET /api/v1/merchant/status
-      # 返回当前用户的商家审核状态
-      # Returns the current user's merchant review status
       def status
         merchant_profile = current_user.merchant_profile
 
@@ -38,10 +29,44 @@ module Api
         end
       end
 
+      # POST /api/v1/merchant/apply
+      # 提交入驻申请，创建 MerchantProfile（status=submitted）
+      # 同一用户只能申请一次（已有 profile 则报错）
+      def apply
+        if current_user.merchant_profile.present?
+          return render_error(
+            message: '您已提交过入驻申请，请勿重复提交',
+            code:    'already_applied',
+            status:  :unprocessable_entity
+          )
+        end
+
+        profile = MerchantProfile.new(apply_params.merge(user: current_user, status: 'submitted'))
+
+        if profile.save
+          render_success(
+            data:   MerchantProfileBlueprint.render_as_hash(profile),
+            status: :created
+          )
+        else
+          render_validation_error(profile)
+        end
+      end
+
       private
 
       def status_message(profile)
         I18n.t("api.merchants.status.#{profile.status}", default: '')
+      end
+
+      def apply_params
+        params.require(:merchant).permit(
+          :shop_name,
+          :license_file_key,
+          :idcard_front_key, :idcard_back_key,
+          :bank_name, :bank_branch,
+          :address_province, :address_city, :address_district, :address_detail
+        )
       end
     end
   end

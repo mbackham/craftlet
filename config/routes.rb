@@ -54,7 +54,26 @@ Rails.application.routes.draw do
 
       # 商家相关 API
       resource :merchant, only: [], controller: 'merchants' do
-        get :status
+        get  :status
+        post :apply
+
+        # 商家端订单管理（Week 3）
+        resources :orders, only: %i[index show], controller: 'merchants/orders' do
+          member do
+            post :accept
+            post :start_producing
+            post :deliver
+          end
+        end
+
+        # 商家资料管理（Week 3）
+        resource :profile, only: %i[show update], controller: 'merchants/profiles'
+
+        # 商家看板（Week 3）
+        get :dashboard, to: 'merchants/dashboard#show'
+
+        # 结算查询（Week 3）
+        resources :settlements, only: %i[index show], controller: 'merchants/settlements'
       end
 
       # 反馈相关 API

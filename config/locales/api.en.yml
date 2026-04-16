@@ -44,3 +44,26 @@ en:
       invalid_order_status: "This order is not in a payable state"
       unsupported_channel: "Unsupported payment channel. Please choose wechat or alipay"
       create_failed: "Failed to create payment. Please try again later"
+
+    tickets:
+      errors:
+        not_found: "Ticket not found or access denied"
+        closed_ticket: "This ticket is closed. You cannot add messages to a closed ticket"
+        cannot_close: "This ticket cannot be closed in its current state"
+      status:
+        open: "Open"
+        assigned: "Assigned"
+        in_progress: "In Progress"
+        resolved: "Resolved"
+        closed: "Closed"
+      categories:
+        general: "General Inquiry"
+        payment: "Payment Issue"
+        order: "Order Issue"
+        merchant: "Merchant Issue"
+        other: "Other"
+      priorities:
+        low: "Low"
+        normal: "Normal"
+        high: "High"
+        urgent: "Urgent"

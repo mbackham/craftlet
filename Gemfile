@@ -43,6 +43,10 @@ gem "aasm"
 # === Background jobs ===
 gem "sidekiq"
 
+# === Push Notifications ===
+# Expo Push Notifications — Week 4 (2026-04-16)
+gem "exponent-server-sdk"
+
 # === Auditing ===
 gem "paper_trail"
 

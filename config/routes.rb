@@ -52,6 +52,14 @@ Rails.application.routes.draw do
         end
       end
 
+      # ── Week 4: 工单系统 API ────────────────────────────────────────────────
+      resources :tickets, only: %i[index show create] do
+        member do
+          post  :messages, action: :add_message
+          patch :close
+        end
+      end
+
       # 商家相关 API
       resource :merchant, only: [], controller: 'merchants' do
         get  :status

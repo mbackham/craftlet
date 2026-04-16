@@ -105,6 +105,79 @@ FactoryBot.define do
     end
   end
 
+  # ── Ticket ──
+  factory :ticket do
+    transient { creator { nil } }
+    sequence(:ticket_no) { |n| "TK-#{Time.current.strftime('%Y%m%d')}-#{n.to_s.rjust(4, '0').upcase}" }
+    subject { "测试工单 #{SecureRandom.hex(4)}" }
+    description { "工单描述内容" }
+    category { "general" }
+    priority { "normal" }
+    status { "open" }
+    creator_type { "User" }
+
+    # creator_id 是 UUID 格式，在 after(:build) 阶段填入
+    after(:build) do |ticket, evaluator|
+      if ticket.creator_id.blank?
+        u = evaluator.creator || FactoryBot.create(:user)
+        ticket.creator_id = Ticket.id_to_uuid(u.id)
+        ticket.creator_type = "User"
+      end
+    end
+
+    trait :closed do
+      status { "closed" }
+      closed_at { Time.current }
+    end
+
+    trait :resolved do
+      status { "resolved" }
+      resolved_at { Time.current }
+    end
+  end
+
+  # ── TicketMessage ──
+  factory :ticket_message do
+    transient { sender { nil } }
+    association :ticket
+    content { "工单消息内容 #{SecureRandom.hex(4)}" }
+    internal { false }
+    sender_type { "User" }
+
+    after(:build) do |msg, evaluator|
+      if msg.sender_id.blank?
+        u = evaluator.sender || FactoryBot.create(:user)
+        msg.sender_id = TicketMessage.id_to_uuid(u.id)
+        msg.sender_type = "User"
+      end
+    end
+  end
+
+  # ── Notification ──
+  factory :notification do
+    association :user
+    title { "测试通知" }
+    body { "通知内容" }
+    notification_type { "system" }
+    data { {} }
+    read_at { nil }
+
+    trait :read do
+      read_at { Time.current }
+    end
+  end
+
+  # ── DeviceToken ──
+  factory :device_token do
+    association :user
+    sequence(:token) { |n| "ExponentPushToken[test-token-#{n}]" }
+    platform { "ios" }
+
+    trait :android do
+      platform { "android" }
+    end
+  end
+
   # ── FundAlert ──
   factory :fund_alert do
     association :subject, factory: [:payment, :paid]

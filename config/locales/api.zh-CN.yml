@@ -44,3 +44,26 @@ zh-CN:
       invalid_order_status: "订单状态不支持支付操作"
       unsupported_channel: "不支持的支付渠道，请选择 wechat 或 alipay"
       create_failed: "支付单创建失败，请稍后重试"
+
+    tickets:
+      errors:
+        not_found: "工单不存在或无权访问"
+        closed_ticket: "工单已关闭，无法追加消息"
+        cannot_close: "当前工单状态不允许关闭"
+      status:
+        open: "待处理"
+        assigned: "已分配"
+        in_progress: "处理中"
+        resolved: "已解决"
+        closed: "已关闭"
+      categories:
+        general: "一般咨询"
+        payment: "支付问题"
+        order: "订单问题"
+        merchant: "商家问题"
+        other: "其他"
+      priorities:
+        low: "低"
+        normal: "普通"
+        high: "高"
+        urgent: "紧急"

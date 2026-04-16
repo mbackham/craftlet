@@ -9,10 +9,10 @@
 #   - 新增 webhooks/logto 限流（防止 Webhook 端点被刷）
 #   - 新增 API 通用限流（按 Bearer token sub 限制已认证请求）
 #
-#   - Removed logins/ip and logins/email (/api/v1/users/sign_in route deleted)
-#   - Removed registrations/ip (registration moved to Logto, no local route)
-#   - Added webhooks/logto throttle (prevent webhook endpoint flooding)
-#   - Added API generic throttle (rate-limit authenticated requests by token sub)
+# Week 4 新增 / Week 4 additions:
+#   - 新增工单创建限流（防止工单刷单）
+#   - 新增支付创建限流（按用户 Token，更严格）
+#   - 新增已认证 API 按 Token 限流（防止单用户接口滥用）
 #
 class Rack::Attack
   ### =============================
@@ -26,28 +26,24 @@ class Rack::Attack
 
   # --- Admin 登录限流（按 IP）/ Admin login throttle (by IP) ---
   # 同一 IP，5 分钟内最多 5 次管理后台登录尝试
-  # Same IP, max 5 admin login attempts in 5 minutes
   throttle('admin_logins/ip', limit: 5, period: 5.minutes) do |req|
     req.ip if req.path == '/admin/login' && req.post?
   end
 
   # --- 密码重置限流（按 IP）/ Password reset throttle (by IP) ---
   # 同一 IP，1 小时内最多 3 次密码重置（Devise :recoverable）
-  # Same IP, max 3 password reset attempts per hour (Devise :recoverable)
   throttle('password_resets/ip', limit: 3, period: 1.hour) do |req|
     req.ip if req.path =~ %r{/users/password\z} && req.post?
   end
 
   # --- 反馈提交限流（按 IP）/ Feedback submit throttle (by IP) ---
   # 同一 IP，1 小时内最多 3 次反馈提交
-  # Same IP, max 3 feedback submissions per hour
   throttle('feedbacks/ip', limit: 3, period: 1.hour) do |req|
     req.ip if req.path == '/api/v1/feedbacks' && req.post?
   end
 
   # --- 反馈提交限流（按 Email）/ Feedback submit throttle (by Email) ---
   # 同一邮箱，1 天内最多 5 次反馈提交
-  # Same email, max 5 feedback submissions per day
   throttle('feedbacks/email', limit: 5, period: 1.day) do |req|
     if req.path == '/api/v1/feedbacks' && req.post?
       begin
@@ -62,14 +58,40 @@ class Rack::Attack
 
   # --- Logto Webhook 限流（按 IP）/ Logto Webhook throttle (by IP) ---
   # 同一 IP，1 分钟内最多 30 次 Webhook 调用（防止伪造 Webhook 刷库）
-  # Same IP, max 30 webhook calls per minute (prevent spoofed webhook flooding)
   throttle('webhooks/logto/ip', limit: 30, period: 1.minute) do |req|
     req.ip if req.path == '/api/webhooks/logto' && req.post?
   end
 
+  # --- 工单创建限流（按 IP）/ Ticket creation throttle (by IP) --- [Week 4]
+  # 同一 IP，1 小时内最多 10 次工单创建（防止工单刷单）
+  throttle('tickets/create/ip', limit: 10, period: 1.hour) do |req|
+    req.ip if req.path == '/api/v1/tickets' && req.post?
+  end
+
+  # --- 工单消息限流（按 IP）/ Ticket message throttle (by IP) --- [Week 4]
+  # 同一 IP，1 分钟内最多 20 次工单消息
+  throttle('tickets/messages/ip', limit: 20, period: 1.minute) do |req|
+    req.ip if req.path =~ %r{/api/v1/tickets/\d+/messages} && req.post?
+  end
+
+  # --- 支付创建限流（按 Bearer token）/ Payment creation throttle (by token) --- [Week 4]
+  # 同一 Token，1 分钟内最多 5 次支付请求（防止重复提交）
+  throttle('payments/create/token', limit: 5, period: 1.minute) do |req|
+    if req.path == '/api/v1/payments' && req.post?
+      req.env['HTTP_AUTHORIZATION']&.delete_prefix('Bearer ')&.strip&.slice(0, 64)
+    end
+  end
+
+  # --- 已认证 API 按 Token 限流 / Authenticated API throttle by token --- [Week 4]
+  # 同一 Token，每分钟最多 120 次已认证 API 请求（防止单用户接口滥用）
+  throttle('api/authenticated/token', limit: 120, period: 1.minute) do |req|
+    if req.path.start_with?('/api/v1/') && req.env['HTTP_AUTHORIZATION']&.start_with?('Bearer ')
+      req.env['HTTP_AUTHORIZATION'].delete_prefix('Bearer ').strip.slice(0, 64)
+    end
+  end
+
   # --- 全局限流（按 IP）/ Global throttle (by IP) ---
   # 同一 IP，每分钟最多 300 次请求（排除静态资源和健康检查）
-  # Same IP, max 300 requests per minute (excluding assets and health check)
   throttle('req/ip', limit: 300, period: 1.minute) do |req|
     req.ip unless req.path.start_with?('/assets') || req.path == '/up'
   end

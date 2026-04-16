@@ -1878,6 +1878,451 @@ paths:
           description: 无权查看此支付单
         '404':
           description: 支付单不存在
+  "/api/v1/tickets":
+    get:
+      summary: 工单列表
+      tags:
+      - 工单
+      description: |
+        返回当前登录用户创建的工单列表，按创建时间倒序排列，支持分页。
+        需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 页码（默认 1）
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        description: 每页条数（默认 20）
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        ticket_no:
+                          type: string
+                          example: TK-20260416-0001
+                        subject:
+                          type: string
+                        status:
+                          type: string
+                          enum:
+                          - open
+                          - assigned
+                          - in_progress
+                          - resolved
+                          - closed
+                        category:
+                          type: string
+                          enum:
+                          - general
+                          - payment
+                          - order
+                          - merchant
+                          - other
+                        priority:
+                          type: string
+                          enum:
+                          - low
+                          - normal
+                          - high
+                          - urgent
+                        created_at:
+                          type: string
+                          format: date-time
+                        assigned_at:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        resolved_at:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        closed_at:
+                          type: string
+                          format: date-time
+                          nullable: true
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                      total_pages:
+                        type: integer
+                      total_count:
+                        type: integer
+                      per_page:
+                        type: integer
+        '401':
+          description: 未登录或 Token 无效
+    post:
+      summary: 创建工单
+      tags:
+      - 工单
+      description: |
+        用户提交新工单，初始状态为 `open`，等待客服分配处理。
+        - category 可选值：general / payment / order / merchant / other
+        - priority 可选值：low / normal / high / urgent
+        - 创建成功后会触发站内通知
+        需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      responses:
+        '201':
+          description: 工单创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      ticket_no:
+                        type: string
+                      subject:
+                        type: string
+                      status:
+                        type: string
+                        enum:
+                        - open
+                      category:
+                        type: string
+                      priority:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+        '401':
+          description: 未登录或 Token 无效
+        '422':
+          description: 参数验证失败（如 subject 为空）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: validation_error
+                      message:
+                        type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ticket:
+                  type: object
+                  properties:
+                    subject:
+                      type: string
+                      description: 工单主题（必填）
+                    description:
+                      type: string
+                      description: 详细描述
+                    category:
+                      type: string
+                      enum:
+                      - general
+                      - payment
+                      - order
+                      - merchant
+                      - other
+                      description: 工单类别
+                    priority:
+                      type: string
+                      enum:
+                      - low
+                      - normal
+                      - high
+                      - urgent
+                      description: 优先级
+                  required:
+                  - subject
+              required:
+              - ticket
+  "/api/v1/tickets/{id}":
+    get:
+      summary: 工单详情
+      tags:
+      - 工单
+      description: 返回指定工单的详情，包含完整描述和公开消息列表。只能查看自己的工单。需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: 工单 ID
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      ticket_no:
+                        type: string
+                      subject:
+                        type: string
+                      description:
+                        type: string
+                        nullable: true
+                      status:
+                        type: string
+                      category:
+                        type: string
+                      priority:
+                        type: string
+                      messages:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            content:
+                              type: string
+                            sender_type:
+                              type: string
+                              description: User 或 AdminUser
+                            internal:
+                              type: boolean
+                            created_at:
+                              type: string
+                              format: date-time
+                      created_at:
+                        type: string
+                        format: date-time
+                      assigned_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      resolved_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      closed_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+        '401':
+          description: 未登录或 Token 无效
+        '404':
+          description: 工单不存在或不属于当前用户
+  "/api/v1/tickets/{id}/messages":
+    post:
+      summary: 追加工单消息
+      tags:
+      - 工单
+      description: |
+        用户向工单追加一条消息（回复客服）。
+        - 工单必须处于非关闭状态（open / assigned / in_progress / resolved）
+        - 只能向自己的工单追加消息
+        需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: 工单 ID
+        schema:
+          type: integer
+      responses:
+        '201':
+          description: 消息追加成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      content:
+                        type: string
+                      sender_type:
+                        type: string
+                      internal:
+                        type: boolean
+                      created_at:
+                        type: string
+                        format: date-time
+        '401':
+          description: 未登录或 Token 无效
+        '404':
+          description: 工单不存在或不属于当前用户
+        '422':
+          description: 工单已关闭或消息内容为空
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: ticket_closed
+                      message:
+                        type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: object
+                  properties:
+                    content:
+                      type: string
+                      description: 消息内容（必填）
+                  required:
+                  - content
+              required:
+              - message
+  "/api/v1/tickets/{id}/close":
+    patch:
+      summary: 关闭工单
+      tags:
+      - 工单
+      description: |
+        用户主动关闭自己的工单。
+        - 可关闭的状态：open / assigned / in_progress / resolved
+        - 已关闭（closed）的工单无法再次关闭
+        需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: 工单 ID
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: 工单关闭成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      ticket_no:
+                        type: string
+                      status:
+                        type: string
+                        enum:
+                        - closed
+                      closed_at:
+                        type: string
+                        format: date-time
+        '401':
+          description: 未登录或 Token 无效
+        '404':
+          description: 工单不存在或不属于当前用户
+        '422':
+          description: 工单状态不允许关闭（已关闭）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: invalid_state
+                      message:
+                        type: string
   "/api/v1/users/device_tokens":
     post:
       summary: 注册设备推送 Token

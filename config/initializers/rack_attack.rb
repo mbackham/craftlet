@@ -18,7 +18,18 @@ class Rack::Attack
   ### =============================
   ### 缓存后端 / Cache backend
   ### =============================
-  Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new if Rails.env.test? || Rails.env.development?
+  # 开发/测试环境用内存缓存，生产环境必须用 Redis（否则多进程/多实例限流无效）
+  if Rails.env.test? || Rails.env.development?
+    Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
+  else
+    # ⚠️ Fix: 生产环境显式配置 Redis，防止限流在多进程下失效
+    # 依赖 config/initializers/redis.rb 中初始化的 $redis 实例
+    Rack::Attack.cache.store = ActiveSupport::Cache::RedisCacheStore.new(
+      url:       ENV.fetch('REDIS_URL', 'redis://localhost:6379/0'),
+      namespace: 'rack_attack',
+      expires_in: 1.hour  # 最大 TTL 兜底
+    )
+  end
 
   ### =============================
   ### 限流规则 / Throttle rules

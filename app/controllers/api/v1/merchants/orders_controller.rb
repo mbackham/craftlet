@@ -21,6 +21,7 @@ module Api
         # GET /api/v1/merchant/orders
         def index
           scope = current_user.merchant_orders
+                              .includes(:order_items, :payments)
                               .order(created_at: :desc)
 
           # 状态过滤：?status=paid 等

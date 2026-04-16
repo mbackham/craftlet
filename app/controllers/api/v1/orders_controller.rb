@@ -78,12 +78,13 @@ module Api
       private
 
       def set_order
-        @order = Order.find(params[:id])
+        @order = Order.includes(:order_items, :payments).find(params[:id])
       end
 
       def order_params
+        # ⚠️ Fix: 移除 cancel_reason（创建时不应允许客户端设置）
         params.require(:order).permit(
-          :merchant_id, :total_amount, :currency, :cancel_reason
+          :merchant_id, :total_amount, :currency
         )
       end
 

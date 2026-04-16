@@ -78,6 +78,19 @@ RSpec.describe 'Merchant Orders API', type: :request do
         body = JSON.parse(response.body)
         expect(body['data'].all? { |o| o['status'] == 'paid' }).to be true
       end
+
+      it 'returns sorted by created_at desc' do
+        get '/api/v1/merchant/orders', headers: auth_headers
+        body = JSON.parse(response.body)
+        ids = body['data'].map { |o| o['id'] }
+        expect(ids).to eq(my_orders.map(&:id).sort.reverse)
+      end
+
+      it 'includes pagination meta' do
+        get '/api/v1/merchant/orders', headers: auth_headers
+        body = JSON.parse(response.body)
+        expect(body['meta']).to include('current_page', 'total_pages', 'total_count', 'per_page')
+      end
     end
   end
 
@@ -159,6 +172,13 @@ RSpec.describe 'Merchant Orders API', type: :request do
     let!(:accepted_order) { create_merchant_order(status: 'accepted') }
     let!(:paid_order)     { create_merchant_order(status: 'paid') }
 
+    context 'without authentication' do
+      it 'returns 401' do
+        post "/api/v1/merchant/orders/#{accepted_order.id}/start_producing"
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
     context 'with valid JWT' do
       it 'transitions order from accepted to producing' do
         post "/api/v1/merchant/orders/#{accepted_order.id}/start_producing", headers: auth_headers
@@ -185,6 +205,13 @@ RSpec.describe 'Merchant Orders API', type: :request do
     let!(:producing_order) { create_merchant_order(status: 'producing') }
     let!(:accepted_order)  { create_merchant_order(status: 'accepted') }
 
+    context 'without authentication' do
+      it 'returns 401' do
+        post "/api/v1/merchant/orders/#{producing_order.id}/deliver"
+        expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
     context 'with valid JWT' do
       it 'transitions order from producing to delivered' do
         post "/api/v1/merchant/orders/#{producing_order.id}/deliver", headers: auth_headers
@@ -202,6 +229,26 @@ RSpec.describe 'Merchant Orders API', type: :request do
         body = JSON.parse(response.body)
         expect(body.dig('error', 'code')).to eq('invalid_state')
       end
+    end
+  end
+
+  # ── 完整工作流：paid → accepted → producing → delivered ────────────────
+
+  describe 'Full merchant order workflow' do
+    it 'transitions through full lifecycle' do
+      order = create_merchant_order(status: 'paid')
+
+      post "/api/v1/merchant/orders/#{order.id}/accept", headers: auth_headers
+      expect(response).to have_http_status(:ok)
+      expect(order.reload.status).to eq('accepted')
+
+      post "/api/v1/merchant/orders/#{order.id}/start_producing", headers: auth_headers
+      expect(response).to have_http_status(:ok)
+      expect(order.reload.status).to eq('producing')
+
+      post "/api/v1/merchant/orders/#{order.id}/deliver", headers: auth_headers
+      expect(response).to have_http_status(:ok)
+      expect(order.reload.status).to eq('delivered')
     end
   end
 end

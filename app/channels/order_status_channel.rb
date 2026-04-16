@@ -35,6 +35,8 @@ class OrderStatusChannel < ApplicationCable::Channel
   def authorized_for_order?(order)
     customer = Order.find_user_by_uuid(order.customer_id)
     merchant = Order.find_user_by_uuid(order.merchant_id)
-    current_user == customer || current_user == merchant
+    # ⚠️ Fix: 不能用 == 比较两次独立 DB 查询返回的不同 Ruby 对象实例
+    # 必须比较 .id（Integer）才能正确判断是否为同一个用户
+    current_user.id == customer&.id || current_user.id == merchant&.id
   end
 end

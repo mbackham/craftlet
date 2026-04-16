@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_13_000001) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_15_065600) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -265,6 +265,17 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_13_000001) do
     t.index ["status"], name: "index_coupons_on_status"
     t.index ["user_id", "coupon_template_id"], name: "index_coupons_on_user_and_template"
     t.index ["user_id"], name: "index_coupons_on_user_id"
+  end
+
+  create_table "device_tokens", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "token", null: false
+    t.string "platform", null: false, comment: "ios / android"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["platform"], name: "index_device_tokens_on_platform"
+    t.index ["token"], name: "index_device_tokens_on_token", unique: true
+    t.index ["user_id"], name: "index_device_tokens_on_user_id"
   end
 
   create_table "dw_dim_merchants", force: :cascade do |t|
@@ -653,6 +664,20 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_13_000001) do
     t.index ["action"], name: "index_merchant_review_logs_on_action"
     t.index ["merchant_profile_id"], name: "index_merchant_review_logs_on_merchant_profile_id"
     t.index ["operator_admin_id"], name: "index_merchant_review_logs_on_operator_admin_id"
+  end
+
+  create_table "notifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "title", null: false
+    t.text "body"
+    t.string "notification_type", null: false, comment: "order_accepted / order_rejected / bid_received / system"
+    t.datetime "read_at"
+    t.jsonb "data", default: {}
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["notification_type"], name: "index_notifications_on_notification_type"
+    t.index ["user_id", "read_at"], name: "index_notifications_on_user_id_and_read_at"
+    t.index ["user_id"], name: "index_notifications_on_user_id"
   end
 
   create_table "order_items", force: :cascade do |t|

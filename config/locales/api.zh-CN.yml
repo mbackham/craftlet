@@ -35,3 +35,12 @@ zh-CN:
       code_required: "请输入兑换码"
       invalid_code: "兑换码无效或已过期"
       already_redeemed: "该兑换码已被使用"
+
+    order:
+      cannot_cancel: "当前订单状态无法取消"
+      not_found: "订单不存在"
+
+    payment:
+      invalid_order_status: "订单状态不支持支付操作"
+      unsupported_channel: "不支持的支付渠道，请选择 wechat 或 alipay"
+      create_failed: "支付单创建失败，请稍后重试"

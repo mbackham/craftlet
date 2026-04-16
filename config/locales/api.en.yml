@@ -35,3 +35,12 @@ en:
       code_required: "Please enter a redemption code"
       invalid_code: "Invalid or expired redemption code"
       already_redeemed: "This redemption code has already been used"
+
+    order:
+      cannot_cancel: "This order cannot be cancelled in its current state"
+      not_found: "Order not found"
+
+    payment:
+      invalid_order_status: "This order is not in a payable state"
+      unsupported_channel: "Unsupported payment channel. Please choose wechat or alipay"
+      create_failed: "Failed to create payment. Please try again later"

@@ -32,7 +32,7 @@ FactoryBot.define do
     sequence(:order_no) { |n| "ORD#{Time.current.strftime('%Y%m%d')}#{n.to_s.rjust(6, '0')}" }
     customer_id { SecureRandom.uuid }
     merchant_id { SecureRandom.uuid }
-    status { "pending" }
+    status { "created" }
     total_amount { rand(100..10_000).to_d }
     currency { "CNY" }
 

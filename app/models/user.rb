@@ -19,6 +19,8 @@ class User < ApplicationRecord
 
   has_many :roles, dependent: :destroy
   has_one :merchant_profile, dependent: :destroy
+  has_many :device_tokens, dependent: :destroy
+  has_many :notifications, dependent: :destroy
 
   # ⚠️  customer_orders / merchant_orders 不能用 has_many！
   #

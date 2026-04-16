@@ -24,6 +24,34 @@ Rails.application.routes.draw do
       #   delete "users/sign_out", to: "users/sessions#destroy", defaults: { format: :json }
       # end
 
+      # ── Week 2: 用户端核心 API ─────────────────────────────────────────────
+      namespace :users do
+        resource  :profile,       only: [:show, :update],  controller: 'profiles'
+        resources :device_tokens, only: [:create, :destroy]
+      end
+
+      # 订单 API（消费者端）
+      resources :orders, only: [:index, :show, :create] do
+        member do
+          post :cancel
+        end
+        resources :bids, only: [:index, :create]
+      end
+
+      # 支付 API
+      resources :payments, only: [:create] do
+        member do
+          get :status
+        end
+      end
+
+      # 通知 API
+      resources :notifications, only: [:index] do
+        collection do
+          patch :mark_read
+        end
+      end
+
       # 商家相关 API
       resource :merchant, only: [], controller: 'merchants' do
         get :status

@@ -37,7 +37,7 @@ module ApiResponse
   # 分页成功（与 Pagy 集成）
   # Paginated success (integrates with Pagy)
   # @param data        [Array]       当前页数据 / current page data
-  # @param pagy        [Pagy]        Pagy 实例 / Pagy instance
+  # @param pagy        [Pagy::Offset] Pagy 实例 / Pagy instance
   # @param status      [Symbol]      HTTP 状态码 / HTTP status
   def render_paginated(data:, pagy:, status: :ok)
     render_success(
@@ -45,9 +45,9 @@ module ApiResponse
       status: status,
       meta:   {
         current_page:  pagy.page,
-        total_pages:   pagy.pages,
+        total_pages:   pagy.last,           # Pagy 43: .last 替代 .pages / replaces .pages
         total_count:   pagy.count,
-        per_page:      pagy.items
+        per_page:      pagy.limit           # Pagy 43: .limit 替代 .items / replaces .items
       }
     )
   end

@@ -7,15 +7,283 @@ info:
   contact:
     name: Craftlet Team
 paths:
+  "/api/payments/callbacks/wechat":
+    post:
+      summary: 微信支付回调
+      tags:
+      - 支付回调
+      description: |
+        接收微信支付退款结果回调通知。由微信服务器主动 POST 调用，**无需用户 JWT 认证**。
+
+        **请求格式**：JSON Body
+
+        **响应格式**：JSON `{"code": "SUCCESS"}` 或 `{"code": "FAIL"}`（微信要求的格式）
+
+        **幂等性**：重复回调返回 200 SUCCESS，不重复处理。
+
+        ⚠️ **KI-W2-01**：当前签名验证处于 stub 模式（营业执照未到位）。生产前需启用真实 RSA-SHA256 验证。
+      parameters: []
+      responses:
+        '200':
+          description: 处理成功（含幂等重复回调）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    enum:
+                    - SUCCESS
+                    description: 微信要求的成功标识
+        '400':
+          description: 请求缺少必要字段（如 refund_id）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    enum:
+                    - FAIL
+                  message:
+                    type: string
+        '422':
+          description: 未找到对应退款单（refund_id 不存在）
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refund_id:
+                  type: string
+                  description: 微信退款单号（provider_refund_no）
+                out_refund_no:
+                  type: string
+                  description: 商户退款单号（idempotency_key）
+                refund_fee:
+                  type: integer
+                  description: 退款金额（分）
+              required:
+              - refund_id
+              - out_refund_no
+              - refund_fee
+  "/api/payments/callbacks/alipay":
+    post:
+      summary: 支付宝回调
+      tags:
+      - 支付回调
+      description: |
+        接收支付宝退款结果回调通知。由支付宝服务器主动 POST 调用，**无需用户 JWT 认证**。
+
+        **请求格式**：Form Data（application/x-www-form-urlencoded）
+
+        **响应格式**：纯文本 `success` 或 `fail`（支付宝要求的格式）
+
+        **幂等性**：重复回调返回 200 success，不重复处理。
+
+        ⚠️ **KI-W2-01**：当前签名验证处于 stub 模式（营业执照未到位）。生产前需启用真实 RSA2 验证。
+      parameters: []
+      responses:
+        '200':
+          description: 处理成功，响应体为纯文本 'success'
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: success
+        '400':
+          description: 缺少必要字段，响应体为纯文本 'fail'
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: fail
+        '422':
+          description: 未找到对应退款单，响应体为纯文本 'fail'
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: fail
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: string
+        description: 通知类型，如 refund_resultNotify
+  "/api/v1/orders/{order_id}/bids":
+    get:
+      summary: 查看订单竞价列表
+      tags:
+      - 竞价
+      description: |
+        返回指定订单的所有报价列表。
+        **权限**：只有订单的消费者（customer）可以查看报价列表，商家（bidder）查看会返回 403。
+        需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: order_id
+        in: path
+        required: true
+        description: 订单 ID
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: 获取成功（仅限订单消费者）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        amount:
+                          type: string
+                          example: '250.0'
+                        status:
+                          type: string
+                          enum:
+                          - pending
+                          - accepted
+                          - rejected
+                        message:
+                          type: string
+                          nullable: true
+                        created_at:
+                          type: string
+                          format: date-time
+        '401':
+          description: 未登录或 Token 无效
+        '403':
+          description: 当前用户不是此订单的消费者
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
+    post:
+      summary: 提交报价
+      tags:
+      - 竞价
+      description: |
+        商家对指定订单提交报价（竞价）。报价金额必须大于 0。
+        需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: order_id
+        in: path
+        required: true
+        description: 订单 ID
+        schema:
+          type: integer
+      responses:
+        '201':
+          description: 报价提交成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      amount:
+                        type: string
+                      status:
+                        type: string
+                        enum:
+                        - pending
+                      message:
+                        type: string
+                        nullable: true
+                      created_at:
+                        type: string
+                        format: date-time
+        '401':
+          description: 未登录或 Token 无效
+        '404':
+          description: 订单不存在
+        '422':
+          description: 报价金额无效（≤0）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: string
+                  description: 报价金额（必须 > 0）
+                  example: '250.00'
+                message:
+                  type: string
+                  description: 报价备注（可选）
+              required:
+              - amount
   "/api/v1/feedbacks/captcha":
     get:
       summary: 获取验证码
       tags:
       - 反馈
-      description: 获取图片验证码，用于提交反馈时验证
+      description: |
+        获取图片验证码。
+        ⚠️ KI-W1-01: 当前实现依赖 session（RuCaptcha）。API-only 模式下降级返回占位响应。
+        建议迁移至无状态验证码方案。
       responses:
         '200':
-          description: 获取成功
+          description: 获取成功（captcha_image 可能为 null）
           content:
             application/json:
               schema:
@@ -23,16 +291,17 @@ paths:
                 properties:
                   captcha_image:
                     type: string
-                    description: 验证码图片 (Base64)
+                    nullable: true
+                    description: 验证码图片 (Base64)，API-only 模式下为 null
                   captcha_key:
                     type: string
-                    description: 验证码 Key（提交反馈时需要）
+                    description: 验证码 Key
   "/api/v1/feedbacks":
     post:
       summary: 提交反馈
       tags:
       - 反馈
-      description: 提交用户反馈，需要先获取验证码。支持文字和截图。
+      description: 提交用户反馈。跳过 JWT 认证（公开表单），支持匿名提交。验证码在 API-only 模式下自动通过。
       parameters: []
       responses:
         '201':
@@ -42,33 +311,35 @@ paths:
               schema:
                 type: object
                 properties:
-                  id:
-                    type: integer
-                    description: 反馈 ID
-                  tracking_number:
-                    type: string
-                    description: 跟踪编号
-                  message:
-                    type: string
-                    description: 提示信息
-                  estimated_response_time:
-                    type: string
-                    description: 预计回复时间
-        '422':
-          description: 提交失败（参数错误或验证码错误）
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      tracking_number:
+                        type: string
+                      message:
+                        type: string
+                      estimated_response_time:
+                        type: string
+        '400':
+          description: 参数不足
           content:
             application/json:
               schema:
                 type: object
                 properties:
+                  success:
+                    type: boolean
                   error:
-                    type: string
-                    description: 错误信息
-                  details:
-                    type: array
-                    items:
-                      type: string
-                    description: 详细错误列表
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
       requestBody:
         content:
           application/json:
@@ -80,35 +351,31 @@ paths:
                   properties:
                     feedback_type:
                       type: string
-                      description: 反馈类型
+                      enum:
+                      - bug_report
+                      - feature_request
+                      - complaint
+                      - other
                     subject:
                       type: string
-                      description: 反馈主题
                     content:
                       type: string
-                      description: 反馈内容
                     submitter_name:
                       type: string
-                      description: 提交者姓名
                     submitter_email:
                       type: string
-                      description: 提交者邮箱
                     submitter_phone:
                       type: string
-                      description: 提交者电话
                     page_url:
                       type: string
-                      description: 相关页面 URL
                   required:
                   - feedback_type
                   - subject
                   - content
-                _rucaptcha:
-                  type: string
-                  description: 验证码
+                  - submitter_email
+                  - submitter_name
               required:
               - feedback
-              - _rucaptcha
   "/api/v1/feedbacks/{tracking_number}":
     get:
       summary: 查看反馈状态
@@ -118,7 +385,6 @@ paths:
       parameters:
       - name: tracking_number
         in: path
-        description: 反馈跟踪编号
         required: true
         schema:
           type: string
@@ -130,19 +396,20 @@ paths:
               schema:
                 type: object
                 properties:
-                  tracking_number:
-                    type: string
-                    description: 跟踪编号
-                  status:
-                    type: string
-                    description: 处理状态
-                  submitted_at:
-                    type: string
-                    format: date-time
-                    description: 提交时间
-                  last_update:
-                    type: string
-                    description: 最新进展
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      tracking_number:
+                        type: string
+                      status:
+                        type: string
+                      submitted_at:
+                        type: string
+                        format: date-time
+                      last_update:
+                        type: string
         '404':
           description: 反馈不存在
   "/api/v1/merchant/status":
@@ -150,9 +417,16 @@ paths:
       summary: 获取商家审核状态
       tags:
       - 商家
-      description: 返回当前登录用户的商家入驻审核状态。需要 JWT 认证。
+      description: 返回当前登录用户的商家入驻审核状态。需要 Logto JWT 认证。
       security:
       - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
       responses:
         '200':
           description: 获取成功
@@ -161,44 +435,879 @@ paths:
               schema:
                 type: object
                 properties:
-                  status:
-                    type: string
-                    enum:
-                    - not_applied
-                    - pending
-                    - submitted
-                    - approved
-                    - rejected
-                    - suspended
-                    description: 审核状态
-                  shop_name:
-                    type: string
-                    nullable: true
-                    description: 店铺名称
-                  message:
-                    type: string
-                    description: 状态说明
-                  rejected_reason:
-                    type: string
-                    nullable: true
-                    description: 拒绝原因
-                  approved_at:
-                    type: string
-                    nullable: true
-                    format: date-time
-                    description: 通过时间
-                  rejected_at:
-                    type: string
-                    nullable: true
-                    format: date-time
-                    description: 拒绝时间
-                  created_at:
-                    type: string
-                    nullable: true
-                    format: date-time
-                    description: 申请时间
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                        - not_applied
+                        - pending
+                        - submitted
+                        - approved
+                        - rejected
+                        - suspended
+                        description: 审核状态
+                      shop_name:
+                        type: string
+                        nullable: true
+                      message:
+                        type: string
+                      rejected_reason:
+                        type: string
+                        nullable: true
+                      approved_at:
+                        type: string
+                        nullable: true
+                        format: date-time
+                      rejected_at:
+                        type: string
+                        nullable: true
+                        format: date-time
+                      created_at:
+                        type: string
+                        nullable: true
+                        format: date-time
         '401':
           description: 未登录或 Token 无效
+  "/api/v1/notifications":
+    get:
+      summary: 通知列表
+      tags:
+      - 通知
+      description: 分页返回当前用户的站内通知，按创建时间倒序排列。响应中包含已读/未读状态。需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 页码（默认 1）
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        description: 每页条数（默认 20）
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        title:
+                          type: string
+                        body:
+                          type: string
+                        notification_type:
+                          type: string
+                          enum:
+                          - order_accepted
+                          - order_rejected
+                          - order_completed
+                          - order_canceled
+                          - payment_success
+                          - system
+                          description: 通知类型
+                        read:
+                          type: boolean
+                          description: 是否已读
+                        read_at:
+                          type: string
+                          format: date-time
+                          nullable: true
+                        data:
+                          type: object
+                          nullable: true
+                          additionalProperties: true
+                          description: 附加业务数据（如 order_id）
+                        created_at:
+                          type: string
+                          format: date-time
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                      total_pages:
+                        type: integer
+                      total_count:
+                        type: integer
+                      per_page:
+                        type: integer
+        '401':
+          description: 未登录或 Token 无效
+  "/api/v1/notifications/mark_read":
+    patch:
+      summary: 批量标记通知已读
+      tags:
+      - 通知
+      description: |
+        将指定通知标记为已读。
+        - 传入 `ids` 数组：只标记指定 ID 的通知
+        - 不传 `ids`（或传空数组）：标记当前用户所有未读通知为已读
+        - 跨用户隔离：只处理属于当前用户的通知，其他用户的 ID 会被忽略
+        需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 全部标记已读（不传 ids）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      marked_count:
+                        type: integer
+                        description: 本次实际标记已读的数量
+        '401':
+          description: 未登录或 Token 无效
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: integer
+                  description: 要标记已读的通知 ID 列表（不传则标记全部未读）
+  "/api/v1/orders":
+    get:
+      summary: 消费者订单列表
+      tags:
+      - 订单
+      description: 分页返回当前登录用户（消费者）的所有订单，按创建时间倒序排列。需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: 页码（默认 1）
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        description: 每页条数（默认 20）
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        order_no:
+                          type: string
+                          example: ORD20260416ABCDEF
+                        status:
+                          type: string
+                          enum:
+                          - created
+                          - paid
+                          - accepted
+                          - completed
+                          - canceled
+                          - refunded
+                        total_amount:
+                          type: string
+                          example: '299.0'
+                        currency:
+                          type: string
+                          example: CNY
+                        created_at:
+                          type: string
+                          format: date-time
+                  meta:
+                    type: object
+                    properties:
+                      current_page:
+                        type: integer
+                      total_pages:
+                        type: integer
+                      total_count:
+                        type: integer
+                      per_page:
+                        type: integer
+        '401':
+          description: 未登录或 Token 无效
+    post:
+      summary: 创建订单
+      tags:
+      - 订单
+      description: 消费者创建新订单。创建后状态为 created，等待支付。需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      responses:
+        '201':
+          description: 订单创建成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      order_no:
+                        type: string
+                      status:
+                        type: string
+                        enum:
+                        - created
+                      total_amount:
+                        type: string
+                      currency:
+                        type: string
+                      created_at:
+                        type: string
+                        format: date-time
+        '401':
+          description: 未登录或 Token 无效
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  type: object
+                  properties:
+                    merchant_id:
+                      type: string
+                      description: 商家 UUID（格式：00000000-0000-0000-0000-XXXXXXXXXXXX）
+                    total_amount:
+                      type: string
+                      description: 订单金额
+                      example: '299.00'
+                    currency:
+                      type: string
+                      description: 货币代码
+                      example: CNY
+                  required:
+                  - merchant_id
+                  - total_amount
+                  - currency
+              required:
+              - order
+  "/api/v1/orders/{id}":
+    get:
+      summary: 订单详情
+      tags:
+      - 订单
+      description: 返回单个订单详情，包含订单项和支付记录。只有订单的消费者或商家可以查看。需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: 订单 ID
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      order_no:
+                        type: string
+                      status:
+                        type: string
+                      total_amount:
+                        type: string
+                      currency:
+                        type: string
+                      order_items:
+                        type: array
+                        items:
+                          type: object
+                      payments:
+                        type: array
+                        items:
+                          type: object
+                      created_at:
+                        type: string
+                        format: date-time
+        '401':
+          description: 未登录或 Token 无效
+        '403':
+          description: 无权查看此订单
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
+        '404':
+          description: 订单不存在
+  "/api/v1/orders/{id}/cancel":
+    post:
+      summary: 取消订单
+      tags:
+      - 订单
+      description: 消费者取消自己的订单。只有 created 状态的订单可以取消，其他状态返回 422。需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: 订单 ID
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: 取消成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      status:
+                        type: string
+                        enum:
+                        - canceled
+        '401':
+          description: 未登录或 Token 无效
+        '403':
+          description: 无权操作此订单
+        '422':
+          description: 当前状态无法取消（如已完成）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        example: invalid_state
+                      message:
+                        type: string
+  "/api/v1/payments":
+    post:
+      summary: 创建支付单
+      tags:
+      - 支付
+      description: |
+        为订单创建支付单，返回 App 端调起支付所需的参数（微信/支付宝）。
+        - 订单状态必须为 `created`，否则返回 422
+        - 只有订单的消费者可以发起支付
+        - 支持渠道：`wechat`（微信支付）、`alipay`（支付宝）
+        需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      responses:
+        '201':
+          description: 支付单创建成功，返回调起参数
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                        description: 支付单 ID
+                      channel:
+                        type: string
+                        enum:
+                        - wechat
+                        - alipay
+                      amount:
+                        type: string
+                        example: '188.0'
+                      status:
+                        type: string
+                        enum:
+                        - pending
+                      provider_trade_no:
+                        type: string
+                        nullable: true
+                      pay_params:
+                        type: object
+                        description: App 调起支付所需参数（微信：prepay_id 等；支付宝：order_string）
+                        additionalProperties: true
+                      created_at:
+                        type: string
+                        format: date-time
+        '401':
+          description: 未登录或 Token 无效
+        '403':
+          description: 无权为此订单支付
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
+        '422':
+          description: 不支持的支付渠道或订单状态不允许支付
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unsupported_channel
+                        - invalid_order_status
+                        - payment_create_failed
+                      message:
+                        type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order_id:
+                  type: integer
+                  description: 订单 ID
+                channel:
+                  type: string
+                  enum:
+                  - wechat
+                  - alipay
+                  description: 支付渠道
+              required:
+              - order_id
+              - channel
+  "/api/v1/payments/{id}/status":
+    get:
+      summary: 查询支付状态
+      tags:
+      - 支付
+      description: 轮询查询支付单当前状态。App 端调起支付后可轮询此接口确认支付结果。只有订单的消费者可以查询。需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: 支付单 ID
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: 查询成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      status:
+                        type: string
+                        enum:
+                        - pending
+                        - paid
+                        - failed
+                        - refunded
+                      channel:
+                        type: string
+                        enum:
+                        - wechat
+                        - alipay
+                      amount:
+                        type: string
+                      paid_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+        '401':
+          description: 未登录或 Token 无效
+        '403':
+          description: 无权查看此支付单
+        '404':
+          description: 支付单不存在
+  "/api/v1/users/device_tokens":
+    post:
+      summary: 注册设备推送 Token
+      tags:
+      - 用户
+      description: 注册 Expo 推送 Token，用于接收订单状态变更等推送通知。同一 token 重复注册幂等处理（upsert）。需要 Logto
+        JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      responses:
+        '201':
+          description: 注册成功（含幂等重复注册）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      token:
+                        type: string
+                      platform:
+                        type: string
+                        enum:
+                        - ios
+                        - android
+                      created_at:
+                        type: string
+                        format: date-time
+        '401':
+          description: 未登录或 Token 无效
+        '422':
+          description: 参数无效（platform 不合法或 token 缺失）
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                device_token:
+                  type: object
+                  properties:
+                    token:
+                      type: string
+                      description: Expo Push Token，格式：ExpoToken[xxx]
+                    platform:
+                      type: string
+                      enum:
+                      - ios
+                      - android
+                      description: 设备平台
+                  required:
+                  - token
+                  - platform
+              required:
+              - device_token
+  "/api/v1/users/device_tokens/{id}":
+    delete:
+      summary: 注销设备推送 Token
+      tags:
+      - 用户
+      description: 删除指定的设备推送 Token，用于退出登录或更换设备时清理推送订阅。需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        description: 设备 Token ID
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: 删除成功
+        '401':
+          description: 未登录或 Token 无效
+        '404':
+          description: Token 不存在
+  "/api/v1/users/profile":
+    get:
+      summary: 获取当前用户资料
+      tags:
+      - 用户
+      description: 返回当前登录用户的完整资料。需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 获取成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      email:
+                        type: string
+                        format: email
+                      nickname:
+                        type: string
+                        nullable: true
+                      locale:
+                        type: string
+                        example: zh-CN
+                      country_code:
+                        type: string
+                        example: CN
+                        nullable: true
+                      status:
+                        type: string
+                        enum:
+                        - active
+                        - suspended
+                        - disabled
+                      is_merchant:
+                        type: boolean
+                      created_at:
+                        type: string
+                        format: date-time
+        '401':
+          description: 未登录或 Token 无效
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                      message:
+                        type: string
+    patch:
+      summary: 更新当前用户资料
+      tags:
+      - 用户
+      description: 更新当前登录用户的资料（locale、country_code、nickname、avatar_key）。需要 Logto JWT
+        认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      email:
+                        type: string
+                      nickname:
+                        type: string
+                        nullable: true
+                      locale:
+                        type: string
+                      country_code:
+                        type: string
+                        nullable: true
+                      status:
+                        type: string
+        '401':
+          description: 未登录或 Token 无效
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    nickname:
+                      type: string
+                      description: 昵称
+                    locale:
+                      type: string
+                      description: 语言偏好，如 zh-CN、en
+                    country_code:
+                      type: string
+                      description: 地区代码，如 CN、INTL
+                    avatar_key:
+                      type: string
+                      description: S3 对象 Key（头像）
+              required:
+              - user
   "/api/v1/users/sign_in":
     post:
       summary: 用户登录

@@ -70,6 +70,19 @@ RSpec.configure do |config|
 
   # FactoryBot shorthand: create(:user) instead of FactoryBot.create(:user)
   config.include FactoryBot::Syntax::Methods
+
+  # Rack::Attack — 测试环境禁用限流，避免快速重复请求触发 503 / 429
+  # Rack::Attack — Disable rate limiting in tests to prevent 503/429 on rapid requests
+  config.before(:suite) do
+    Rack::Attack.enabled = false
+    # Logto 配置标志：测试环境中视为已配置，让认证中间件正常运行
+    # Logto configured flag: treat as configured in tests so auth middleware runs normally
+    Rails.application.config.logto_configured = true
+  end
+
+  config.after(:suite) do
+    Rack::Attack.enabled = true
+  end
 end
 
 # Shoulda Matchers configuration

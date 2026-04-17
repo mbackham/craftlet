@@ -44,6 +44,9 @@ zh-CN:
       invalid_order_status: "订单状态不支持支付操作"
       unsupported_channel: "不支持的支付渠道，请选择 wechat 或 alipay"
       create_failed: "支付单创建失败，请稍后重试"
+      upload:
+        unsupported_content_type: "不支持的文件类型，仅支持 JPEG、PNG、WebP、HEIC/HEIF 图片"
+        invalid_file_size: "文件大小无效，最大支持 10 MB"
 
     tickets:
       errors:

@@ -44,6 +44,9 @@ en:
       invalid_order_status: "This order is not in a payable state"
       unsupported_channel: "Unsupported payment channel. Please choose wechat or alipay"
       create_failed: "Failed to create payment. Please try again later"
+      upload:
+        unsupported_content_type: "Unsupported file type. Only JPEG, PNG, WebP, and HEIC/HEIF images are allowed"
+        invalid_file_size: "Invalid file size. Maximum allowed size is 10 MB"
 
     tickets:
       errors:

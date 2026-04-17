@@ -96,6 +96,11 @@ Rails.application.routes.draw do
       resources :announcements, only: [:index]
       resources :faqs, only: [:index]
 
+      # 文件上传预签名
+      scope :upload do
+        post :presign, to: 'uploads#presign'
+      end
+
       # 营销工具 API (需登录)
       resources :coupons, only: [:index] do
         collection do

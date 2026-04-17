@@ -3078,6 +3078,128 @@ paths:
           description: 未登录或 Token 无效
         '404':
           description: Token 不存在
+  "/api/v1/upload/presign":
+    post:
+      summary: 获取 S3 预签名上传 URL
+      tags:
+      - 文件上传
+      description: |
+        返回一个有效期 15 分钟的 S3 预签名 PUT URL。客户端拿到 URL 后直接向 S3
+        发起 HTTP PUT 请求上传文件，**不经过后端服务器**，避免大文件占用后端带宽。
+
+        **上传流程（客户端）：**
+        1. `POST /api/v1/upload/presign` → 获取 `presigned_url` 和 `object_key`
+        2. 用 `presigned_url` 直接 `PUT` 文件到 S3（需携带 `Content-Type`）
+        3. 将 `object_key` 保存到业务字段（如 `avatar_key`、`license_file_key`）
+
+        **支持的文件类型：** `image/jpeg`、`image/png`、`image/webp`、`image/heic`、`image/heif`
+
+        **文件大小限制：** 最大 10 MB（`file_size` 必须与实际文件一致，S3 会校验）
+
+        **支持的 purpose 值：**
+
+        | purpose | 用途 |
+        |---------|------|
+        | `avatar` | 用户头像 |
+        | `merchant_license` | 商家营业执照 |
+        | `merchant_idcard` | 商家身份证 |
+        | `order_attachment` | 订单附件（手串图片、需求图等）|
+        | `general` | 其他（默认） |
+
+        需要 Logto JWT 认证。
+      security:
+      - Bearer: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: Bearer <Logto JWT>
+        schema:
+          type: string
+      responses:
+        '200':
+          description: 成功返回预签名 URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      presigned_url:
+                        type: string
+                        format: uri
+                        description: 用于直接 PUT 上传到 S3 的预签名 URL，有效期 15 分钟
+                        example: "https://craftlet-bucket.s3.amazonaws.com/uploads/avatar/123/uuid.jpg?X-Amz-Signature=..."
+                      object_key:
+                        type: string
+                        description: 文件在 S3 中的对象路径，上传成功后将此值保存到业务字段
+                        example: "uploads/avatar/123/550e8400-e29b-41d4-a716-446655440000.jpg"
+                      expires_in:
+                        type: integer
+                        description: 预签名 URL 有效期（秒）
+                        example: 900
+        '401':
+          description: 未登录或 Token 无效
+        '422':
+          description: 参数不合法
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  error:
+                    type: object
+                    properties:
+                      code:
+                        type: string
+                        enum:
+                        - unsupported_content_type
+                        - invalid_file_size
+                      message:
+                        type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content_type:
+                  type: string
+                  description: 文件的 MIME 类型，必须是支持的图片格式
+                  enum:
+                  - image/jpeg
+                  - image/png
+                  - image/webp
+                  - image/heic
+                  - image/heif
+                  example: image/jpeg
+                file_size:
+                  type: integer
+                  description: 文件字节数，最大 10485760（10 MB）
+                  example: 204800
+                purpose:
+                  type: string
+                  description: 文件用途，影响 S3 存储目录
+                  enum:
+                  - avatar
+                  - merchant_license
+                  - merchant_idcard
+                  - order_attachment
+                  - general
+                  default: general
+                  example: avatar
+              required:
+              - content_type
+              - file_size
   "/api/v1/users/profile":
     get:
       summary: 获取当前用户资料
@@ -3215,68 +3337,6 @@ paths:
                       description: S3 对象 Key（头像）
               required:
               - user
-  "/api/v1/users/sign_in":
-    post:
-      summary: 用户登录
-      tags:
-      - 认证
-      description: 使用邮箱和密码登录，返回 JWT Token
-      parameters: []
-      responses:
-        '200':
-          description: 登录成功
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  user:
-                    type: object
-                    properties:
-                      id:
-                        type: integer
-                        description: 用户 ID
-                      email:
-                        type: string
-                        description: 用户邮箱
-                  token:
-                    type: string
-                    description: JWT Token
-        '401':
-          description: 登录失败（邮箱或密码错误）
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                user:
-                  type: object
-                  properties:
-                    email:
-                      type: string
-                      example: user@example.com
-                      description: 用户邮箱
-                    password:
-                      type: string
-                      example: password123
-                      description: 用户密码
-                  required:
-                  - email
-                  - password
-              required:
-              - user
-  "/api/v1/users/sign_out":
-    delete:
-      summary: 用户登出
-      tags:
-      - 认证
-      description: 注销当前用户的 JWT Token
-      security:
-      - Bearer: []
-      responses:
-        '204':
-          description: 登出成功
   "/api/webhooks/logto":
     post:
       summary: Logto 用户事件 Webhook

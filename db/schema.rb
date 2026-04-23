@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_15_065600) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_23_100002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -205,6 +205,30 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_15_065600) do
     t.index ["bidder_id"], name: "index_bids_on_bidder_id"
     t.index ["order_id"], name: "index_bids_on_order_id"
     t.index ["status"], name: "index_bids_on_status"
+  end
+
+  create_table "bracelet_configs", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "name", null: false
+    t.string "status", default: "draft"
+    t.jsonb "bead_items", default: [], null: false
+    t.bigint "string_element_id"
+    t.string "string_color_hex"
+    t.string "string_color_name"
+    t.integer "total_beads"
+    t.decimal "estimated_length_mm", precision: 7, scale: 2
+    t.string "wrist_size"
+    t.string "knot_style"
+    t.jsonb "price_snapshot", default: {}
+    t.text "notes"
+    t.datetime "saved_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["bead_items"], name: "index_bracelet_configs_on_bead_items", using: :gin
+    t.index ["created_at"], name: "index_bracelet_configs_on_created_at"
+    t.index ["status"], name: "index_bracelet_configs_on_status"
+    t.index ["string_element_id"], name: "index_bracelet_configs_on_string_element_id"
+    t.index ["user_id"], name: "index_bracelet_configs_on_user_id"
   end
 
   create_table "coupon_budget_alerts", force: :cascade do |t|
@@ -444,9 +468,30 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_15_065600) do
     t.datetime "unshelved_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "element_type", default: "other"
+    t.string "material_type"
+    t.string "finish_type"
+    t.string "color_hex"
+    t.string "color_name"
+    t.decimal "size_mm", precision: 6, scale: 2
+    t.decimal "weight_g", precision: 8, scale: 3
+    t.boolean "is_natural", default: false
+    t.string "origin_region"
+    t.string "mesh_url"
+    t.string "glb_key"
+    t.decimal "hole_diameter_mm", precision: 5, scale: 2
+    t.string "hardness_level"
+    t.jsonb "tags", default: []
+    t.jsonb "metadata", default: {}
     t.index ["category"], name: "index_elements_on_category"
+    t.index ["color_hex"], name: "index_elements_on_color_hex"
     t.index ["created_at"], name: "index_elements_on_created_at"
+    t.index ["element_type"], name: "index_elements_on_element_type"
+    t.index ["is_natural"], name: "index_elements_on_is_natural"
+    t.index ["material_type"], name: "index_elements_on_material_type"
+    t.index ["metadata"], name: "index_elements_on_metadata", using: :gin
     t.index ["status"], name: "index_elements_on_status"
+    t.index ["tags"], name: "index_elements_on_tags", using: :gin
   end
 
   create_table "etl_clean_logs", force: :cascade do |t|
@@ -1044,6 +1089,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_15_065600) do
   add_foreign_key "admin_user_roles", "admin_roles"
   add_foreign_key "admin_user_roles", "admin_users", column: "user_id"
   add_foreign_key "bids", "orders"
+  add_foreign_key "bracelet_configs", "users"
   add_foreign_key "coupon_budget_alerts", "coupon_templates"
   add_foreign_key "coupons", "coupon_templates"
   add_foreign_key "etl_clean_logs", "etl_clean_rules"

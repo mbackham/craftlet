@@ -70,3 +70,10 @@ zh-CN:
         normal: "普通"
         high: "高"
         urgent: "紧急"
+
+
+    bracelet_configs:
+      errors:
+        cannot_edit_ordered: "已下单的方案不可修改"
+        can_only_delete_draft: "只有草稿方案可以删除"
+        cannot_save: "保存失败，请确认方案信息完整"

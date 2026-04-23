@@ -21,6 +21,7 @@ class User < ApplicationRecord
   has_one :merchant_profile, dependent: :destroy
   has_many :device_tokens, dependent: :destroy
   has_many :notifications, dependent: :destroy
+  has_many :bracelet_configs, dependent: :destroy
 
   # ⚠️  customer_orders / merchant_orders 不能用 has_many！
   #

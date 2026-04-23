@@ -96,6 +96,16 @@ Rails.application.routes.draw do
       resources :announcements, only: [:index]
       resources :faqs, only: [:index]
 
+      # 手串元素库 API (公开只读)
+      resources :elements, only: %i[index show]
+
+      # 手串方案 API (需登录)
+      resources :bracelet_configs, only: %i[index show create update destroy] do
+        member do
+          post :save
+        end
+      end
+
       # 文件上传预签名
       scope :upload do
         post :presign, to: 'uploads#presign'

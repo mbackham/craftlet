@@ -435,6 +435,67 @@ zh-CN:
     effect: 特效
     font: 字体
 
+  # 元素类型翻译
+  element_types:
+    bead: 珠子
+    string: 绳子
+    other: 其他
+
+  # 材质类型翻译
+  material_types:
+    wood: 木质
+    glass: 玻璃
+    hetian_jade: 和田玉
+    jadeite: 翡翠
+    agate: 玛瑙
+    crystal: 水晶
+    amber: 琥珀
+    coral: 珊瑚
+    lapis: 青金石
+    turquoise: 绿松石
+    obsidian: 黑曜石
+    bodhi: 菩提
+    bone: 骨质
+    metal: 金属
+    ceramic: 陶瓷
+    resin: 树脂
+    fabric: 布料（绳）
+    other: 其他
+
+  # 表面工艺翻译
+  finish_types:
+    matte: 哑光
+    glossy: 亮光
+    frosted: 磨砂
+    carved: 雕刻
+    polished: 抛光
+
+  # 手串方案状态翻译
+  bracelet_config_statuses:
+    draft: 草稿
+    saved: 已保存
+    ordered: 已下单
+
+  # 手腕尺寸翻译
+  wrist_sizes:
+    S: S（14-15cm）
+    M: M（15-16cm）
+    L: L（16-17cm）
+    XL: XL（17-18cm）
+    free_size: 通用尺寸
+
+  # 打结方式翻译
+  knot_styles:
+    single_knot: 单结
+    double_knot: 双结
+    adjustable: 活动扣
+
+  # 珠子位置翻译
+  bead_positions:
+    main: 主珠
+    spacer: 间隔珠
+    focal: 核心珠
+
   # 订单状态翻译
   order_statuses:
     created: 待支付
@@ -597,6 +658,11 @@ zh-CN:
       approval_time: 审批时间
       name: 名称
       category: 分类
+      element_type: 元素类型
+      material_type: 材质
+      finish_type: 表面工艺
+      color: 颜色
+      is_natural: 天然/仿制
       price: 价格
       shelf_time: 上架时间
       order_no: 订单号

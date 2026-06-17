@@ -13,3 +13,5 @@ set :ssh_options, {
 set :deploy_to, "/var/www/craftlet"
 set :rails_env, "production"
 set :branch, "main"
+config.hosts << "komaprogram.xyz"
+config.hosts << "www.komaprogram.xyz"
